@@ -1,0 +1,15 @@
+Num_Stage = 1
+
+Stage_Name = Stage_1
+    Task_Type = serial
+    Num_Tasks = 4
+    Task_Length = polynomial [10, 2] Input_1
+    Num_Processes = 1
+    Read_Buffer = 65536
+    Write_Buffer = 65536
+    Input_Files_Each_Task = 1
+        Input_1.Source = filesystem
+        Input_1.Size = uniform 5
+    Output_Files_Each_Task = 1
+        Output_1.Size = polynomial [10, 2] Length
+    Interleave_Option = 0

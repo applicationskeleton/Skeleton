@@ -1,0 +1,16 @@
+Num_Stage = 1
+
+Stage_Name = Stage_1
+    Task_Type = serial
+    Num_Tasks = 369
+    Task_Length = uniform 1.1
+    Num_Processes = 1
+    Read_Buffer = 65536
+    Write_Buffer = 65536
+    Input_Files_Each_Task = 1
+        Input_1.Source = filesystem
+        Input_1.Size = uniform 2100000
+    Output_Files_Each_Task = 2
+        Output_1.Size = uniform 4200000
+	Output_2.Size = uniform 4200000
+    Interleave_Option = 0
