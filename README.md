@@ -1,7 +1,7 @@
 Skeleton
 ========
 
-Application Skeleton is a tool to generate skeleton applications --- easy-to-program, easy-to-run aplications --- that mimic a real applications' parallel or distributed performance at a task (but not process) level.
+Application Skeleton is a tool to generate skeleton applications --- easy-to-program, easy-to-run applications --- that mimic a real applications' parallel or distributed performance at a task (but not process) level.
 
 Application classes that can be represented include: bag of tasks, map reduce, multi-stage workflow, and variations of these with a fixed number of iterations.
 
