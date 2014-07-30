@@ -48,7 +48,7 @@ This document introduces the Application Skeleton tool, part of the AIMES projec
 
 \section{Introduction}
 
-The Application Skeleton (just `Skeleton' hereafter) tool \cite{Skeleton2013, Skeleton2014} lets users quickly and easily produce a synthetic distributed application that runs in a distributed environment, e.g. grids, clusters, clouds. The source code can be accessed at \url{https://github.com/zhaozhang/Skeleton}.
+The Application Skeleton (just `Skeleton' hereafter) tool \cite{Skeleton2013, Skeleton2014} lets users quickly and easily produce a synthetic distributed application that runs in a distributed environment, e.g. grids, clusters, clouds. The source code can be accessed at \url{https://github.com/applicationskeleton/Skeleton}.
 A skeleton application is a synthetic application that is intended to represent the computation, I/O, and networking behavior of a real application.
 In the Skeleton tool, an application is composed of one or more stages.
 The user needs to define each stage's task type, number of processes, task length, computation and I/O interleaving option, read/write buffer size, input source, input size, output size, and other properties.
@@ -74,7 +74,7 @@ Four examples of how the Skeleton tool can be used to build application skeleton
 
 \subsection{Bag-of-tasks application}
 
-Listing~\ref{lst:bag} shows a sample input for a bag-of-tasks application with uniform task length, and uniform input and output file size, where each task reads one file and writes one file. Figure~\ref{fig:bag} shows the very simple DAG for this. The sample application description file can be accessed at \url{https://github.com/zhaozhang/Skeleton/blob/master/src/sample-input/bag.input}.
+Listing~\ref{lst:bag} shows a sample input for a bag-of-tasks application with uniform task length, and uniform input and output file size, where each task reads one file and writes one file. Figure~\ref{fig:bag} shows the very simple DAG for this. The sample application description file can be accessed at \url{https://github.com/applicationskeleton/Skeleton/blob/master/src/sample-input/bag.input}.
 
 \begin{lstlisting}[caption=Sample input for a bag-of-tasks application, label=lst:bag, linewidth=1.0\textwidth, xleftmargin=2.5ex]
 Num_Stage = 1
@@ -179,7 +179,7 @@ Each Shuffle task task runs a fixed amount of time, representing reorganizing th
 Each of these tasks reads all of the output files of the map tasks, and writes one output file (representing the records with hash values that fall in the task's range).
 The two Reduce tasks read the outputs of all shuffle tasks, run a fixed amount of time, and write two distinct output files of fixed size. The Gather stage has one task that reads the output files from stage 3 and writes one output file (representing a combination of its inputs).
 Figure~\ref{fig:mr} shows the DAG for this skeleton.
-The sample application description file can be accessed at \url{https://github.com/zhaozhang/Skeleton/blob/master/src/sample-input/map-reduce.input}.
+The sample application description file can be accessed at \url{https://github.com/applicationskeleton/Skeleton/blob/master/src/sample-input/map-reduce.input}.
 
 \begin{lstlisting}[caption=Sample input for a MapReduce application, label=lst:mr, linewidth=1.0\textwidth, xleftmargin=2.5ex]
 Num_Stage = 4
@@ -296,7 +296,7 @@ This section documents how a user can run the Skeleton tool and the available pa
 
 \subsection{Requirements}
 
-The Skeleton code is built to use Python3.  To use Python2 instead, please follow the instructions in the skeleton source file (\url{https://github.com/zhaozhang/Skeleton/blob/master/src/skeleton.py}). 
+The Skeleton code is built to use Python3.  To use Python2 instead, please follow the instructions in the skeleton source file (\url{https://github.com/applicationskeleton/Skeleton/blob/master/src/skeleton.py}). 
 
 \subsection{Application-wide parameter}
 
@@ -599,7 +599,7 @@ which could be filled in as:
 
 
 \section{Examples in GitHub}
-This section explains the examples in the GitHub repository and their usage. The source code is available from \url{https://github.com/zhaozhang/Skeleton/tree/master/src/sample-input}.
+This section explains the examples in the GitHub repository and their usage. The source code is available from \url{https://github.com/applicationskeleton/Skeleton/tree/master/src/sample-input}.
 To run these examples, go to the ``src'' directory, then execute ``./skeleton.py sample-input/xxx.input Shell''.
 \begin{itemize}
 \item{\bf bag.input}: Generates a bag of independent tasks. 
