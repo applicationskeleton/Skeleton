@@ -7,7 +7,8 @@ fi
 input=$1
 prefix=`echo ${input}| cut -d '.' -f 1` 
 
-path=`which dax2dot`
+path=../src/Pegasus/dax2dot
+
 if [ "${path}" == "" ];then
     echo "pegasus is not properly installed"
     echo "need to run: export PATH=${PATH}:/path/to/dax2dot "
