@@ -2,7 +2,7 @@ Num_Stage = 1
 
 Stage_Name = Stage_1
     Task_Type = serial
-    Num_Tasks = 369
+    Num_Tasks = 4
     Task_Length = uniform 1.1
     Num_Processes = 1
     Read_Buffer = 65536
