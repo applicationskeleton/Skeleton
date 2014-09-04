@@ -12,6 +12,7 @@ path=../src/Pegasus/dax2dot
 if [ "${path}" == "" ];then
     echo "pegasus is not properly installed"
     echo "need to run: export PATH=${PATH}:/path/to/dax2dot "
+    echo "you also need to install graphviz to use dot"
     exit 1
 fi
 
