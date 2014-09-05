@@ -612,9 +612,9 @@ class Application():
         if distribution == "uniform":
             lengthl = [parameter]*num_files
         elif distribution == "normal":
-            m=re.match(r"\[(?P<avg>\d+), (?P<stdev>\d+)\](?P<unit>\w*)", parameter)
-            avg = int(m.group('avg'))
-            stdev = int(m.group('stdev'))
+            m=re.match(r"\[(?P<avg>\d+|\d+.\d+), (?P<stdev>\d+|\d+.\d+)\](?P<unit>\w*)", parameter)
+            avg = float(m.group('avg'))
+            stdev = float(m.group('stdev'))
             unit = m.group('unit')
             randoml = []
             random.seed()
@@ -622,11 +622,11 @@ class Application():
                 randoml.append(random.normalvariate(avg, stdev))
             lengthl = []
             for i in randoml:
-                lengthl.append(str(int(i))+unit)
+                lengthl.append(str("%.2f" % float(i))+unit)
         elif distribution == "gauss":
-            m=re.match(r"\[(?P<avg>\d+), (?P<stdev>\d+)\](?P<unit>\w*)", parameter)
-            avg = int(m.group('avg'))
-            stdev = int(m.group('stdev'))
+            m=re.match(r"\[(?P<avg>\d+|\d+.\d+), (?P<stdev>\d+|\d+.\d+)\](?P<unit>\w*)", parameter)
+            avg = float(m.group('avg'))
+            stdev = float(m.group('stdev'))
             unit = m.group('unit')
             randoml = []
             random.seed()
@@ -634,11 +634,11 @@ class Application():
                 randoml.append(random.gauss(avg, stdev))
             lengthl = []
             for i in randoml:
-                lengthl.append(str(int(i))+unit)
+                lengthl.append(str("%.2f" % float(i))+unit)
         elif distribution == "lognorm":
-            m=re.match(r"\[(?P<avg>\d+), (?P<stdev>\d+)\](?P<unit>\w*)", parameter)
-            avg = int(m.group('avg'))
-            stdev = int(m.group('stdev'))
+            m=re.match(r"\[(?P<avg>\d+|\d+.\d+), (?P<stdev>\d+|\d+.\d+)\](?P<unit>\w*)", parameter)
+            avg = float(m.group('avg'))
+            stdev = float(m.group('stdev'))
             #size = int(m.group('size'))
             unit = m.group('unit')
             randoml = []
@@ -647,11 +647,11 @@ class Application():
                 randoml.append(random.lognormvariate(avg, stdev))
             lengthl = []
             for i in randoml:
-                lengthl.append(str(int(i))+unit)
+                lengthl.append(str("%.2f" % float(i))+unit)
         elif distribution == "triangular":
-            m=re.match(r"\[(?P<low>\d+), (?P<high>\d+)\](?P<unit>\w*)", parameter)
-            low = int(m.group('low'))
-            high = int(m.group('high'))
+            m=re.match(r"\[(?P<low>\d+|\d+.\d+), (?P<high>\d+|\d+.\d+)\](?P<unit>\w*)", parameter)
+            low = float(m.group('low'))
+            high = float(m.group('high'))
             #size = int(m.group('size'))
             unit = m.group('unit')
             randoml = []
@@ -660,7 +660,7 @@ class Application():
                 randoml.append(random.triangular(low, high))
             lengthl = []
             for i in randoml:
-                lengthl.append(str(int(i))+unit)
+                lengthl.append(str("%.2f" % float(i))+unit)
         else:
             print("ERROR: unknown distribution: "+distribution)
         return lengthl
