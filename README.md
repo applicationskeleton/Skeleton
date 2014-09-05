@@ -27,4 +27,4 @@ A paper about the first version of Application Skeletons is:
 Z. Zhang and D. S. Katz, "Application Skeletons: Encapsulating MTC Application Task Computation and I/O," Proceedings of 6th Workshop on Many-Task Computing on Grids and Supercomputers (MTAGS), (in conjunction with SC13), 2013. http://dx.doi.org/10.1145/2503210.2503222
 
 A paper about the current version is in press as:
-Z. Zhang, D. S. Katz, "Using Application Skeletons to Improve eScience Infrastructure," Proceedings of 10th IEEE International Conference on eScience, 2014.
+Z. Zhang and D. S. Katz, "Using Application Skeletons to Improve eScience Infrastructure," Proceedings of 10th IEEE International Conference on eScience, 2014.
