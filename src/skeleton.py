@@ -18,7 +18,7 @@ import copy
 import subprocess
 import random
 
-if len(sys.argv) >= 3 and sys.argv[2] == 'DAX':
+if len(sys.argv) >= 3 and sys.argv[2] == 'Pegasus':
     from Pegasus.DAX3 import *
 
 class Files():
@@ -162,7 +162,7 @@ class Application():
                         s = s+" "+stage.outputdir[o]+"/"+t.outputlist[o].name+" "+t.outputlist[o].size
                     print(s)    
 
-        elif self.mode == "DAX":
+        elif self.mode == "Pegasus":
             for stage in self.stagelist:
                 for t in stage.task_list:
                     t.set_args()
@@ -829,7 +829,7 @@ class Application():
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         print(('usage: %s <skeleton_input> <mode>' % sys.argv[0]))
-        #mode should be one of shell, DAX, Swift
+        #mode should be one of shell, Pegasus, Swift
         sys.exit(1)
 
     global input_file
