@@ -296,6 +296,8 @@ This section documents how a user can run the Skeleton tool and the available pa
 
 The Skeleton code is built to use Python3.  To use Python2 instead, please follow the instructions in the skeleton source file (\url{https://github.com/applicationskeleton/Skeleton/blob/master/src/skeleton.py}). 
 
+Note: using Python2 will limit the input task mapping options that can be used (see \S\ref{sec:def_mapping} for more information).
+
 \subsection{Application-wide parameter}
 
 There is only one parameter that spans the whole description file:
@@ -329,9 +331,9 @@ Parameters documented in this section is only valid within its stage declaration
 \item{\textbf{Input\_Files\_Each\_Task}:} declares the ratio between number of input files and the number of tasks.
 
 
-\item{\textbf{Input\_\$.Source}:} declares the input source of the \$th (i.e., 1 = first, 2 = second, 3=third, etc.) input file, either filesystem, or outputs of a previously defined stage (e.g., {\tt Input\_\$1.Source = Stage\_1.Output\_1}). 
+\item{\textbf{Input\_\$.Source}:} declares the input source of the \$th (i.e., 1 = first, 2 = second, 3=third, etc.) input file, either filesystem, or outputs of a previously defined stage (e.g., {\tt Input\_2.Source = Stage\_1.Output\_1}). 
 
-\item{\textbf{Input\_\$.Size}:}  declares input file size of the  \$th input file. The distribution of task lengths can be uniform, normal, gauss, triangular, or lognorm. This parameter has to appear in pairs with \textbf{Input\_\$.Source}. (e.g., {\tt Input\_\$1.Size = uniform 1048576})
+\item{\textbf{Input\_\$.Size}:}  declares input file size of the  \$th input file. The distribution of task lengths can be uniform, normal, gauss, triangular, or lognorm. This parameter has to appear in pairs with \textbf{Input\_\$.Source}. (e.g., {\tt Input\_1.Size = uniform 1048576})
 
 \item{\textbf{Input\_Task\_Mapping}:} declares user specified input file and task mapping. The mapping option currently only supports combination mapping and external mapping. 
 Combination mapping lets users specify the input files in combinations and map to tasks. Please refer to Line 27 in Listing~\ref{lst:sample} for an example.
@@ -458,16 +460,20 @@ Stage_Name = Stage_1
 
 \subsubsection{Mapping files between stages}\label{sec:def_mapping}
 
-Mapping files between stages can be done in two ways in this version of Skeleton.
-First, users can explicitly specify \textbf{Input\_Files\_Each\_Task}, \textbf{Input\_\$.Source}, and \textbf{Input\_\$.Size}.
-Second, users can use \textbf{Input\_Files\_Each\_Task} and \textbf{Input\_Task\_Mapping} options to specify the mapping if the mapping conforms a combinatorial or user defined function. 
-With \textbf{Input\_Task\_Mapping} option, users can either use
-the \textbf{combination} option to specify the mapping or use the \textbf{external} routine to customize the mapping. 
+Mapping files between stages can be done in two ways.
+
+\begin{enumerate}
+\item Users can explicitly specify \textbf{Input\_Files\_Each\_Task}, \textbf{Input\_\$.Source}, and \textbf{Input\_\$.Size}.
 
 \paragraph{Direct specification mapping}
 
 Lines 11-12 in Listing~\ref{lst:outtaskfunc} show the usage of \textbf{Input\_Files\_Each\_Task}, \textbf{Input\_\$.Source}, and \textbf{Input\_\$.Size}.
 Users can specify \textbf{Input\_\$.Source} as ``filesystem'' or as output files from previous stages: e.g., ``Stage\_1.Output\_1''.
+
+\item Users can use \textbf{Input\_Files\_Each\_Task} and \textbf{Input\_Task\_Mapping} options to specify the mapping if the mapping conforms a combinatorial or user defined function (though this is not supported when using Python2). 
+With \textbf{Input\_Task\_Mapping} option, users can either use
+the \textbf{combination} option to specify the mapping or use the \textbf{external} routine to customize the mapping. 
+
 
 \paragraph{Combinatorial mapping}
 
@@ -497,7 +503,7 @@ manner: the first and second file are mapped to the first task, the third and fo
 to the second task, and so on. If the mapping runs out of input files, it will go back to the beginning
 of the input file list and multiple tasks will consume some input files.
 
-
+\end{enumerate}
 
 \begin{lstlisting}[caption=Use case for external mapper, label=lst:exmapper, linewidth=1.0\textwidth, xleftmargin=2.5ex]
 Num_Stage = 2
