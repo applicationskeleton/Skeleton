@@ -574,6 +574,47 @@ class Application():
                     f = Files(fname, fsize)
                     stage.task_list[t].outputlist.append(f)
 
+    def choose(self, n, m):
+        clist = []
+        if m == 1:
+            for i in range(n):
+                tlist = []
+                tlist.append(i)
+                clist.append(tlist)
+            return clist
+        elif m == n:
+            tlist = []
+            for i in range(n):
+                tlist.append(i)
+            clist.append(tlist)
+            return clist
+        else:
+            tlist = self.choose(n, m-1)
+            for t in tlist:
+                for i in list(range(n)):
+                    if i > t[len(t)-1]:
+                        tlist = list(t)
+                        tlist.append(i)
+                        clist.append(tlist)
+            return clist            
+
+    def combination(self, flist, m):
+        if m > len(flist):
+            print("ERROR: Maximum number of files exceeded!")
+            sys.exit(1)
+
+        clist = self.choose(len(flist), m)    
+        rlist = []        
+        for l in clist:
+            tlist = []
+            for f in l:
+                tlist.append(flist[f])
+            rlist.append(tlist)
+        return rlist
+
+    
+    
+    '''
     def combination(self, flist, m):
         rlist = []
         if m == 1:
@@ -586,11 +627,15 @@ class Application():
             for p in plist:
                 for f in flist:
                     if f not in p and flist.index(f)>flist.index(p[len(p)-1]):
+                        p.append(f)
+                        rlist.append(p)
                         pc = list(p)
                         pc.append(f)
-                        rlist.append(pc)            
+                        rlist.append(pc)
+            for f in flist:
+                print(f.name)
             return rlist    
-                
+    '''            
 
     def generate(self):
         self.parse()
