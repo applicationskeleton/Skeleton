@@ -28,5 +28,5 @@ Z. Zhang and D. S. Katz, "Application Skeletons: Encapsulating MTC Application T
 
 A paper about the current version is:
 Z. Zhang and D. S. Katz, "Using Application Skeletons to Improve eScience Infrastructure," Proceedings of 10th IEEE International Conference on eScience, 2014.
-http://dx.doi.org/10.1109/eScience.2014.9 (paper)
-http://www.slideshare.net/danielskatz/using-application-skeletons-to-improve-escience-infrastructure (slides)
+http://dx.doi.org/10.1109/eScience.2014.9 (paper).
+http://www.slideshare.net/danielskatz/using-application-skeletons-to-improve-escience-infrastructure (slides).
