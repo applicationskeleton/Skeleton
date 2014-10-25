@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #!/usr/bin/env python3
 #if you want to use python 2, replace the first line with: #!/usr/bin/env python
 
@@ -17,11 +18,12 @@ import re
 import copy
 import subprocess
 import random
+import json
 
 if len(sys.argv) >= 3 and sys.argv[2] == 'Pegasus':
     from Pegasus.DAX3 import *
 
-class Files():
+class File():
     def __init__(self, name, size):
         self.name = name
         self.size = size
@@ -38,7 +40,7 @@ class Task():
         self.outputlist = outputlist
         self.interleave_option = interleave_option
         self.mode = mode
-        self.path_to_binary = ""
+        # self.path_to_binary = ""
         self.args = ""
         
     def set_args(self):
@@ -446,7 +448,7 @@ class Application():
                     for t in range(stage.num_tasks):
                         fname = stage.name+"_Input_"+str(i)+"_"+str(t+1)
                         fsize = sizel[t]
-                        f = Files(fname, fsize)
+                        f = File(fname, fsize)
                         stage.task_list[t].inputlist.append(f)
                 else:
                     #handle reference input files
@@ -571,7 +573,7 @@ class Application():
                 for t in range(stage.num_tasks):
                     fname = stage.name+"_Output_"+str(o)+"_"+str(t+1)
                     fsize = sizel[t]
-                    f = Files(fname, fsize)
+                    f = File(fname, fsize)
                     stage.task_list[t].outputlist.append(f)
 
     def choose(self, n, k):
@@ -876,12 +878,23 @@ class Application():
 
             stage = Stage(stage_name, task_type, num_tasks, lengthpara, num_processes, read_buf, write_buf, input_file_each_task, input_para, input_task_mapping, output_file_each_task, output_para, interleave_option, iteration_num, iteration_stages, iteration_sub, mode)
             self.stagelist.append(stage)
-                
+
+def convert_to_builtin_type(obj):
+    # print 'default(', repr(obj), ')'
+    # Convert objects to a dictionary of their representation
+    d = { 'class':obj.__class__.__name__, 
+          # '__class__':obj.__class__.__name__, 
+          # '__module__':obj.__module__,
+          }
+    d.update(obj.__dict__)
+    return d
+
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print(('usage: %s <skeleton_input> <mode>' % sys.argv[0]))
-        #mode should be one of shell, Pegasus, Swift
+
+    if len(sys.argv) < 3 or len(sys.argv) > 5:
+        print(('Usage: %s <skeleton_input> <mode> [<json_output_file>]' % sys.argv[0]))
+        print('        mode should be one of: Shell, Pegasus, Swift')
         sys.exit(1)
 
     global input_file
@@ -892,12 +905,19 @@ if __name__ == '__main__':
     mode = sys.argv[2]
 
     if len(sys.argv) == 4:
-        outfile = sys.argv[3]
+        jsonfile = sys.argv[3]
     else:
-        outfile = None
+        jsonfile = None
+
+    outfile = None # Seems like this is not yet implemented (mw)
 
     global app    
     app = Application("test_skeleton", input_file, mode, outfile)
     app.generate()
+    if jsonfile:
+        jfd = open(jsonfile, 'w+')
+        json.dump(app, jfd, default=convert_to_builtin_type, indent=2, separators=(',', ' : '))
+        jfd.write('\n');
+        jfd.close();
     app.printTask()
     app.printSetup()
