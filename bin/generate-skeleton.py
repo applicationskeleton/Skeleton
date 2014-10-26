@@ -11,9 +11,9 @@ import aimes.skeleton
 
 if __name__ == '__main__':
 
-    if len(sys.argv) < 3 or len(sys.argv) > 5:
-        print(('Usage: %s <skeleton_input> <mode> [<json_output_file>]' % sys.argv[0]))
-        print('        mode should be one of: Shell, Pegasus, Swift')
+    if len(sys.argv) < 3 or len(sys.argv) > 4:
+        print(('Usage: %s <skeleton_input> <mode> [output_file]' % sys.argv[0]))
+        print('        mode should be one of: Shell, Pegasus, Swift, JSON')
         sys.exit(1)
 
     input_file = sys.argv[1]
@@ -23,22 +23,12 @@ if __name__ == '__main__':
     mode = sys.argv[2]
 
     if len(sys.argv) == 4:
-        jsonfile = sys.argv[3]
+        outfile = sys.argv[3]
     else:
-        jsonfile = None
-
-    outfile = None # Seems like this is not yet implemented (mw)
+        outfile = None
 
     app = aimes.skeleton.Application("test_skeleton", input_file, mode, outfile)
     app.generate()
     app.printTask()
     app.printSetup()
-
-    if jsonfile:
-        jsonstr = app.to_json ()
-        if jsonfile == '-' :
-            print jsonstr
-        else :
-            with open(jsonfile, 'w+') as jfd:
-                jfd.write("%s\n" % jsonstr)
 

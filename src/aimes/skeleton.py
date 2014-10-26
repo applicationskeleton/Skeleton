@@ -78,8 +78,8 @@ class Stage():
 
 
 class Application():
-    def __init__(self, name, input_file, mode, outfile):
-        self.mode = mode
+    def __init__(self, name, input_file, mode, outfile=None):
+        self.mode = mode.lower ()
         self.name = name
         self.input_file = input_file
         self.outfile = outfile
@@ -136,7 +136,7 @@ class Application():
         fd.close()                    
 
     def printTask(self):        
-        if self.mode == "Shell":
+        if self.mode == "shell":
             for stage in self.stagelist:
                 for t in stage.task_list:
                     s = "task "+t.task_type+" "+str(t.processes)+" "+str(t.length)+" "+str(t.read_buf)+" "+str(t.write_buf)+" "+str(len(t.inputlist))+" "+str(len(t.outputlist))+" "+str(t.interleave_option)
@@ -146,7 +146,7 @@ class Application():
                         s = s+" "+stage.outputdir[o]+"/"+t.outputlist[o].name+" "+t.outputlist[o].size
                     print(s)    
 
-        elif self.mode == "Pegasus":
+        elif self.mode == "pegasus":
 
             try :
                 from Pegasus.DAX3 import *
@@ -227,7 +227,7 @@ class Application():
                                             if f.name == g.name:
                                                 dax.addDependency(Dependency(parent=taskmap[tt.taskid], child=taskmap[t.taskid]))
             dax.writeXML(sys.stdout)        
-        elif self.mode == "Swift":
+        elif self.mode == "swift":
             s = "type file;"+"\n"
 
             for stage in self.stagelist:
@@ -351,6 +351,16 @@ class Application():
             s = s+'    }\n'
             s = s+'}until(i=='+str(i)+');\n'
             print(s)
+
+        elif self.mode == "json":
+
+            if self.outfile :
+                with open (self.outfile, "w") as out :
+                    out.write ("%s\n\n" % self.as_json ())
+            else :
+                print self.as_json ()
+                print
+
 
     def resolve_iteration(self):
         rlist = []
@@ -872,7 +882,8 @@ class Application():
                     iteration_stages, iteration_sub, self.mode)
             self.stagelist.append(stage)
 
-    def to_json (self) :
+
+    def as_json (self) :
 
         import json
 
