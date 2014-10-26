@@ -915,9 +915,12 @@ if __name__ == '__main__':
     app = Application("test_skeleton", input_file, mode, outfile)
     app.generate()
     if jsonfile:
-        jfd = open(jsonfile, 'w+')
-        json.dump(app, jfd, default=convert_to_builtin_type, indent=2, separators=(',', ' : '))
-        jfd.write('\n');
-        jfd.close();
+        jsonstr = json.dumps(app, default=convert_to_builtin_type, indent=4, separators=(',', ' : '))
+        if jsonfile == '-' :
+            print jsonstr
+        else :
+            with open(jsonfile, 'w+') as jfd:
+                jfd.write("%s\n" % jsonstr)
     app.printTask()
     app.printSetup()
+
