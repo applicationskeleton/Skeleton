@@ -1,27 +1,10 @@
-#!/usr/bin/env python
-#!/usr/bin/env python3
-#if you want to use python 2, replace the first line with: #!/usr/bin/env python
 
-import sys
-if sys.version_info[0] == 2:
-    import Queue
-else:
-    import queue
 import os
-import datetime
-import pickle
-import os
-import string
-import time
-import hashlib
 import re
+import sys
 import copy
-import subprocess
 import random
-import json
-
-if len(sys.argv) >= 3 and sys.argv[2] == 'Pegasus':
-    from Pegasus.DAX3 import *
+import subprocess
 
 class File():
     def __init__(self, name, size):
@@ -98,7 +81,7 @@ class Application():
     def __init__(self, name, input_file, mode, outfile):
         self.mode = mode
         self.name = name
-        self.input = input_file
+        self.input_file = input_file
         self.outfile = outfile
         self.num_stage = 0
         self.stagelist = []
@@ -127,8 +110,7 @@ class Application():
             s.toString()
 
     def printSetup(self):
-        global input_file
-        prefix = os.path.basename(input_file).split('.')[0]
+        prefix = os.path.basename(self.input_file).split('.')[0]
         filename = prefix+"_Setup.sh"
         fd = open(filename, 'w+')
 
@@ -165,6 +147,13 @@ class Application():
                     print(s)    
 
         elif self.mode == "Pegasus":
+
+            try :
+                from Pegasus.DAX3 import *
+            except ImportError as e :
+                print "WARNING: cannot import Pegasus"
+                sys.exit (-1)
+
             for stage in self.stagelist:
                 for t in stage.task_list:
                     t.set_args()
@@ -726,7 +715,7 @@ class Application():
         adds stages to self.stage list.
         '''
         lines = []
-        fd = open(input_file, 'r')
+        fd = open(self.input_file, 'r')
         while True:
             line = fd.readline()
             if not line:
@@ -876,51 +865,28 @@ class Application():
                 else:
                     lines.append(line)
 
-            stage = Stage(stage_name, task_type, num_tasks, lengthpara, num_processes, read_buf, write_buf, input_file_each_task, input_para, input_task_mapping, output_file_each_task, output_para, interleave_option, iteration_num, iteration_stages, iteration_sub, mode)
+            stage = Stage(stage_name, task_type, num_tasks, lengthpara,
+                    num_processes, read_buf, write_buf, input_file_each_task,
+                    input_para, input_task_mapping, output_file_each_task,
+                    output_para, interleave_option, iteration_num,
+                    iteration_stages, iteration_sub, self.mode)
             self.stagelist.append(stage)
 
-def convert_to_builtin_type(obj):
-    # print 'default(', repr(obj), ')'
-    # Convert objects to a dictionary of their representation
-    d = { 'class':obj.__class__.__name__, 
-          # '__class__':obj.__class__.__name__, 
-          # '__module__':obj.__module__,
-          }
-    d.update(obj.__dict__)
-    return d
+    def to_json (self) :
 
+        import json
 
-if __name__ == '__main__':
+        def convert_to_builtin_type(obj):
+            # print 'default(', repr(obj), ')'
+            # Convert objects to a dictionary of their representation
+            d = { 'class':obj.__class__.__name__, 
+                  # '__class__':obj.__class__.__name__, 
+                  # '__module__':obj.__module__,
+                  }
+            d.update(obj.__dict__)
+            return d
 
-    if len(sys.argv) < 3 or len(sys.argv) > 5:
-        print(('Usage: %s <skeleton_input> <mode> [<json_output_file>]' % sys.argv[0]))
-        print('        mode should be one of: Shell, Pegasus, Swift')
-        sys.exit(1)
+        return json.dumps(self, default=convert_to_builtin_type, 
+                          indent=4, separators=(',', ' : '))
 
-    global input_file
-    input_file = sys.argv[1]
-    if not os.path.isfile(input_file):
-        print("ERROR: input file %s does not exist" % input_file)
-        sys.exit(1)
-    mode = sys.argv[2]
-
-    if len(sys.argv) == 4:
-        jsonfile = sys.argv[3]
-    else:
-        jsonfile = None
-
-    outfile = None # Seems like this is not yet implemented (mw)
-
-    global app    
-    app = Application("test_skeleton", input_file, mode, outfile)
-    app.generate()
-    if jsonfile:
-        jsonstr = json.dumps(app, default=convert_to_builtin_type, indent=4, separators=(',', ' : '))
-        if jsonfile == '-' :
-            print jsonstr
-        else :
-            with open(jsonfile, 'w+') as jfd:
-                jfd.write("%s\n" % jsonstr)
-    app.printTask()
-    app.printSetup()
 
