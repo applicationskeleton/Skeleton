@@ -137,229 +137,50 @@ class Application():
 
     def printTask(self):        
         if self.mode == "shell":
-            for stage in self.stagelist:
-                for t in stage.task_list:
-                    s = "task "+t.task_type+" "+str(t.processes)+" "+str(t.length)+" "+str(t.read_buf)+" "+str(t.write_buf)+" "+str(len(t.inputlist))+" "+str(len(t.outputlist))+" "+str(t.interleave_option)
-                    for i in range(len(t.inputlist)):
-                        s = s+" "+stage.inputdir[i]+"/"+t.inputlist[i].name
-                    for o in range(len(t.outputlist)):
-                        s = s+" "+stage.outputdir[o]+"/"+t.outputlist[o].name+" "+t.outputlist[o].size
-                    print(s)    
 
-        elif self.mode == "pegasus":
-
-            try :
-                from Pegasus.DAX3 import *
-            except ImportError as e :
-                print "WARNING: cannot import Pegasus"
-                sys.exit (-1)
-
-            for stage in self.stagelist:
-                for t in stage.task_list:
-                    t.set_args()
-
-            filemap = dict()
-            taskmap = dict()
-            dax = ADAG(self.name)
-            for stage in self.stagelist:
-                for para in stage.input_para:
-                    if para[0] == "filesystem":
-                        index = stage.input_para.index(para)
-                        for t in stage.task_list:
-                            for f in t.inputlist:
-                                i = 0
-                                if f.name not in filemap:
-                                    path = os.path.join(stage.inputdir[i], f.name)
-                                    a = File(path)
-                                    a.addPFN(PFN("file://" + os.getcwd() + "/" + path, "local"))
-                                    dax.addFile(a)
-                                    filemap[f.name] = 1
-                                    i = i+1
-            exe = "./task"                        
-            exe_stage = Executable(namespace=self.name, name=stage.name, version="1.0", os="linux", arch="x86_64", installed=False)
-            exe_stage.addPFN(PFN("file://" + os.getcwd() + "/" + exe, "local"))
-
-            infilemap = dict()
-            outfilemap = dict()
-            for stage in self.stagelist:
-                for task in stage.task_list:
-                    t = Job(namespace=self.name, name=task.taskid, version="1.0")
-                    t.addArguments(task.args)
-                    for f in task.inputlist:
-                        i = 0
-                        if f.name not in infilemap:
-                            path = os.path.join(stage.inputdir[i], f.name)
-                            fh = File(path)
-                            t.uses(fh, link=Link.INPUT)
-                            infilemap[path] = fh
-                            i = i+1
-                        else:
-                            t.uses(infilemap[f.name], link=Link.INPUT)
-                    for f in task.outputlist:
-                        i = 0
-                        if f.name not in outfilemap:
-                            path = os.path.join(stage.outputdir[i], f.name)
-                            fh = File(path)
-                            t.uses(fh, link=Link.OUTPUT)
-                            outfilemap[path] = fh
-                            i = i+1
-                        else:
-                            t.uses(outfilemap[path], link=Link.OUTPUT)
-                    taskmap[task.taskid] = t
-                    dax.addJob(t)
-            
-            for stage in self.stagelist:
-                for index in range(len(stage.input_para)):
-                    para = stage.input_para[index]
-                    if para[0] != "filesystem":
-                        for t in stage.task_list:
-                            f = t.inputlist[index]
-                            words = f.name.split('_')
-                            if len(words) > 5:
-                                stage_name = words[0]+'_'+words[1]+'_'+words[2]+'_'+words[3]
-                            else:
-                                stage_name = words[0]+'_'+words[1]
-                            #print(stage_name)
-                            for st in self.stagelist:
-                                if st.name == stage_name:
-                                    for tt in st.task_list:
-                                        for g in tt.outputlist:
-                                            if f.name == g.name:
-                                                dax.addDependency(Dependency(parent=taskmap[tt.taskid], child=taskmap[t.taskid]))
-            dax.writeXML(sys.stdout)        
-        elif self.mode == "swift":
-            s = "type file;"+"\n"
-
-            for stage in self.stagelist:
-                s = s + "app ("
-                for i in range(int(stage.output_per_task)):
-                    s = s+"file output_"+str(i)+", "
-                if s == "app (":
-                    s = s+' '
-                else:
-                    s = s[:len(s)-2]
-                s = s + ') '
-                s = s + stage.name+'('
-                if int(stage.input_per_task) > 0:
-                    for i in range(int(stage.input_per_task)):
-                        s = s+"file input_"+str(i)+", "
-                s = s+'string t_type, int procs, float length, int read_buf, int write_buf, int num_in, int num_out, int inter_opt, '
-                if int(stage.output_per_task) > 0:
-                    for i in range(int(stage.output_per_task)):
-                        s = s+"string outsize_"+str(i)+", "
-                if s[len(s)-2:] == ", ":
-                    s = s[:len(s)-2]
-                s = s + ') {'+'\n'
-                s = s + '    '+'task t_type procs length read_buf write_buf num_in num_out inter_opt'+' '
-                if int(stage.input_per_task) > 0:
-                    for i in range(int(stage.input_per_task)):
-                        s = s+"@input_"+str(i)+" "
-                if int(stage.output_per_task) > 0:
-                    for i in range(int(stage.output_per_task)):
-                        s = s+"@output_"+str(i)+" "+'outsize_'+str(i)+' '
-                s = s.strip()+";\n}\n"
-                s = s + '\n'
-
-            for stage in self.stagelist:
-                s = s + stage.name+"_proc"+"(){\n"
-                s = s + '    float '+stage.name+'_length[] = ['
-                for task in stage.task_list:
-                    s = s + str(float(task.length.strip('s'))) + ', '
-                if s[len(s)-2:] == ', ':
-                    s = s[:len(s)-2]
-                s = s + '];\n'
-
-                s = s + '    string '+stage.name+'_inputfiles[] = ['
-                for t in stage.task_list:
-                    i = 0
-                    for f in t.inputlist:
-                        inputdir = stage.inputdir[i]
-                        filepath = os.path.join(inputdir, f.name)
-                        s = s + '\"'+filepath+ '\", '
-                        i = i+1
-                if s[len(s)-2:] == ', ':
-                    s = s[:len(s)-2]
-                s = s + '];\n'
-                
-                s = s + '    string '+stage.name+'_outputfiles[] = ['
-                for t in stage.task_list:
-                    i = 0
-                    for o in t.outputlist:
-                        outputdir = stage.outputdir[i]
-                        filepath = os.path.join(outputdir, o.name)
-                        s = s + '\"'+filepath+ '\", '
-                        i = i+1
-                if s[len(s)-2:] == ', ':
-                    s = s[:len(s)-2]
-                s = s + '];\n\n'
-
-                s = s + '    string '+stage.name+'_outputsizes[] = ['
-                for t in stage.task_list:
-                    for o in t.outputlist:
-                        s = s + '\"'+o.size.strip('B')+'\"' + ', '
-                if s[len(s)-2:] == ', ':
-                    s = s[:len(s)-2]
-                s = s + '];\n\n'
-
-                s = s + '    foreach l, i in '+stage.name+'_length{\n'
-                for i in range(int(stage.input_per_task)):
-                    s = s+"        file "+stage.name+"_infile_"+str(i)+" <single_file_mapper; file="+stage.name+"_inputfiles[i*"+str(stage.input_per_task)+"+"+str(i)+"]"+">;\n"
-                    
-                for i in range(int(stage.output_per_task)):
-                    s = s+"        file "+stage.name+"_outfile_"+str(i)+" <single_file_mapper; file="+stage.name+"_outputfiles[i*"+str(stage.output_per_task)+"+"+str(i)+"]"+">;\n"
-
-                if int(stage.output_per_task) > 0:
-                    for i in range(int(stage.output_per_task)):
-                        s = s + "        string outsize_"+str(i)+" = "+stage.name+"_outputsizes[i*"+str(stage.output_per_task)+"+"+str(i)+"];"    
-                s = s + '\n'
-                s = s + "        string t_type = \""+stage.task_type+"\";\n"
-                s = s + "        int procs = "+str(stage.processes)+";\n"
-                s = s + "        int read_buf = "+stage.read_buf+";\n"
-                s = s + "        int write_buf = "+stage.write_buf+";\n"
-                s = s + "        int num_in = "+str(stage.input_per_task)+";\n"
-                s = s + "        int num_out = "+str(stage.output_per_task)+";\n"
-                s = s + "        int inter_opt = "+ stage.interleave_option+";\n"
-                s = s + '\n'
-
-                if int(stage.output_per_task) > 0:
-                    for i in range(int(stage.output_per_task)):
-                        s = s + "        "+stage.name+"_outfile_"+str(i)+", "
-                    if s[len(s)-2:] == ", ":
-                        s = s[:len(s)-2]                        
-                s = s + " = "
-                s = s + stage.name + '('
-                if int(stage.input_per_task) > 0:
-                    for i in range(int(stage.input_per_task)):
-                        s = s + stage.name+"_infile_"+str(i)+", "
-                s = s+'t_type, procs, l, read_buf, write_buf, num_in, num_out, inter_opt, '
-                if int(stage.output_per_task) > 0:
-                    for i in range(int(stage.output_per_task)):
-                        s = s + " outsize_"+str(i) + ", " 
-
-                if s[len(s)-2:] == ", ":
-                    s = s[:len(s)-2]
-                s = s+');\n'
-                s = s+'    }\n'+'}\n\n'
-
-            s = s+'iterate i {\n'
-            s = s+'    switch(i){\n'
-            i = 0
-            for stage in self.stagelist:
-                s = s+'        case '+str(i)+':\n'
-                s = s+'            '+stage.name+'_proc();\n'
-                i = i+1
-            s = s+'    }\n'
-            s = s+'}until(i=='+str(i)+');\n'
-            print(s)
-
-        elif self.mode == "json":
+            shell = self.as_shell ()
 
             if self.outfile :
                 with open (self.outfile, "w") as out :
-                    out.write ("%s\n\n" % self.as_json ())
+                    out.write ("%s\n\n" % shell)
             else :
-                print self.as_json ()
-                print
+                print shell
+
+
+        elif self.mode == "pegasus":
+
+            dax = self.as_dax ()
+
+            if self.outfile :
+                dax.writeXML(self.outfile)
+            else :
+                dax.writeXML(sys.stdout)        
+
+
+        elif self.mode == "swift":
+
+            swift = self.as_swift ()
+
+            if self.outfile :
+                with open (self.outfile, "w") as out :
+                    out.write ("%s\n\n" % swift)
+            else :
+                print swift
+
+
+        elif self.mode == "json":
+
+            json = self.as_json ()
+
+            if self.outfile :
+                with open (self.outfile, "w") as out :
+                    out.write ("%s\n\n" % json)
+            else :
+                print json
+
+
+        else :
+            print "ERROR: unknown mode '%s'" % self.mode
 
 
     def resolve_iteration(self):
@@ -883,6 +704,235 @@ class Application():
             self.stagelist.append(stage)
 
 
+
+    def as_shell (self) :
+
+        s = ""
+
+        for stage in self.stagelist:
+            for t in stage.task_list:
+                s += "task "+t.task_type+" "+str(t.processes)+" "+str(t.length)+" "+str(t.read_buf)+" "+str(t.write_buf)+" "+str(len(t.inputlist))+" "+str(len(t.outputlist))+" "+str(t.interleave_option)
+                for i in range(len(t.inputlist)):
+                    s += " "+stage.inputdir[i]+"/"+t.inputlist[i].name
+                for o in range(len(t.outputlist)):
+                    s += " "+stage.outputdir[o]+"/"+t.outputlist[o].name+" "+t.outputlist[o].size
+                s += "\n"
+
+        return s    
+
+
+    def as_dax (self) :
+
+        try :
+            from Pegasus.DAX3 import *
+        except ImportError as e :
+            print "WARNING: cannot import Pegasus"
+            sys.exit (0)
+
+        for stage in self.stagelist:
+            for t in stage.task_list:
+                t.set_args()
+
+        filemap = dict()
+        taskmap = dict()
+        dax = ADAG(self.name)
+        for stage in self.stagelist:
+            for para in stage.input_para:
+                if para[0] == "filesystem":
+                    index = stage.input_para.index(para)
+                    for t in stage.task_list:
+                        for f in t.inputlist:
+                            i = 0
+                            if f.name not in filemap:
+                                path = os.path.join(stage.inputdir[i], f.name)
+                                a = File(path)
+                                a.addPFN(PFN("file://" + os.getcwd() + "/" + path, "local"))
+                                dax.addFile(a)
+                                filemap[f.name] = 1
+                                i = i+1
+        exe = "./task"                        
+        exe_stage = Executable(namespace=self.name, name=stage.name, version="1.0", os="linux", arch="x86_64", installed=False)
+        exe_stage.addPFN(PFN("file://" + os.getcwd() + "/" + exe, "local"))
+
+        infilemap = dict()
+        outfilemap = dict()
+        for stage in self.stagelist:
+            for task in stage.task_list:
+                t = Job(namespace=self.name, name=task.taskid, version="1.0")
+                t.addArguments(task.args)
+                for f in task.inputlist:
+                    i = 0
+                    if f.name not in infilemap:
+                        path = os.path.join(stage.inputdir[i], f.name)
+                        fh = File(path)
+                        t.uses(fh, link=Link.INPUT)
+                        infilemap[path] = fh
+                        i = i+1
+                    else:
+                        t.uses(infilemap[f.name], link=Link.INPUT)
+                for f in task.outputlist:
+                    i = 0
+                    if f.name not in outfilemap:
+                        path = os.path.join(stage.outputdir[i], f.name)
+                        fh = File(path)
+                        t.uses(fh, link=Link.OUTPUT)
+                        outfilemap[path] = fh
+                        i = i+1
+                    else:
+                        t.uses(outfilemap[path], link=Link.OUTPUT)
+                taskmap[task.taskid] = t
+                dax.addJob(t)
+        
+        for stage in self.stagelist:
+            for index in range(len(stage.input_para)):
+                para = stage.input_para[index]
+                if para[0] != "filesystem":
+                    for t in stage.task_list:
+                        f = t.inputlist[index]
+                        words = f.name.split('_')
+                        if len(words) > 5:
+                            stage_name = words[0]+'_'+words[1]+'_'+words[2]+'_'+words[3]
+                        else:
+                            stage_name = words[0]+'_'+words[1]
+                        #print(stage_name)
+                        for st in self.stagelist:
+                            if st.name == stage_name:
+                                for tt in st.task_list:
+                                    for g in tt.outputlist:
+                                        if f.name == g.name:
+                                            dax.addDependency(Dependency(parent=taskmap[tt.taskid], child=taskmap[t.taskid]))
+
+        return dax
+
+
+    def as_swift (self) :
+
+        s = "type file;"+"\n"
+
+        for stage in self.stagelist:
+            s = s + "app ("
+            for i in range(int(stage.output_per_task)):
+                s = s+"file output_"+str(i)+", "
+            if s == "app (":
+                s = s+' '
+            else:
+                s = s[:len(s)-2]
+            s = s + ') '
+            s = s + stage.name+'('
+            if int(stage.input_per_task) > 0:
+                for i in range(int(stage.input_per_task)):
+                    s = s+"file input_"+str(i)+", "
+            s = s+'string t_type, int procs, float length, int read_buf, int write_buf, int num_in, int num_out, int inter_opt, '
+            if int(stage.output_per_task) > 0:
+                for i in range(int(stage.output_per_task)):
+                    s = s+"string outsize_"+str(i)+", "
+            if s[len(s)-2:] == ", ":
+                s = s[:len(s)-2]
+            s = s + ') {'+'\n'
+            s = s + '    '+'task t_type procs length read_buf write_buf num_in num_out inter_opt'+' '
+            if int(stage.input_per_task) > 0:
+                for i in range(int(stage.input_per_task)):
+                    s = s+"@input_"+str(i)+" "
+            if int(stage.output_per_task) > 0:
+                for i in range(int(stage.output_per_task)):
+                    s = s+"@output_"+str(i)+" "+'outsize_'+str(i)+' '
+            s = s.strip()+";\n}\n"
+            s = s + '\n'
+
+        for stage in self.stagelist:
+            s = s + stage.name+"_proc"+"(){\n"
+            s = s + '    float '+stage.name+'_length[] = ['
+            for task in stage.task_list:
+                s = s + str(float(task.length.strip('s'))) + ', '
+            if s[len(s)-2:] == ', ':
+                s = s[:len(s)-2]
+            s = s + '];\n'
+
+            s = s + '    string '+stage.name+'_inputfiles[] = ['
+            for t in stage.task_list:
+                i = 0
+                for f in t.inputlist:
+                    inputdir = stage.inputdir[i]
+                    filepath = os.path.join(inputdir, f.name)
+                    s = s + '\"'+filepath+ '\", '
+                    i = i+1
+            if s[len(s)-2:] == ', ':
+                s = s[:len(s)-2]
+            s = s + '];\n'
+            
+            s = s + '    string '+stage.name+'_outputfiles[] = ['
+            for t in stage.task_list:
+                i = 0
+                for o in t.outputlist:
+                    outputdir = stage.outputdir[i]
+                    filepath = os.path.join(outputdir, o.name)
+                    s = s + '\"'+filepath+ '\", '
+                    i = i+1
+            if s[len(s)-2:] == ', ':
+                s = s[:len(s)-2]
+            s = s + '];\n\n'
+
+            s = s + '    string '+stage.name+'_outputsizes[] = ['
+            for t in stage.task_list:
+                for o in t.outputlist:
+                    s = s + '\"'+o.size.strip('B')+'\"' + ', '
+            if s[len(s)-2:] == ', ':
+                s = s[:len(s)-2]
+            s = s + '];\n\n'
+
+            s = s + '    foreach l, i in '+stage.name+'_length{\n'
+            for i in range(int(stage.input_per_task)):
+                s = s+"        file "+stage.name+"_infile_"+str(i)+" <single_file_mapper; file="+stage.name+"_inputfiles[i*"+str(stage.input_per_task)+"+"+str(i)+"]"+">;\n"
+                
+            for i in range(int(stage.output_per_task)):
+                s = s+"        file "+stage.name+"_outfile_"+str(i)+" <single_file_mapper; file="+stage.name+"_outputfiles[i*"+str(stage.output_per_task)+"+"+str(i)+"]"+">;\n"
+
+            if int(stage.output_per_task) > 0:
+                for i in range(int(stage.output_per_task)):
+                    s = s + "        string outsize_"+str(i)+" = "+stage.name+"_outputsizes[i*"+str(stage.output_per_task)+"+"+str(i)+"];"    
+            s = s + '\n'
+            s = s + "        string t_type = \""+stage.task_type+"\";\n"
+            s = s + "        int procs = "+str(stage.processes)+";\n"
+            s = s + "        int read_buf = "+stage.read_buf+";\n"
+            s = s + "        int write_buf = "+stage.write_buf+";\n"
+            s = s + "        int num_in = "+str(stage.input_per_task)+";\n"
+            s = s + "        int num_out = "+str(stage.output_per_task)+";\n"
+            s = s + "        int inter_opt = "+ stage.interleave_option+";\n"
+            s = s + '\n'
+
+            if int(stage.output_per_task) > 0:
+                for i in range(int(stage.output_per_task)):
+                    s = s + "        "+stage.name+"_outfile_"+str(i)+", "
+                if s[len(s)-2:] == ", ":
+                    s = s[:len(s)-2]                        
+            s = s + " = "
+            s = s + stage.name + '('
+            if int(stage.input_per_task) > 0:
+                for i in range(int(stage.input_per_task)):
+                    s = s + stage.name+"_infile_"+str(i)+", "
+            s = s+'t_type, procs, l, read_buf, write_buf, num_in, num_out, inter_opt, '
+            if int(stage.output_per_task) > 0:
+                for i in range(int(stage.output_per_task)):
+                    s = s + " outsize_"+str(i) + ", " 
+
+            if s[len(s)-2:] == ", ":
+                s = s[:len(s)-2]
+            s = s+');\n'
+            s = s+'    }\n'+'}\n\n'
+
+        s = s+'iterate i {\n'
+        s = s+'    switch(i){\n'
+        i = 0
+        for stage in self.stagelist:
+            s = s+'        case '+str(i)+':\n'
+            s = s+'            '+stage.name+'_proc();\n'
+            i = i+1
+        s = s+'    }\n'
+        s = s+'}until(i=='+str(i)+');\n'
+
+        return s
+
+
     def as_json (self) :
 
         import json
@@ -898,6 +948,6 @@ class Application():
             return d
 
         return json.dumps(self, default=convert_to_builtin_type, 
-                          indent=4, separators=(',', ' : '))
+                          indent=4, separators=(',', ' : ')) + "\n"
 
 
