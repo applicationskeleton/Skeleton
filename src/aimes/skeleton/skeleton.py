@@ -40,6 +40,15 @@ class Task():
         for o in self.outputlist:
             s = s+" "+o.name+" "+o.size
         print(s)    
+
+    def get_command(self, inputdir, outputdir) :
+        s  = "task "+self.task_type+" "+str(self.processes)+" "+str(self.length)+" "+str(self.read_buf)+" "+str(self.write_buf)+" "+str(len(self.inputlist))+" "+str(len(self.outputlist))+" "+str(self.interleave_option)
+        for i in range(len(self.inputlist)):
+            s += " "+inputdir+"/"+self.inputlist[i].name
+        for o in range(len(self.outputlist)):
+            s += " "+outputdir+"/"+self.outputlist[o].name+" "+self.outputlist[o].size
+        s += "\n"
+        return s
         
 
 class Stage():
@@ -711,11 +720,9 @@ class Application():
 
         for stage in self.stagelist:
             for t in stage.task_list:
-                s += "task "+t.task_type+" "+str(t.processes)+" "+str(t.length)+" "+str(t.read_buf)+" "+str(t.write_buf)+" "+str(len(t.inputlist))+" "+str(len(t.outputlist))+" "+str(t.interleave_option)
-                for i in range(len(t.inputlist)):
-                    s += " "+stage.inputdir[i]+"/"+t.inputlist[i].name
-                for o in range(len(t.outputlist)):
-                    s += " "+stage.outputdir[o]+"/"+t.outputlist[o].name+" "+t.outputlist[o].size
+                inputdir  = stage.inputdir[i]
+                outputdir = stage.outputdir[i]
+                s += t.get_command (inputdir, outputdir)
                 s += "\n"
 
         return s    

@@ -1,6 +1,8 @@
-__author__    = ""
-__copyright__ = "Copyright 2014"
-__license__   = "MIT"
+
+__author__    = ''
+__email__     = ''
+__copyright__ = 'Copyright 2013/14, AIMES project'
+__license__   = 'MIT'
 
 
 """ Setup script. Used by easy_install and pip. """
@@ -9,7 +11,7 @@ import os
 import sys
 import subprocess as sp
 
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages
 
 name     = 'aimes.skeleton'
 mod_root = 'src'
@@ -47,7 +49,7 @@ def get_version (mod_root):
         if  not src_root :
             src_root = '.'
 
-        with open (src_root + "/VERSION", "r") as f :
+        with open (src_root + '/VERSION', 'r') as f :
             version = f.readline ().strip()
 
 
@@ -62,22 +64,22 @@ def get_version (mod_root):
         if  p.returncode   !=  0  or \
             version_detail == '@' or \
             'fatal'        in version_detail :
-            version_detail =  "v%s" % version
+            version_detail =  'v%s' % version
 
         print 'version: %s (%s)'  % (version, version_detail)
 
 
         # make sure the version files exist for the runtime version inspection
-        path = "%s/%s" % (src_root, mod_root)
+        path = '%s/%s' % (src_root, mod_root)
         print 'creating %s/VERSION' % path
 
-        with open (path + "/VERSION",     "w") as f : f.write (version        + "\n")
-        with open (path + "/VERSION.git", "w") as f : f.write (version_detail + "\n")
+        with open (path + '/VERSION',     'w') as f : f.write (version        + '\n')
+        with open (path + '/VERSION.git', 'w') as f : f.write (version_detail + '\n')
 
         return version, version_detail
 
     except Exception as e :
-        raise RuntimeError ("Could not extract/set version: %s" % e)
+        raise RuntimeError ('Could not extract/set version: %s' % e)
 
 
 #-----------------------------------------------------------------------------
@@ -88,7 +90,7 @@ version, version_detail = get_version (mod_root)
 #-----------------------------------------------------------------------------
 # check python version. we need > 2.6, <3.x
 if  sys.hexversion < 0x02060000 or sys.hexversion >= 0x03000000:
-    raise RuntimeError("%s requires Python 2.x (2.6 or higher)" % name)
+    raise RuntimeError('%s requires Python 2.x (2.6 or higher)' % name)
 
 
 #-----------------------------------------------------------------------------
@@ -97,7 +99,7 @@ def read(*rnames):
     try :
         return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
     except :
-        return ""
+        return ''
 
 
 #-----------------------------------------------------------------------------
@@ -107,12 +109,12 @@ setup_args = {
     'description'      : 'A Skeleton Generator',
     'long_description' : (read('README.md') + '\n\n' + read('CHANGES.md')),
     'author'           : '',
-    'author_email'     : "radical@rutgers.edu",
-    'maintainer'       : "",
-    'maintainer_email' : "",
-    'url'              : "",
-    'license'          : "MIT",
-    'keywords'         : "",
+    'author_email'     : '',
+    'maintainer'       : '',
+    'maintainer_email' : '',
+    'url'              : '',
+    'license'          : 'MIT',
+    'keywords'         : '',
     'classifiers'      : [
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -131,8 +133,8 @@ setup_args = {
     ],
 
     'namespace_packages': ['aimes'],
-    'packages'    : find_packages('src'),
-    'package_dir' : {'': 'src'},
+    'packages'         : find_packages('src'),
+    'package_dir'      : {'': 'src'},
     'scripts'          : ['bin/generate-skeleton.py'],
     'package_data'     : {'': ['*.sh', '*.json', 'VERSION', 'VERSION.git']},
 
