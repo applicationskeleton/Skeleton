@@ -720,12 +720,13 @@ class Application():
 
         for stage in self.stagelist:
             i = 0
+            # FIXME: don't understand the inputdir indexing...
             for t in stage.task_list:
                 inputdir  = stage.inputdir[i]
                 outputdir = stage.outputdir[i]
                 s += t.get_command (inputdir, outputdir)
                 s += "\n"
-                i += 1
+              # i += 1
 
         return s    
 
