@@ -719,11 +719,13 @@ class Application():
         s = ""
 
         for stage in self.stagelist:
+            i = 0
             for t in stage.task_list:
                 inputdir  = stage.inputdir[i]
                 outputdir = stage.outputdir[i]
                 s += t.get_command (inputdir, outputdir)
                 s += "\n"
+                i += 1
 
         return s    
 
