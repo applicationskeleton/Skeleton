@@ -23,6 +23,7 @@ class Task():
         self.outputlist = outputlist
         self.interleave_option = interleave_option
         self.mode = mode
+        self.command = None
         # self.path_to_binary = ""
         self.args = ""
         
@@ -41,13 +42,14 @@ class Task():
             s = s+" "+o.name+" "+o.size
         print(s)    
 
-    def get_command(self, inputdir, outputdir) :
+    def get_command(self, stage) :
         s  = "task "+self.task_type+" "+str(self.processes)+" "+str(self.length)+" "+str(self.read_buf)+" "+str(self.write_buf)+" "+str(len(self.inputlist))+" "+str(len(self.outputlist))+" "+str(self.interleave_option)
         for i in range(len(self.inputlist)):
-            s += " "+inputdir+"/"+self.inputlist[i].name
+            s += " "+stage.inputdir[i]+"/"+self.inputlist[i].name
         for o in range(len(self.outputlist)):
-            s += " "+outputdir+"/"+self.outputlist[o].name+" "+self.outputlist[o].size
+            s += " "+stage.outputdir[o]+"/"+self.outputlist[o].name+" "+self.outputlist[o].size
         s += "\n"
+        self.command = s
         return s
         
 
@@ -257,7 +259,9 @@ class Application():
         #initial task generation
         for stage in self.stagelist:
             for i in range(stage.num_tasks):
-                task = Task(stage.name+"_"+str(i), stage.task_type, stage.processes, 0, stage.read_buf, stage.write_buf, [], [], stage.interleave_option, stage.mode)
+                task = Task(stage.name+"_"+str(i), stage.task_type, stage.processes, 0, 
+                            stage.read_buf, stage.write_buf, [], [], 
+                            stage.interleave_option, stage.mode)
                 stage.task_list.append(task)
             #print(len(stage.task_list))
 
@@ -717,17 +721,9 @@ class Application():
     def as_shell (self) :
 
         s = ""
-
         for stage in self.stagelist:
-            i = 0
-            # FIXME: don't understand the inputdir indexing...
             for t in stage.task_list:
-                inputdir  = stage.inputdir[i]
-                outputdir = stage.outputdir[i]
-                s += t.get_command (inputdir, outputdir)
-                s += "\n"
-              # i += 1
-
+                s += t.get_command (stage)
         return s    
 
 
@@ -944,6 +940,11 @@ class Application():
 
 
     def as_json (self) :
+
+        # make sure all tasks have self._command defined
+        for stage in self.stagelist :
+            for task in stage.task_list :
+                task.get_command (stage)
 
         import json
 
