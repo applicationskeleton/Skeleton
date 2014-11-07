@@ -1,0 +1,49 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[pdftex]{graphicx}
+  \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\usepackage{subfigure}
+\title{Skeleton Paper Outline}
+\begin{document}
+\maketitle
+\section{Introduction}
+In this section, we state the motivation, challenge and contribution of the Skeleton.
+\begin{itemize}
+\item {Motivation}: Computer scientists who work on tools and systems meant to
+support or enable a variety of distributed computing applications want to use real
+applications to prove that the systems they design actually help those applications.
+However, in many cases, compiling and executing real applications can be time
+consuming. Some of applications (or data) are privately accessible; some use legacy
+code and are dependent on out-of-date libraries; and some are hard to understand
+based on the computer scientists knowledge of the background, when it might not
+be necessary for the computer scientists to understand the science problem.
+These issue led us to the idea of an Application Skeleton - to provide computer
+scientists a powerful and easy-to-use tool to build synthetic applications that represent
+real applications, with runtime, I/O, and intertask communication close to identical to those of
+the real applications. This allows computer scientists to focus on the system they are
+building; they can work with the simpler Skeleton applications and be sure that their
+work will also be applicable to the real applications.
+
+\item {Challenge}: The challenge is to provide an easy-to-use programming
+(specification) model to express an application with an acceptable performance
+difference between the Skeleton application and the real application.
+
+\item {Contribution}: 1. An application abstraction that gives users good expressiveness
+to capture the key performance elements of applications. 2. A versatile Skeleton
+implementation that is interoperable with mainstream workflow frameworks and
+systems (e.g., Shell, Pegasus and Swift).
+
+\end{itemize}
+
+\section{Application Examples}
+This section lists a couple of common application examples: a bag-of-tasks, map-reduce applications, and multi-stage applications (DOCK, PageRank, Montage).
+
+\section{Skeleton Interface Design}
+Skeleton abstracts an application as a number of stages, and each stage is abstracted as a number of tasks. 
+
+\section{Skeleton App Performance}
+I will use Montage, BLAST, CyberShake as sample applications to compare the skeleton app performance and the real application performance. The platform I can think of right now is BG/P, and I can run the scripts through AMFS. Ideally, skeleton and real app should deliver identical performance.
+\end{document}
