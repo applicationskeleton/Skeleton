@@ -120,20 +120,24 @@ class Application():
         for s in self.stagelist:
             s.toString()
 
-    def printSetup(self):
-        prefix = os.path.basename(self.input_file).split('.')[0]
-        filename = prefix+"_Setup.sh"
-        fd = open(filename, 'w+')
+    def getSetup(self):
+        """
+        returns list of command lines which, when run, setup all files and dirs
+        for the first stage
+        """
 
+        ret    = list()
         dirmap = dict()
+
         for stage in self.stagelist:
             for i in range(len(stage.input_para)):
                 if stage.input_para[i][0] == "filesystem" and stage.inputdir[i] not in dirmap:
-                    fd.write("mkdir "+stage.inputdir[i]+"\n")
+                    ret.append ("mkdir %s" % stage.inputdir[i])
                     dirmap[stage.inputdir[i]] = 1
                 for d in stage.outputdir: 
                     if d not in dirmap:
-                        fd.write("mkdir "+d+"\n")
+                        ret.append ("mkdir %s" % d)
+
                         dirmap[d] = 1
 
         filemap = dict()
@@ -142,9 +146,23 @@ class Application():
                 if stage.input_para[i][0] == "filesystem":
                     for t in stage.task_list:
                         if t.inputlist[i].name not in filemap:
-                            fd.write("dd if=/dev/zero of="+stage.inputdir[i]+"/"+t.inputlist[i].name+" bs="+str(t.inputlist[i].size)+" count=1 \n")
+                            ret.append ("dd if=/dev/zero of='%s/%s'  bs='%s' count=1" \
+                                     % (stage.inputdir[i], t.inputlist[i].name, t.inputlist[i].size))
                             filemap[t.inputlist[i].name] = 1
-        fd.close()                    
+
+        return ret
+
+
+    def printSetup(self):
+
+        prefix   = os.path.basename(self.input_file).split('.')[0]
+        filename = prefix+"_Setup.sh"
+
+        with open(filename, 'w+') as fd :
+            setup = self.getSetup ()
+            for cmd in setup :
+                fd.write ("%s\n" % cmd)
+
 
     def printTask(self):        
         if self.mode == "shell":
@@ -730,7 +748,7 @@ class Application():
     def as_dax (self) :
 
         try :
-            from Pegasus.DAX3 import *
+            import Pegasus.DAX3
         except ImportError as e :
             print "WARNING: cannot import Pegasus"
             sys.exit (0)
@@ -741,7 +759,7 @@ class Application():
 
         filemap = dict()
         taskmap = dict()
-        dax = ADAG(self.name)
+        dax = Pegasus.Dax3.ADAG(self.name)
         for stage in self.stagelist:
             for para in stage.input_para:
                 if para[0] == "filesystem":
