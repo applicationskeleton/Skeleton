@@ -132,11 +132,11 @@ class Application():
         for stage in self.stagelist:
             for i in range(len(stage.input_para)):
                 if stage.input_para[i][0] == "filesystem" and stage.inputdir[i] not in dirmap:
-                    ret.append ("mkdir %s" % stage.inputdir[i])
+                    ret.append ("mkdir -p %s" % stage.inputdir[i])
                     dirmap[stage.inputdir[i]] = 1
                 for d in stage.outputdir: 
                     if d not in dirmap:
-                        ret.append ("mkdir %s" % d)
+                        ret.append ("mkdir -p %s" % d)
 
                         dirmap[d] = 1
 
