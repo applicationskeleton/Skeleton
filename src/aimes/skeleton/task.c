@@ -1,16 +1,16 @@
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#include <unistd.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
 #include <math.h>
 #include <time.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <libgen.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #ifdef MPI
 # include <mpi.h>
@@ -18,6 +18,7 @@
 
 #define MAXSTR    1024
 #define MAXOUTPUT 1024
+
 
 /* -------------------------------------------------------------------------- */
 /* Declare write element */
@@ -56,6 +57,30 @@ void bail (const char* fmt, ... )
 
     exit (-1);
 
+}
+
+
+/* -------------------------------------------------------------------------- */
+void prep_output (char* fname)
+{
+    int   ret;
+    char *dir;
+    char *base;
+    char *bname;
+    char *dname;
+
+    dir   = strdup   (fname);
+    base  = strdup   (fname);
+
+    dname = dirname  (dir);
+    bname = basename (base);
+
+    ret   = mkdir (dname, S_IRUSR|S_IWUSR|S_IXUSR);
+
+    if ( ret < 0 )
+        bail ("Cannot mkdir (%s)", dname);
+
+    return;
 }
 
 
@@ -136,6 +161,8 @@ void writefiles(char **output_files, int *output_sizes, int bufsize, int num_out
         int size;
         int count = 0;
         long int total_size = 0;
+
+        prep_output (output_files[i]);
 
         mode_t mode = S_IRUSR|S_IWUSR;
         fd = open(output_files[i], O_CREAT|O_TRUNC|O_RDWR, mode);
@@ -318,6 +345,8 @@ void compute_write (double task_length, char **output_files, int *output_sizes,
         int count = 0;
         long int total_size = 0;
 
+        prep_output (output_files[i]);
+
         mode_t mode = S_IRUSR|S_IWUSR;
         fd = open(output_files[i], O_CREAT|O_TRUNC|O_RDWR, mode);
 
@@ -427,6 +456,8 @@ void read_compute_write(char **input_files, int r_bufsize, int num_input,
         int fd;
         int size;
         long int total_size = 0;
+
+        prep_output (output_files[i]);
 
         mode_t mode = S_IRUSR|S_IWUSR;
         fd = open(output_files[i], O_CREAT|O_TRUNC|O_RDWR, mode);
