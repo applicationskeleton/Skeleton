@@ -458,44 +458,12 @@ class Application():
             # print(rlist)        
             return sorted(rlist)
     
-    def combination(self, flist, m):
-        if m > len(flist):
-            print("ERROR: Maximum number of files exceeded!")
-            sys.exit(1)
 
-        clist = self.choose(len(flist), m)    
-        rlist = []        
-        for l in clist:
-            tlist = []
-            for f in l:
-                tlist.append(flist[f])
-            rlist.append(tlist)
-        return rlist
-
-    
-    
-    '''
     def combination(self, flist, m):
-        rlist = []
-        if m == 1:
-            for f in flist:
-                s = [f]
-                rlist.append(s)
-            return rlist
-        else:
-            plist = self.combination(flist, m-1)
-            for p in plist:
-                for f in flist:
-                    if f not in p and flist.index(f)>flist.index(p[len(p)-1]):
-                        p.append(f)
-                        rlist.append(p)
-                        pc = list(p)
-                        pc.append(f)
-                        rlist.append(pc)
-            for f in flist:
-                print(f.name)
-            return rlist    
-    '''            
+
+        import itertools
+        return list (itertools.combinations (flist, m))
+
 
     def generate(self):
         self.parse()
