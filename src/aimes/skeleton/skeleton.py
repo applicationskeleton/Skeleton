@@ -427,37 +427,6 @@ class Application():
                     f = File(fname, fsize)
                     stage.task_list[t].outputlist.append(f)
 
-    def choose(self, n, k):
-        # print(n, k)
-        rlist = []
-        if k==1:
-            for i in range(n):
-                tlist = []
-                tlist.append(i)
-                rlist.append(tlist)
-            return rlist
-        elif k==n:
-            tlist = []
-            for i in range(n):
-                tlist.append(i)
-            rlist.append(tlist)
-            return rlist
-        else:
-            rlist1 = self.choose(n-1, k-1)
-            # print(rlist1)
-            for r in rlist1:
-                tlist = list(r)
-                tlist.append(n-1)
-                rlist.append(tlist)
-
-            rlist2 = self.choose(n-1, k)
-            # print(rlist2)
-            for r in rlist2:
-                if r not in rlist:
-                    rlist.append(r)
-            # print(rlist)        
-            return sorted(rlist)
-    
 
     def combination(self, flist, m):
 
