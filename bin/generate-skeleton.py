@@ -5,30 +5,50 @@
 import sys
 import os
 import json
+import argparse
 
 import aimes.skeleton
 
+# ------------------------------------------------------------------------------
+#
+def parse_arguments():
 
-if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m', '--mode',  dest='mode',  default='shell',
+            help="output mode: shell, pegasys, swift, json (default: shell)")
+    parser.add_argument('-i', '--input_file', dest='input_file', default=None,
+            help="skeleton description file (mandatory)")
+    parser.add_argument('-o', '--output_file', dest='output_file', default='-',
+            help="output file (default: '-' (stdout))")
 
-    if len(sys.argv) < 3 or len(sys.argv) > 4:
-        print(('Usage: %s <skeleton_input> <mode> [output_file]' % sys.argv[0]))
-        print('        mode should be one of: Shell, Pegasus, Swift, JSON')
-        sys.exit(1)
+    return parser.parse_args(), parser
 
-    input_file = sys.argv[1]
+
+# ------------------------------------------------------------------------------
+#
+def main():
+
+    arguments, parser = parse_arguments()
+
+    mode        = arguments.mode
+    input_file  = arguments.input_file
+    output_file = arguments.output_file
+
     if not os.path.isfile(input_file):
         print("ERROR: input file %s does not exist" % input_file)
-        sys.exit(1)
-    mode = sys.argv[2]
+        return 1
 
-    if len(sys.argv) == 4:
-        outfile = sys.argv[3]
-    else:
-        outfile = None
+    if  output_file == '-' :
+        output_file = None
 
-    app = aimes.skeleton.Application("test_skeleton", input_file, mode, outfile)
+    app = aimes.skeleton.Application("test_skeleton", input_file, mode, output_file)
     app.generate()
     app.printTask()
     app.printSetup()
+
+
+# ------------------------------------------------------------------------------
+#
+if __name__ == "__main__":
+    sys.exit(main())
 

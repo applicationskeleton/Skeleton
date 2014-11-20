@@ -89,6 +89,7 @@ class Stage():
 
 
 class Application():
+
     def __init__(self, name, input_file, mode, outfile=None):
         self.mode = mode.lower ()
         self.name = name
