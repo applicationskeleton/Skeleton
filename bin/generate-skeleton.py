@@ -41,10 +41,12 @@ def main():
     if  output_file == '-' :
         output_file = None
 
-    app = aimes.skeleton.Application("test_skeleton", input_file, mode, output_file)
-    app.generate()
-    app.printTask()
-    app.printSetup()
+    skeleton = aimes.skeleton.Skeleton ("test_skeleton", input_file)
+    skeleton.generate(mode, output_file)
+    print "Skeleton : "
+    print str(skeleton)
+    print "Skeleton (setup) : "
+    print '\n'.join (skeleton.get_setup ())
 
 
 # ------------------------------------------------------------------------------

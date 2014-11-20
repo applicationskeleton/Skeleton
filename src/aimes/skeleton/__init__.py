@@ -1,5 +1,5 @@
 
 __import__('pkg_resources').declare_namespace(__name__)
 
-from skeleton import *
+from skeleton_api import *
 
