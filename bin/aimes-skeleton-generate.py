@@ -30,10 +30,20 @@ def parse_arguments():
                         default = '-',
                         help    = "output file (default: '-' (stdout))")
 
+    parser.add_argument('-c', '--create-setup', 
+                        dest    = 'create_setup', 
+                        action  = 'store_true',
+                        help    = "create setup script as <output_file>_setup.sh (default: no)")
+
+    parser.add_argument('-r', '--run_setup', 
+                        dest    = 'run_setup', 
+                        action  = 'store_true',
+                        help    = "run setup script (default: no)")
+
     parser.add_argument('-v', '--verbose', 
                         dest    = 'verbose', 
                         action  = 'store_true',
-                        help    = "verbose (default: off)")
+                        help    = "verbose (default: no)")
 
     return parser.parse_args(), parser
 
@@ -44,10 +54,12 @@ def main():
 
     arguments, parser = parse_arguments()
 
-    mode        = arguments.mode
-    input_file  = arguments.input_file
-    output_file = arguments.output_file
-    verbose     = arguments.verbose
+    mode         = arguments.mode
+    input_file   = arguments.input_file
+    output_file  = arguments.output_file
+    create_setup = arguments.create_setup
+    run_setup    = arguments.run_setup
+    verbose      = arguments.verbose
 
     if not input_file:
         print("ERROR: input file not specified")
@@ -58,30 +70,65 @@ def main():
         return 1
 
     if  output_file == '-' :
-        output_file = None
+        output_file  = None
 
-    skeleton = aimes.skeleton.Skeleton ("test_skeleton", input_file)
-    skeleton.generate(mode, output_file)
+    skeleton = aimes.skeleton.Skeleton (input_file)
+    skeleton.generate (mode)
+
+    skeleton_mode  = skeleton.get_mode  (mode)
+    skeleton_setup = skeleton.get_setup ()
+
 
     if verbose :
         print "Skeleton : "
         print str(skeleton)
         print "Skeleton (setup) : "
-        print '\n'.join (skeleton.get_setup ())
+        print '\n'.join (skeleton_setup)
 
-
-    skeleton_str = skeleton.convert (mode)
+    skeleton_setup = skeleton.get_setup ()
 
     if output_file :
-        with open (output_file, "w") as out :
-            out.write ("\n%s\n\n" % skeleton_str)
+
+        output_mode = mode.lower()
+        if  output_mode == 'pegasus':
+            output_mode =  'dax'
+
+        with open ("%s.%s" % (output_file, output_mode), "w") as out :
+            print "writing %s.%s" % (output_file, output_mode)
+            out.write ("\n%s\n\n" % skeleton_mode)
+
+
+        if create_setup :
+
+            output_dir  = os.path.dirname  (output_file)
+            output_base = os.path.basename (output_file)
+
+            if '.' in output_base :
+                output_base = '.'.join (output_base.split ('.')[:-1])
+
+            setup_output_file = ""
+            if output_dir :
+                setup_output_file += "%s/" % output_dir
+            setup_output_file += "%s_setup.sh" % output_base
+
+            with open (setup_output_file, 'w') as out :
+                print "writing %s" % (setup_output_file)
+                out.write ("#!/bin/sh\n\n%s\n\n" % '\n'.join (skeleton_setup))
 
     else :
-        print "\n%s\n\n" % skeleton_str
+        print "\nSkeleton (%s) :\n\n%s\n" % (mode, skeleton_mode)
+
+        if create_setup :
+            print "Setup (shell):\n\n%s\n\n" % '\n'.join (skeleton_setup)
+
+
+    if run_setup :
+        skeleton.setup ()
 
 
 # ------------------------------------------------------------------------------
 #
 if __name__ == "__main__":
     sys.exit(main())
+
 
