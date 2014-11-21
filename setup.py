@@ -135,7 +135,9 @@ setup_args = {
     'namespace_packages': ['aimes'],
     'packages'         : find_packages('src'),
     'package_dir'      : {'': 'src'},
-    'scripts'          : ['bin/generate-skeleton.py'],
+    'scripts'          : ['bin/aims-skeleton-generate.py',
+                          'bin/aims-skeleton-version.py', 
+                          'bin/dax2dot'],
     'package_data'     : {'': ['*.sh', '*.json', 'VERSION', 'VERSION.git']},
 
     'install_requires' : [],
