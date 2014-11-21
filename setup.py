@@ -15,6 +15,7 @@ from setuptools import setup, find_packages
 
 name     = 'aimes.skeleton'
 mod_root = 'src'
+mod_path = 'src/aimes/skeleton'
 
 #-----------------------------------------------------------------------------
 #
@@ -30,11 +31,11 @@ mod_root = 'src'
 #   - both files, VERSION and VERSION.git are used to provide the runtime
 #     version information.
 #
-def get_version (mod_root):
+def get_version (mod_path):
     """
-    mod_root
+    mod_path
         a VERSION and VERSION.git file containing the version strings is created
-        in mod_root, during installation.  Those files are used at runtime to
+        in mod_path, during installation.  Those files are used at runtime to
         get the version information.
 
     """
@@ -70,7 +71,7 @@ def get_version (mod_root):
 
 
         # make sure the version files exist for the runtime version inspection
-        path = '%s/%s' % (src_root, mod_root)
+        path = '%s/%s' % (src_root, mod_path)
         print 'creating %s/VERSION' % path
 
         with open (path + '/VERSION',     'w') as f : f.write (version        + '\n')
@@ -84,7 +85,7 @@ def get_version (mod_root):
 
 #-----------------------------------------------------------------------------
 # get version info -- this will create VERSION and srcroot/VERSION
-version, version_detail = get_version (mod_root)
+version, version_detail = get_version (mod_path)
 
 
 #-----------------------------------------------------------------------------
@@ -135,8 +136,8 @@ setup_args = {
     'namespace_packages': ['aimes'],
     'packages'         : find_packages('src'),
     'package_dir'      : {'': 'src'},
-    'scripts'          : ['bin/aimes-skeleton-generate.py',
-                          'bin/aimes-skeleton-version.py', 
+    'scripts'          : ['bin/aimes-skeleton-generate',
+                          'bin/aimes-skeleton-version', 
                           'bin/dax2dot'],
     'package_data'     : {'': ['*.sh', '*.json', 'VERSION', 'VERSION.git']},
 

@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import aimes.skeleton
+
+print "version: %s (%s)" % (aimes.skeleton.version, aimes.skeleton.version_detail)
+
