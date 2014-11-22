@@ -99,6 +99,8 @@ class Skeleton(object) :
         self.name   = name
         self._impl  = skeleton_impl.Application (name, input_file)
         self._setup = None
+        self.stages = list()
+        self.tasks  = list()
 
 
     # --------------------------------------------------------------------------
