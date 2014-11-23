@@ -283,7 +283,7 @@ class Task(object) :
         self.write_buf         = int(self._priv['write_buf'])
 
         # Assume an integer task length
-        self.length  = math.ceil(float(self.length))
+        self.length  = int(math.ceil(float(self.length)))
 
         self.inputs  = list()
         self.outputs = list()
