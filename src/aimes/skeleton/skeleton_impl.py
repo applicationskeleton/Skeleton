@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import copy
+import math
 import random
 import subprocess
 
@@ -37,6 +38,9 @@ class Task(object):
         self.outputlist        = outputlist
         self.interleave_option = interleave_option
         self.mode              = mode
+
+        # make sure length is an integer
+        self.length = math.ceil(float(self.length))
 
         self.command           = None
       # self.path_to_binary    = ""
