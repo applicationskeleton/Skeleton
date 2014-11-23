@@ -76,7 +76,9 @@ class Task(object):
             s += " %s/%s" % (stage.inputdir[i], self.inputlist[i].name)
 
         for o in range(len(self.outputlist)):
-            s += " %s/%s" % (stage.outputdir[o], self.outputlist[o].name)
+            s += " %s/%s %s" % (stage.outputdir[o], 
+                                self.outputlist[o].name, 
+                                self.outputlist[o].size)
 
         self.command = s
         return s
