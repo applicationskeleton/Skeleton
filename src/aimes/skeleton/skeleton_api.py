@@ -70,6 +70,7 @@ for task in skeleton.tasks:
 
 import os
 import json
+import math
 import weakref
 
 import skeleton_impl
@@ -267,6 +268,7 @@ class Task(object) :
     def __init__ (self, priv, stage):
 
         self._priv = priv
+
         self.stage = weakref.ref (stage)
 
         self.name              =     self._priv['taskid']
@@ -274,11 +276,14 @@ class Task(object) :
         self.mode              =     self._priv['mode']
         self.command           =     self._priv['command']
         self.args              =     self._priv['args']
-        self.length            = int(self._priv['length'])
+        self.length            =     self._priv['length']
         self.cores             = int(self._priv['processes'])
         self.interleave_option =     self._priv['interleave_option']
         self.read_buf          = int(self._priv['read_buf'])
         self.write_buf         = int(self._priv['write_buf'])
+
+        # Assume an integer task length
+        self.length  = math.ceil(float(self.length))
 
         self.inputs  = list()
         self.outputs = list()
