@@ -293,7 +293,6 @@ class Task(object) :
 
             self.inputs.append (input_dict)
 
-
         for priv_output in self._priv['outputlist']:
             output_dict = dict()
             output_dict['name'] = priv_output['name']
@@ -324,7 +323,7 @@ class Task(object) :
 
         out += "        : outputs           : %s\n" % len (self.outputs)
         for o in self.outputs :
-            out += "        :                   : %10s %s\n" % (i['name'], i['size'])
+            out += "        :                   : %10s %s\n" % (o['name'], o['size'])
 
         return out
 
