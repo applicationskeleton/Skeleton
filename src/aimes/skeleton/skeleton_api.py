@@ -332,35 +332,5 @@ class Task(object) :
 
         return out
 
-
-# -----------------------------------------------------------------------------
-#
-# The API also includes a free function which can convert a (set of)
-# Skeleton Task(s) into a (set of) RADICAL-Pilot
-# ComputeUnitDescription(s).
-#
-# FIXME: this is not fully implemented -- lift from aimes.emanager!
-#
-def task_to_cud (tasks) :
-
-    import radical.pilot
-
-    return_list = True
-    if not isinstance (tasks, list):
-        tasks = [tasks]
-        return_list = False
-
-    ret = list()
-    for task in tasks:
-        cud = radical.pilot.ComputeUnitDescription ()
-        cud.executable = "/bin/sleep"
-        cud.arguments  = [str(task.length)]
-
-        ret.append (cud)
-
-    if  return_list :
-        return ret
-    else :
-        return ret[0]
-
+# ------------------------------------------------------------------------------
 
