@@ -139,7 +139,7 @@ setup_args = {
     'scripts'          : ['bin/aimes-skeleton-generate',
                           'bin/aimes-skeleton-version', 
                           'bin/dax2dot'],
-    'package_data'     : {'': ['*.sh', '*.json', 'VERSION', 'VERSION.git']},
+    'package_data'     : {'': ['*.sh', '*.c', 'VERSION', 'VERSION.git']},
 
     'install_requires' : [],
     'tests_require'    : [],
