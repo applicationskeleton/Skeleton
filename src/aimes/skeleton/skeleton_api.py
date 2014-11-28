@@ -271,19 +271,16 @@ class Task(object) :
 
         self.stage = weakref.ref (stage)
 
-        self.name              =     self._priv['taskid']
-        self.task_type         =     self._priv['task_type']
-        self.mode              =     self._priv['mode']
-        self.command           =     self._priv['command']
-        self.args              =     self._priv['args']
-        self.length            =     self._priv['length']
-        self.cores             = int(self._priv['processes'])
-        self.interleave_option =     self._priv['interleave_option']
-        self.read_buf          = int(self._priv['read_buf'])
-        self.write_buf         = int(self._priv['write_buf'])
-
-        # Assume an integer task length
-        self.length  = int(math.ceil(float(self.length)))
+        self.name              =       self._priv['taskid']
+        self.task_type         =       self._priv['task_type']
+        self.mode              =       self._priv['mode']
+        self.command           =       self._priv['command']
+        self.args              =       self._priv['args']
+        self.length            = float(self._priv['length'])
+        self.cores             =   int(self._priv['processes'])
+        self.interleave_option =       self._priv['interleave_option']
+        self.read_buf          =   int(self._priv['read_buf'])
+        self.write_buf         =   int(self._priv['write_buf'])
 
         self.inputs  = list()
         self.outputs = list()
