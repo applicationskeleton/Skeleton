@@ -1,5 +1,5 @@
 
-__author__    = "Matteo Turillii, Andre Merzky"
+__author__    = "Matteo Turilli, Andre Merzky"
 __copyright__ = "Copyright 2013-2014, The AIMES Project"
 __license__   = "MIT"
 
