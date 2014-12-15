@@ -68,17 +68,24 @@ void prep_output (char* fname)
     char *base;
     char *bname;
     char *dname;
+	struct stat st;
 
     dir   = strdup   (fname);
     base  = strdup   (fname);
 
     dname = dirname  (dir);
-    bname = basename (base);
+    // bname = basename (base);
 
-    ret   = mkdir (dname, S_IRUSR|S_IWUSR|S_IXUSR);
+    ret = mkdir (dname, S_IRUSR|S_IWUSR|S_IXUSR);
 
     if ( ret < 0 )
-        bail ("Cannot mkdir (%s)", dname);
+	  if( errno != EEXIST )
+		bail ("Cannot mkdir (%s)", dname);
+
+	ret = chmod (dname, S_IRUSR|S_IWUSR|S_IXUSR);
+
+    if ( ret < 0 )
+	  bail ("Cannot chmod 700 (%s)", dname);
 
     return;
 }
