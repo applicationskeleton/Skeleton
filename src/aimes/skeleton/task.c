@@ -186,7 +186,7 @@ void writefiles(char **output_files, int *output_sizes, int bufsize, int num_out
             count++;
 
             if (count % 1000 == 0)
-                printf("write operations: %d total_size: %ld output_size: %ld\n", 
+                printf("write operations: %d total_size: %ld output_size: %d\n", 
                        count, total_size, output_sizes[i]);
         }
 
@@ -220,7 +220,7 @@ void compute(double task_length)
 
 
 /* -------------------------------------------------------------------------- */
-int read_compute(char **input_files, int bufsize, int num_input, double task_length)
+void read_compute(char **input_files, int bufsize, int num_input, double task_length)
 {
     int i;
     int ret;
@@ -374,7 +374,7 @@ void compute_write (double task_length, char **output_files, int *output_sizes,
             count++;
 
             if (count % 1000 == 0)
-                printf("write operations: %d total_size: %ld output_size: %ld\n", 
+                printf("write operations: %d total_size: %ld output_size: %d\n", 
                        count, total_size, output_sizes[i]);
         }
 
