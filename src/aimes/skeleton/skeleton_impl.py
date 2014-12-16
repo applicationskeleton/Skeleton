@@ -495,10 +495,10 @@ class Application(object):
             
     # --------------------------------------------------------------------------
     #
-    def generate_function(self, distribution, parameter, num_files):
+    def generate_function(self, distribution, parameter, num_items):
         lengthl = []
         if distribution == "uniform":
-            lengthl = [parameter]*num_files
+            lengthl = [parameter]*num_items
         elif distribution == "normal":
             m=re.match(r"\[(?P<avg>\d+|\d+.\d+), (?P<stdev>\d+|\d+.\d+)\](?P<unit>\w*)", parameter)
             avg = float(m.group('avg'))
@@ -506,8 +506,8 @@ class Application(object):
             unit = m.group('unit')
             randoml = []
             random.seed()
-            for i in range(int(num_files)):
-                randoml.append(random.normalvariate(avg, stdev))
+            for i in range(int(num_items)):
+                randoml.append(max(0.0,random.normalvariate(avg, stdev)))
             lengthl = []
             for i in randoml:
                 lengthl.append(str("%.2f" % float(i))+unit)
@@ -518,8 +518,8 @@ class Application(object):
             unit = m.group('unit')
             randoml = []
             random.seed()
-            for i in range(int(num_files)):
-                randoml.append(random.gauss(avg, stdev))
+            for i in range(int(num_items)):
+                randoml.append(max(0.0,random.gauss(avg, stdev)))
             lengthl = []
             for i in randoml:
                 lengthl.append(str("%.2f" % float(i))+unit)
@@ -531,8 +531,8 @@ class Application(object):
             unit = m.group('unit')
             randoml = []
             random.seed()
-            for i in range(int(num_files)):
-                randoml.append(random.lognormvariate(avg, stdev))
+            for i in range(int(num_items)):
+                randoml.append(max(0.0,random.lognormvariate(avg, stdev)))
             lengthl = []
             for i in randoml:
                 lengthl.append(str("%.2f" % float(i))+unit)
@@ -544,15 +544,14 @@ class Application(object):
             unit = m.group('unit')
             randoml = []
             random.seed()
-            for i in range(int(num_files)):
-                randoml.append(random.triangular(low, high))
+            for i in range(int(num_items)):
+                randoml.append(max(0.0,random.triangular(low, high)))
             lengthl = []
             for i in randoml:
                 lengthl.append(str("%.2f" % float(i))+unit)
         else:
             print("ERROR: unknown distribution: "+distribution)
         return lengthl
-
 
     # --------------------------------------------------------------------------
     #
