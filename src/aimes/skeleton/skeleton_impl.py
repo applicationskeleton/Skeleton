@@ -1,4 +1,8 @@
 
+__author__    = "See AUTHORS file"
+__copyright__ = "Copyright 2013-2015, The AIMES Project"
+__license__   = "MIT"
+
 import os
 import re
 import sys
