@@ -1,5 +1,6 @@
 Changes from 1.1 to 1.2:
   code refactored to provide both API and CLI
   some command line options changed - see usage message, tutorial slides, report for details
+  "choose" code (used in input file mapping) replaced by calls to itertools
   task lengths less than zero now set to zero (distribution functions can create negative task lengths)
   tutorial slides and report updated to match
