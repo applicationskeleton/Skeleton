@@ -1,6 +1,1 @@
 1.1
-
-Changes from 1.0:
- code refactored to provide both API and CLI
- task lengths less than zero now set to zero (distribution functions can create negative task lengths)
- 
