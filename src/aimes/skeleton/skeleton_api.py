@@ -1,6 +1,6 @@
 
 __author__    = "See AUTHORS file"
-__copyright__ = "Copyright 2013-2014, The AIMES Project"
+__copyright__ = "Copyright 2013-2015, The AIMES Project"
 __license__   = "MIT"
 
 
