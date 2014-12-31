@@ -1,0 +1,5 @@
+Changes from 1.0 to 1.1:
+  code refactored to provide both API and CLI
+  some command line options changed - see usage message, tutorial slides, report for details
+  task lengths less than zero now set to zero (distribution functions can create negative task lengths)
+  tutorial slides and report updated to match
