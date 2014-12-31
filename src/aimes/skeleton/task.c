@@ -1,4 +1,11 @@
 
+/*
+__author__    = "See AUTHORS file"
+__copyright__ = "Copyright 2013-2015, The AIMES Project"
+__license__   = "MIT"
+*/
+
+
 #include <math.h>
 #include <time.h>
 #include <errno.h>
