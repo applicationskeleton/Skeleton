@@ -1,4 +1,5 @@
-<a href="http://dx.doi.org/10.5281/zenodo.11096"><img src="https://zenodo.org/badge/doi/10.5281/zenodo.11096.png" alt="10.5281/zenodo.11096"></a>
+<a href="http://dx.doi.org/10.5281/zenodo.13750"><img src="https://zenodo.org/badge/doi/10.5281/zenodo.13750.svg" alt="10.5281/zenodo.13750"></a>
+
 
 Skeleton
 ========
