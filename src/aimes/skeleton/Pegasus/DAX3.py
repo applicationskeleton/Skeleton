@@ -97,8 +97,8 @@ __author__ = "Gideon Juve <juve@usc.edu>"
 __version__ = "3.3"
 
 import datetime, os, sys
-from io import StringIO
-#from StringIO import StringIO
+# from io import StringIO
+from StringIO import StringIO
 import codecs
 import shlex
 import codecs

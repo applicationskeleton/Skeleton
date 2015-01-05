@@ -1,0 +1,178 @@
+#!/usr/bin/env python
+#!/usr/bin/env python3
+#if you want to use python 2, replace the first line with: #!/usr/bin/env python
+
+import sys
+import os
+import optparse
+
+import aimes.skeleton
+
+# ------------------------------------------------------------------------------
+#
+def parse_options():
+
+    parser = optparse.OptionParser (add_help_option=False)
+
+    parser.add_option ('-i', '--input_file',   dest='input_file',   default=None) 
+    parser.add_option ('-m', '--mode',         dest='mode',         default='shell') 
+    parser.add_option ('-o', '--output_file',  dest='output_file',  default='-') 
+    parser.add_option ('-c', '--create-setup', dest='create_setup', action ='store_true') 
+    parser.add_option ('-r', '--run_setup',    dest='run_setup',    action ='store_true') 
+    parser.add_option ('-v', '--verbose',      dest='verbose',      action ='store_true') 
+    parser.add_option ('-h', '--help',         dest='help',         action ='store_true') 
+
+    return parser.parse_args()
+
+
+# ------------------------------------------------------------------------------
+#
+def usage(msg=None):
+
+    if msg:
+        print "\n        ERROR  : %s" % msg
+
+    print """
+        usage  : %s -i <input> [-o <output>] [-m <mode>] [-v] [-h] [-c] [-r]
+        example: %s -i skeleton.in -r -v -m shell
+
+        options:
+            -i --input_file, 
+                specify input file, ie. the skeleton description (mandatory)
+           
+            -m --mode
+                specify output mode: shell, pegasus, swift, json (default: shell)
+           
+            -o --output_file
+                specify output file (default: - (stdout))
+           
+            -c --create-setup
+                create setup script as <output_file>_setup.sh (default: no)
+           
+            -r --run_setup
+                run setup script (default: no)
+           
+            -v --verbose
+                verbose operation (default: no)
+           
+            -h --help
+                print help (default: no)
+
+
+        modes:
+
+            shell  : output will be stored a shell script, ie. a set of
+                     shell commands which can be executed locally
+            json   : output will be stored a json description.
+            pegasus: output will be stored a DAX XML description,
+                     suitable for the consumption by Pegasus WMS.
+            swift  : output will be stored in a swift program,
+                     suitable to run under the SWIFT interpreter.
+
+            For all modes, the setup script will be stored as shell
+            script (if so requested via '-c').
+
+""" % (sys.argv[0], sys.argv[0])
+
+    if msg :
+        sys.exit (-1)
+
+    else :
+        sys.exit (0)
+        
+
+# ------------------------------------------------------------------------------
+#
+def main():
+
+    options, args = parse_options()
+
+    help         = options.help
+    mode         = options.mode
+    input_file   = options.input_file
+    output_file  = options.output_file
+    create_setup = options.create_setup
+    run_setup    = options.run_setup
+    verbose      = options.verbose
+
+    if help :
+        usage ()
+
+    if args :
+        usage ("cannot handle arguments %s" % str(args))
+
+    if mode not in ['shell', 'json', 'swift', 'pegasus'] :
+        usage("mode '%s' not supported" % mode)
+
+    if not input_file:
+        usage("input file not specified")
+
+    if not os.path.isfile(input_file):
+        usage("input file %s does not exist" % input_file)
+
+    if  output_file == '-' :
+        output_file  = None
+
+    skeleton = aimes.skeleton.Skeleton (input_file)
+    skeleton.generate (mode)
+
+    skeleton_mode  = skeleton.get_mode  (mode)
+    skeleton_setup = skeleton.get_setup ()
+
+
+    if verbose :
+        print "Skeleton : "
+        print str(skeleton)
+        print "Skeleton (setup) : "
+        print '\n'.join (skeleton_setup)
+
+    skeleton_setup = skeleton.get_setup ()
+
+    if output_file :
+
+        output_mode = mode.lower()
+        if  output_mode == 'pegasus':
+            output_mode =  'dax'
+
+        with open ("%s" % (output_file), "w") as out :
+            print "writing %s" % (output_file)
+            out.write ("\n%s\n\n" % skeleton_mode)
+
+
+        if create_setup :
+
+            output_dir  = os.path.dirname  (output_file)
+            output_base = os.path.basename (output_file)
+
+            if '.' in output_base :
+                output_base = '.'.join (output_base.split ('.')[:-1])
+
+            setup_output_file = ""
+            if output_dir :
+                setup_output_file += "%s/" % output_dir
+            setup_output_file += "%s_setup.sh" % output_base
+
+            with open (setup_output_file, 'w') as out :
+                print "writing %s" % (setup_output_file)
+                out.write ("#!/bin/sh\n\n%s\n\n" % '\n'.join (skeleton_setup))
+
+    else :
+        print "\nSkeleton (%s) :\n\n%s\n" % (mode, skeleton_mode)
+
+        if create_setup :
+            print "Setup (shell):\n\n%s\n\n" % '\n'.join (skeleton_setup)
+
+
+    if run_setup :
+        skeleton.setup ()
+
+
+# ------------------------------------------------------------------------------
+#
+if __name__ == "__main__":
+
+    sys.exit(main())
+
+
+# ------------------------------------------------------------------------------
+
