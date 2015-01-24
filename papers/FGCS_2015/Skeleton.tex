@@ -1,16 +1,54 @@
-\documentclass[conference]{IEEEtran}
-\usepackage{pgf}
-\usepackage{listings}
+%% 
+%% Copyright 2007, 2008, 2009 Elsevier Ltd
+%% 
+%% This file is part of the 'Elsarticle Bundle'.
+%% ---------------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.2 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'Elsarticle Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+
+%% Template article for Elsevier's document class `elsarticle'
+%% with numbered style bibliographic references
+%% SP 2008/03/01
+
+\documentclass[preprint,12pt]{elsarticle}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+%% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+%% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+%% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
 \usepackage{url}
-\usepackage{subfigure}
-\usepackage{flushend} % equalizes columns on last page
+\usepackage{color}
 
-\definecolor{darkgreen}{rgb}{0,0.7,0}
-\definecolor{violet}{rgb}{0.5,0.0,0.5}
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
 
-\newcommand{\up}{\vspace*{-1em}}
-\newcommand{\upp}{\vspace*{-0.5em}}
-\lstset{language=bash, numbers=left, numberstyle=\tiny\color{gray}, numbersep=3pt, escapeinside={\$}, basicstyle=\footnotesize\ttfamily, escapeinside={\%*}{*)}}
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
 
 \newif\ifdraft
 \drafttrue
@@ -25,44 +63,56 @@
 \newcommand{\note}[1]{}
 \fi
 
-\newenvironment{shortlist}{
-        \vspace*{-0.5em}
-  \begin{itemize}
-  \setlength{\itemsep}{-0.1em}
-}{
-  \end{itemize}
-        \vspace*{-0.5em}
-}
 
-\hyphenation{Map-Reduce stand-alone}
-
+\journal{FGCS}
 
 \begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for theassociated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for theassociated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for theassociated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+%% \author{Name\corref{cor1}\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \address{Address\fnref{label3}}
+%% \fntext[label3]{}
+
 \title{Using Application Skeletons to Improve eScience Infrastructure}
 
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{}
+%% \address[label1]{}
+%% \address[label2]{}
 
-% author names and affiliations
-% use a multiple column layout for up to three different
-% affiliations
+\author[ucanl]{Daniel S. Katz\corref{cor1}}\ead{d.katz@ieee.org}
 
-\author{\IEEEauthorblockN{Zhao Zhang}
-\IEEEauthorblockA{Department of Computer Science\\
-University of Chicago\\
-Email: zhaozhang@uchicago.edu}\\
-\and
-\IEEEauthorblockN{Daniel S. Katz}
-\IEEEauthorblockA{Computation Institute\\
-University of Chicago \&\\
-Argonne National Laboratory\\
-Email: d.katz@ieee.org}
-}
+\author[rutgers]{Andre Merzky}\ead{andre@merzky.net}
 
+\author[ucb]{Zhao Zhang}\ead{zhaozhang@eecs.berkeley.edu}
 
-% make the title area
-\maketitle
+\author[rutgers]{Shantenu Jha}\ead{shantenu.jha@rutgers.edu}
+
+?\cortext[cor1]{Corresponding author} 
+
+\address[ucanl]{Computation Institute, University of Chicago and Argonne National Laboratory, Chicago, IL, USA}
+\address[rutgers]{RADICAL Laboratory, Rutgers University, New Brunswick, NJ, USA}\address[ucb]{Electrical Engineering \& Computer Science, University of California, Berkeley, CA, USA}
 
 
 \begin{abstract}
+
 Computer scientists who work on tools and systems to support
 eScience (a variety of parallel and distributed) applications usually use actual applications to prove that their
 systems will benefit science and engineering (e.g., improve application performance). Accessing and building the applications and necessary data sets can be difficult because of policy
@@ -86,10 +136,22 @@ simplifies the process of designing, implementing, and testing these optimizatio
 
 \end{abstract}
 
-\lstset{
-  basicstyle=\ttfamily\scriptsize,
-  breaklines=true
-}
+\begin{keyword}
+%% keywords here, in the form: keyword \sep keyword
+
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+%% \linenumbers
+
+%% main text
+
 
 \section{Introduction}
 
@@ -101,12 +163,12 @@ Computer scientists who build tools and systems (programming languages, runtime 
 to enable eScience often have to work on real scientific applications to prove the effectiveness of 
 the system. Accessing and building the real applications can be time consuming or sometimes infeasible for one
 or more of the following reasons:
-\begin{shortlist}
+\begin{itemize}
 \item {} Some applications (source) are privately accessible.
 \item {} Some data is difficult to access.
 \item {} Some applications use legacy code and are dependent on out-of-date libraries.
 \item {} Some applications are hard to understand because of the knowledge gap between the computer scientists and domain scientists.
-\end{shortlist}
+\end{itemize}
 In addition, real applications may be difficult to scale or modify in order to demonstrate
 system trends and characteristics~\cite{DPA-paper}.
 
@@ -195,12 +257,12 @@ iterations over stages; that is, we don't support dynamic convergence checking.
 %\katznote{update this}
 %\zhaonote{add one more item, please review}
 The contributions of this work include the following:
-\begin{shortlist}
+\begin{itemize}
 \item An application abstraction that gives users good expressiveness and ease of programming to capture the key performance elements of distributed applications
 \item A versatile Skeleton task implementation that is configurable (serial or parallel, number of processes, read/write buffer size, input/output files, interleaving options)
 \item An interoperable Skeleton implementation that works with mainstream workflow frameworks and systems (Swift, Pegasus, and Shell) 
 \item The usage of Skeleton applications to simplify system optimization implementation and highlight their impacts
-\end{shortlist}
+\end{itemize}
 
 The rest of the paper is organized as follows: 
 %Section~\ref{lb:Survey} surveys a number of distributed applications that Application Skeletons are intended to cover. 
@@ -225,7 +287,7 @@ problems.
 
 We are motivated by a wide variety of eScience application types for which we want to be able to build representative skeleton applications. The Application Skeleton implementation
 currently allows the user to express the following:
-\begin{shortlist}
+\begin{itemize}
 \item {Bag of Tasks}: A set of independent tasks. Examples: MG-RAST~\cite{MG-RAST}, DOCK~\cite{dock5-06}
 \item {MapReduce}: A set of distributed application with key-value pairs as intermediate data. Examples: high energy physics histograms~\cite{SCIMP}, object ordering~\cite{PageRank2}
 \item {Multistage Workflow}: A set of distributed applications with multiple stages using files for intermediate data. Examples: Montage~\cite{montage1}, BLAST~\cite{ParallelBlast}, CyberShake postprocessing~\cite{SCEC07}
@@ -233,7 +295,7 @@ currently allows the user to express the following:
 graph mining~\cite{PREGEL}
 \item {Campaign}: An iterative application with a varying set of tasks that must be run to completion in each iteration. Example: Kalman filtering~\cite{KALMAN}
 %\zhaonote{can we cover Campaign now? If my understanding is correct, we can now.}
-\end{shortlist}
+\end{itemize}
 
 Application Skeletons of iterative applications are currently limited to those with a fixed number of iterations. Also, Application Skeletons  can express multiple task types, serial, parallel, or a mix of both. The Application Skeleton concept ideally should also allow a concurrent application to be expressed, though
 this is not yet implemented. (A concurrent application comprises a set of tasks that have to be executed at the same time, e.g., coupled fusion simulation~\cite{klasky:journphy:2005}.)
@@ -330,7 +392,7 @@ reimplementing the actual task and results in poor programmability, and having v
 We have previously shown basic examples of applications described using the Skeleton programming model~\cite{Skeleton2013}.
 In brief, we specify the task parameters at the stage level since it has a fairly global view of most of the task
 properties, which eases programming over specifying each task's parameters individually. The stage parameters are:
-\begin{shortlist}
+\begin{itemize}
 \item{\textbf{Stage\_Name}:} the stage name %The tasks of this stage are named: \$\{Stage\_Name\}\_\$\{Task\_id\}. (This is particularly useful when when external mappers are used)
 \item{\textbf{Stage\_Type}:}  the type of the tasks, serial or parallel
 \item{\textbf{Num\_Tasks}:}  the number of tasks
@@ -348,7 +410,7 @@ properties, which eases programming over specifying each task's parameters indiv
 \item{\textbf{Iteration\_Num}:} optional parameter specifying the number of iterations
 \item{\textbf{Iteration\_Stages}:} the names of the other stages involved in the iteration
 \item{\textbf{Iteration\_Substitute}:} the input file in tasks that will be replaced in the second and later iteration % (e.g., ``Stage\_1.output 1'' replaces the first input file of the tasks in Stage\_1 with its output files). 
-\end{shortlist}
+\end{itemize}
 
 Task\_Length, Input\_File\_Size, and Output\_File\_Size can be stated as statistical distributions. The Application Skeleton tool currently supports uniform, normal, triangular, and lognorm distributions. Task\_Length 
 can also be specified as a polynomial function of Input\_File\_Size (of the first input file). Similarly, Output\_File\_Size
@@ -496,11 +558,11 @@ The Application Skeleton tool is implemented with Python, compatible with both P
 It reads an application configuration file, parses the text, and sets parameters for each stage.
 It then generates three types of files on the local site where it is launched:
 
-\begin{shortlist}
+\begin{itemize}
 \item[] \textbf{Preparation scripts}, to produce the input/output directories and input files for the Skeleton application
 \item[] \textbf{Compilation scripts}, to compile the task source code into executables 
 \item[] \textbf{Application}, the overall skeleton application, which can be implemented in one of three formats: a plain Bash shell script, with the command lines of each stage in a distinct script file; or a Pegasus DAG task description, with task, data and dependency declaration generated automatically; a functional Swift script that represents the complete application. 
-\end{shortlist}
+\end{itemize}
 
 
 
@@ -696,7 +758,6 @@ Measured Time Avg and Measured Time Stdev show the average and the standard devi
 \begin{table*}[ht]
 \begin{center}
     \caption{Number of tasks, inputs, and outputs, and input and output size, for each Montage stage}
-    \up
     \begin{scriptsize}
     \begin{tabular}{ | p{1.6cm} | p{0.8cm} | p{0.8cm} | p{1.2cm} | p{1cm} | p{1.25cm} | p{2.5cm} | p{2.3cm} | p{2.2cm} |}
     \hline
@@ -712,7 +773,6 @@ Measured Time Avg and Measured Time Stdev show the average and the standard devi
     \end{tabular}
     \end{scriptsize}
     \label{tb:montage-stats}
-    \up
 \end{center}   
 \end{table*} 
 
@@ -733,7 +793,6 @@ the result as the estimated task length.
 \begin{table*}[]
 \begin{center}
     \caption{Time-To-Solution Comparison of Skeleton Montage and Real Montage (seconds)}
-    \up
     \begin{scriptsize}
     \begin{tabular}{ | p{1cm} | p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | p{1.4cm} | p{1.2cm} | p{1.8cm} | p{1cm} | p{1cm} |}
     \hline
@@ -744,7 +803,6 @@ the result as the estimated task length.
     \end{tabular}
     \end{scriptsize}
     \label{tb:montage-results}
-    \up
 \end{center}   
 \end{table*}
 
@@ -762,7 +820,6 @@ the result as the estimated task length.
     \end{tabular}
     \end{scriptsize}
     \label{tb:blast-stats}
-    \up
 \end{center}   
 \end{table*}
 
@@ -880,7 +937,6 @@ a piece of the input file, sleep for some time, and write a piece of the output,
 \begin{table}[t]
 \begin{center}
     \caption{Time-To-Solution Comparison of Skeleton BLAST and Real BLAST (seconds)}
-    \up
     \begin{scriptsize}
     \begin{tabular}{ | p{1cm} | p{1cm} |p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | }
     \hline
@@ -891,7 +947,6 @@ a piece of the input file, sleep for some time, and write a piece of the output,
     \end{tabular}
     \end{scriptsize}
     \label{tb:blast-results}
-    \up
 \end{center}   
 \end{table}
 
@@ -908,7 +963,6 @@ a piece of the input file, sleep for some time, and write a piece of the output,
     \end{tabular}
     \end{scriptsize}
     \label{tb:cybershake-stats}
-    \up
 \end{center}   
 \end{table*}
 
@@ -929,7 +983,6 @@ Table~\ref{tb:cybershake-stats} shows the basic statistics of each CyberShake Po
 \begin{table}[t]
 \begin{center}
     \caption{Time-To-Solution Comparison of Skeleton CyberShake and Real CyberShake (seconds)}
-    \up
     \begin{scriptsize}
     \begin{tabular}{ | p{1.5cm} | p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | }
     \hline
@@ -940,7 +993,6 @@ Table~\ref{tb:cybershake-stats} shows the basic statistics of each CyberShake Po
     \end{tabular}
     \end{scriptsize}
     \label{tb:cybershake-results}
-    \up
 \end{center}   
 \end{table}
 
@@ -1110,7 +1162,7 @@ showed that using skeleton applications simplifies the process of system optimiz
 The Application Skeleton code is available as open source at \url{https://github.com/applicationskeleton/Skeleton}~\cite{skeleton-software-v1.1} under the MIT license. We invite the community to try it and to contribute to it.
 
 We plan the following in the near future:
-\begin{shortlist}
+\begin{itemize}
 \item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance.
 \item {} Determine a way to represent the computational work in a task that when combined with a particular platform can give an accurate runtime for that task.
 \item {} Support concurrent tasks that need to run at the same time to exchange information.
@@ -1122,7 +1174,7 @@ We plan the following in the near future:
 %\zhaonote{tryied to explain why we need to integrate, nevermind, we can remove it.}
 %to extend AIMES's application coverage by providing applications with a wide range of characteristics.
 %\zhaonote{Mention integration with AIMES framework. do we have an AIMES reference? Does the above sentence look ok?}
-\end{shortlist}
+\end{itemize}
 
 \section*{Acknowledgments}
 
@@ -1136,8 +1188,28 @@ opinion, finding, and conclusions or recommendations expressed in this
  material are those of the author(s) and do not necessarily reflect 
  the views of the National Science Foundation.
  
-\bibliographystyle{abbrv}
+
+%% \section{}
+%% \label{}
+
+%% If you have bibdatabase file and want bibtex to generate the
+%% bibitems, please use
+%%
+\bibliographystyle{elsarticle-num} 
 \bibliography{Skeleton}
 
-% that's all folks
+%% else use the following coding to input the bibitems directly in the
+%% TeX file.
+
+%% \begin{thebibliography}{00}
+
+%% \bibitem{label}
+%% Text of bibliographic item
+
+%% \bibitem{}
+
+%% \end{thebibliography}
 \end{document}
+\endinput
+%%
+%% End of file `elsarticle-template-num.tex'.
