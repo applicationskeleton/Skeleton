@@ -160,8 +160,6 @@ simplifies the process of designing, implementing, and testing these optimizatio
 
 \section{Introduction}
 
-\katznote{need to add ref to eScience paper~\cite{Skeleton2014} and code~\cite{skeleton-software-v1.2}}
-
 Computer scientists who build tools and systems (programming languages, runtime systems, file systems, workflow systems, etc.) 
 %to support distributed applications often have to work on real scientific applications to prove the effectiveness of
 %\zhaonote{put in the word ``eScience''}
@@ -177,95 +175,54 @@ or more of the following reasons:
 In addition, real applications may be difficult to scale or modify in order to demonstrate
 system trends and characteristics~\cite{DPA-paper}.
 
-%\katznote{introduce AIMES as the source (initial motivation) of this idea?}
 Our Application Skeletons idea was created in the AIMES project, whose goal is to explore the role of abstractions
 and integrated middleware to support eScience at extreme scales. AIMES is co-designing middleware from an application and infrastructure
 perspective. Thus, it requires applications with various characteristics for better application coverage. We have previously encountered many problems
 when accessing real applications and when trying to distribute applications and data as test cases to other researchers. Application Skeletons are intended to overcome these issues.
-%\zhaonote{proposed text, please review}
 
-We previous  presented the Skeleton idea of working around such issues by quickly
-and easily producing a synthetic distributed application that is executable in a distributed environment, for example, grids, clusters, and clouds~\cite{Skeleton2013}. 
-The initial Application Skeleton tool took as input an application description file composed in a top-down approach: an application was described
-as a number of stages, and each stage had a number of tasks. Users specified the tasks at the stage level by articulating
-the number of tasks, task lengths, and input/output file sizes. Some of the parameters, such as task lengths and input file sizes, could be
-described as a statistical distribution.
-This Skeleton implementation could generate bag-of-task, map-reduce, and multistage workflow applications. 
-The task implementation was based on UNIX/Linux sleep and dd commands. The skeleton applications were executable with common
-distributed computing middleware, Swift~\cite{SWIFT2007, swift-ieee09, Swift_2011} and Pegasus~\cite{pegasus, pegasus-04}, as well as the ubiquitous UNIX shell on a single 
-site (a local cluster with a shared file system).
-We measured the performance error between the skeleton application against real Montage~\cite{montage1,montage2} and BLAST~\cite{ParallelBlast} applications
-on 64 processors of a BG/P supercomputer. Some stages had satisfying results while some had large performance gaps, as much as 13\%.
+We previous presented~\cite{Skeleton2013} the Skeleton idea of working around such issues by quickly
+and easily producing a synthetic distributed application that is executable in a distributed environment, for example, grids, clusters, and clouds, and then showed~\cite{Skeleton2014} improvements in reducing the gap between skeleton and real application performance, as well
+as showing Skeleton applications could be used to simplify understanding and demonstrating system optimizations, such as AMFORA~\cite{AMFS2013}.
 
-%\zhaonote{remove the following paragraph?}
-%Our skeleton idea is motivated by both parallel and distributed systems, though we run experiments on a parallel system rather than a distributed
-%environment since a homogeneous supercomputer delivers better performance stability, 
-%while a distributed environment's site availability, network quality, and other factors can vary dramatically, potentially
-%leading to significant unpredictable noise in the measurements. We believe that our tools will be directly useful on distributed systems as well.
-
-In this paper, we show how the Application Skeleton tool has evolved, with improvements in multiple areas, so that the performance gap
-between skeleton applications and real applications has become much smaller, and we demonstrate the use of Application Skeletons in the design of a real middleware system: AMFORA~\cite{AMFS2013}.
-At the application level, the latest Skeleton implementation inherits the original top-down approach of describing an application by stages.
-Applications now covered include bag-of-task, (iterative) map-reduce, and (iterative) multistage workflow applications. In terms of
-application task type, the applications can be composed of serial tasks, parallel tasks, or a mix of both.
-At the stage level, we improved input file and task mapping with a less ambiguous way of declaring distinct sources of multiple input files. 
-%We also keep the external mapping option, with which users can define the mapping in an external script or a python function.
-At the task level, the new version of Skeleton has a completely new task design and implementation. 
-The task is implemented as a versatile C program, and the compiled executable can be serial or parallel dependent on how it is compiled. 
-Users can now specify a task's read/write buffer size, since such buffers are often used in real application code. 
+The Application Skeleton tool takes as input an application description file composed in a top-down approach: an application was described
+as a number of stages, and each stage had a number of tasks. Users specify tasks at the stage level by articulating
+the number of tasks, task lengths, and input/output file sizes. Applications can be composed of serial tasks, parallel tasks, or a mix of both. The task is implemented as a versatile C program, and the compiled executable can be serial or parallel dependent on how it is compiled. 
+Users can specify a task's read/write buffer size, since such buffers are often used in real application code. 
 The Skeleton task can mimic real application tasks' interleaving behavior for reads, writes, and computation. 
 The tasks are C programs compiled to static executables, so they can run on supercomputers with an OS that doesn't have fork()/exec() support, such as the IBM Blue Gene/Q. 
+Some of the task parameters, such as task lengths and input file sizes, can be
+described as a statistical distribution.
+The task implementation is based on UNIX/Linux sleep and dd commands. 
+
+This Skeleton implementation can generate bag-of-task, (iterative) map-reduce, and (iterative) multistage workflow applications. 
+The skeleton applications are executable with common
+distributed computing middleware, Swift~\cite{SWIFT2007, swift-ieee09, Swift_2011} and Pegasus~\cite{pegasus, pegasus-04}, as well as the ubiquitous UNIX shell on a single 
+site (a local cluster with a shared file system), and the skeleton set of tasks can also be output as a generic JSON object that can be used by other systems, such as in our case, by our AIMES middleware.
+
 Once the real application is represented by a Skeleton description file, simply specifying the skeleton parameters and selecting
 which tool or middleware to use means the skeleton application is easily
-distributed.  And changing the parameters makes it easy to study how the system responds to different application characteristics.
-%\katznote{this is all already in this section, in the previous paragraph}
-%\zhaonote{add a brief summary and also explains why we run on a parallel system here.}
-%Our measurements are on 64 processors on a BG/P supercomputer for the Montage, BLAST, adnd CyberShake Postprocessing application
-%show differences of -1.3\%, 1.5\% and 2.4\% repectively. We particularly use a parallel system for its better performance stability,
-%while a distributed environment's (OSG or XSEDE) properties can vary dramatically, potentially leading to significant unpredictable
-%noise in the meauremetns. However, our work has been motivated by both parallel and distributed systems, and we believe that our 
-%tools are directly useful on distributed systems as well as the parallel systems we have used so far.
+distributed.  
+We measured the performance error between the skeleton application against three real applications (Montage~\cite{montage1,montage2}, BLAST~\cite{ParallelBlast}, and CyberShake PostProcessing~\cite{SCEC07}) on 64 processors of a BG/P supercomputer with per stage and total errors of between 1 and 3\%.
+And changing the parameters makes it easy to study how the system responds to different application characteristics, specifically data caching, task scheduling, I/O tuning, and resilience mechanism.
+
+%Providing an easy-to-use way to specify a Skeleton application with acceptable
+%performance difference between Skeleton applications and real applications was the major challenge of this work. In many cases,
+%we had to relax the behavioral similarities between it and a real application to promote ease of programming.
+%For example, while we want a skeleton task to mimic the exact behavior (operation sequence of computation and I/O) of a real 
+%application task, doing so would result
+%in reimplementing the actual task and thus eliminating the ease of programming. We therefore provide only a limited number of operation 
+%interleaving options that users can choose from. 
+%A second challenge is the tradeoff between the ease of programming and expressiveness: we want  Skeletons to cover iterative
+%applications, but we don't want to fully implement a new control flow language. As a compromise, an iterative Skeleton application can have only a fixed number of
+%iterations over stages; that is, we don't support dynamic convergence checking. 
 
 
-%Many system optimizations for the skeleton applications can also be applied to the real applications, e.g., task scheduling and data management. 
-%\katznote{don't understand how the sentence up to here goes with the part after this} 
-%\zhaonote{I removed this sentence. I am a little bit concerned about our statement of the optimizations of systems on synthetic application can be guaranteed to work on real applications.
-%I think for task scheduling, data management (file granularity) it is true. But in the case of I/O system design, such as I/O daemon on I/O nodes of BG/Q, since the I/O traffic of the synthetic
-%application can not be guaranteed to have the same traffic as the real application, thus a specialized I/O optimization that works for the synthetic application might not be working for the real one. Or maybe it can, we need some discussion over this.}
-%so computer scientist now can focus on the system or tools they are building. 
-
-
-
-
-
-Providing an easy-to-use way to specify a Skeleton application with acceptable
-performance difference between Skeleton applications and real applications was the major challenge of this work. In many cases,
-we had to relax the behavioral similarities between it and a real application to promote ease of programming.
-%\zhaonote{I remove the details of this example and put them back in design section, please review the rest of this paragraph.}
-For example, while we want a skeleton task to mimic the exact behavior (operation sequence of computation and I/O) of a real 
-application task, doing so would result
-in reimplementing the actual task and thus eliminating the ease of programming. We therefore provide only a limited number of operation 
-interleaving options that users can choose from. 
-%To balance these requirements, we define four
-%interleaving options for a skeleton task:
-%\begin{itemize}
-%\item interleave-nothing: simply reads, computes then writes
-%\item interleave-read-compute: divides compute into pieces, and interleaves the computations with reads, and finally writes outputs
-%\item interleave-compute-write: reads
-%all inputs at beginning, then divides the writes into pieces and interleaves the writes with computation slices
-%\item interleave-all: divides computation and writes into slices, and interleave them along the reads
-%\end{itemize}
-A second challenge is the tradeoff between the ease of programming and expressiveness: we want  Skeletons to cover iterative
-applications, but we don't want to fully implement a new control flow language. As a compromise, an iterative Skeleton application can have only a fixed number of
-iterations over stages; that is, we don't support dynamic convergence checking. 
-
-%\katznote{update this}
-%\zhaonote{add one more item, please review}
-The contributions of this work include the following:
+This paper summerizes our previous work~\cite{Skeleton2013,Skeleton2014} and adds \katznote{synapse definition and demonstration?}. The contributions of this work include the following:
 \begin{itemize}
 \item An application abstraction that gives users good expressiveness and ease of programming to capture the key performance elements of distributed applications
+\item \katznote{add a bullet for new synapse stuff? - a method for determining skeleton? task? paramenters}
 \item A versatile Skeleton task implementation that is configurable (serial or parallel, number of processes, read/write buffer size, input/output files, interleaving options)
-\item An interoperable Skeleton implementation that works with mainstream workflow frameworks and systems (Swift, Pegasus, and Shell) 
+\item An interoperable Skeleton implementation that works with mainstream workflow frameworks and systems (Swift, Pegasus, and Shell), and allow general output for other systems
 \item The usage of Skeleton applications to simplify system optimization implementation and highlight their impacts
 \end{itemize}
 
@@ -273,6 +230,7 @@ The rest of the paper is organized as follows:
 %Section~\ref{lb:Survey} surveys a number of distributed applications that Application Skeletons are intended to cover. 
 Section~\ref{lb:Design} introduces the design of the Application Skeleton tool and the tradeoffs we made during the process.
 %Section~\ref{lb:Model} presents the Application Skeleton programming model with several examples.
+In Section \ref{lb:Params}, we discuss how Skeleton parameters can be determined.
 In Section \ref{lb:Perf}, we select three representative applications, and compare the Skeleton application performance against the real application performance. In Section \ref{lb:using}, we show how application skeletons can help eScience infrastructure developers.
 Section~\ref{lb:RFwork} discusses related work and envisions future work.
 Conclusions are drawn in Section \ref{lb:Con}. 
@@ -721,6 +679,13 @@ the task source code and compile it.
 %The Interleave\_option is set to 0, indicating that the task will do the reads, computation, and writes
 %in a non-overlapped manner.
 
+\section{Determining Skeleton Parameters}
+\label{lb:Params}
+
+\katznote{how to manually profile apps and get parameters}
+
+\katznote{synapse stuff to go here}
+
 
 \section{Performance Evaluation}
 \label{lb:Perf}
@@ -764,7 +729,7 @@ Measured Time Avg and Measured Time Stdev show the average and the standard devi
 \begin{center}
     \caption{Number of tasks, inputs, and outputs, and input and output size, for each Montage stage}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1.6cm} | p{0.8cm} | p{0.8cm} | p{1.2cm} | p{1cm} | p{1.25cm} | p{2.5cm} | p{2.3cm} | p{2.2cm} |}
+    \begin{tabular}{ | p{1.65cm} | p{0.6cm} | p{0.65cm} | p{0.75cm} | p{0.85cm} | p{0.85cm} | p{1.2cm} | p{1.3cm} | p{1.7cm} |}
     \hline
     Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
 	mProject & 1319 & 1319 & 2594 & 2800 & 10400 & 11.6 & 2.5 & uniform 11.6\\ \hline
@@ -799,9 +764,9 @@ the result as the estimated task length.
 \begin{center}
     \caption{Time-To-Solution Comparison of Skeleton Montage and Real Montage (seconds)}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1cm} | p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | p{1.4cm} | p{1.2cm} | p{1.8cm} | p{1cm} | p{1cm} |}
+    \begin{tabular}{ | p{1cm} | p{1.05cm} | p{1cm} | p{1.2cm} | p{0.75cm} | p{1.1cm} | p{0.8cm} | p{1.0cm} | p{0.75cm} | p{0.8cm} |}
     \hline
-	& mProject & mImgtbl & mOverlaps & mDiffFit & mConcatFit & mBgModel & mBackground & mAdd & Total\\ \hline \hline
+	& mProject & mImgtbl & mOverlaps & mDiff- Fit & mConcat- Fit & mBg- Model & mBack- ground & mAdd & Total\\ \hline \hline
 	Montage & 282.3 & 139.7 & 10.2 & 426.7 & 60.1 & 288.0 & 107.9 &  788.8 & 2103.7\\ \hline
 	Skeleton & 281.8 & 136.8 & 10.0 & 412.5 & 59.2 & 288.1 & 106.2 &  781.8 & 2076.4\\ \hline
 	Error & -0.2\% & -2.1\% & -0.2\% & -3.3\% & -1.5\% & 0.03\% & -1.6\% & -0.9\% & -1.3\%\\ \hline
@@ -815,7 +780,7 @@ the result as the estimated task length.
 \begin{center}
     \caption{Number of tasks, inputs, and outputs, and input and output size, for each BLAST stage}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1.6cm} | p{0.8cm} | p{0.8cm} | p{1.2cm} | p{1.1cm} | p{1.15cm} | p{2.4cm} | p{2.4cm} | p{2.4cm} |}
+    \begin{tabular}{ | p{1.25cm} | p{0.6cm} | p{0.65cm} | p{0.75cm} | p{0.85cm} | p{0.85cm} | p{1.2cm} | p{1.2cm} | p{2.5cm} |}
     \hline
     Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
     split & 1 & 1 & 64 & 3800 & 3800 & 0 & N/A & 0\\ \hline
@@ -959,7 +924,7 @@ a piece of the input file, sleep for some time, and write a piece of the output,
 \begin{center}
     \caption{Number of tasks, inputs, and outputs, and input and output size, for each CyberShake Postprocessing stage}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1.0cm} | p{0.8cm} | p{0.8cm} | p{1.2cm} | p{1.0cm} | p{1.15cm} | p{2.4cm} | p{2.5cm} | p{2.4cm} |}
+    \begin{tabular}{ | p{1.25cm} | p{0.6cm} | p{0.65cm} | p{0.75cm} | p{0.85cm} | p{0.85cm} | p{1.2cm} | p{1.2cm} | p{2.5cm} |}
     \hline
     Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
 	Extract & 128 & 130 & 256 & 5400 & 11000 & 6.39 & 2.2 & uniform 6.39\\ \hline
@@ -1164,7 +1129,7 @@ showed that using skeleton applications simplifies the process of system optimiz
 %Later, we plan the following: 
 %\katznote{changes here?}
 %\zhaonote{add ``cloud environments'' in the last item.}
-The Application Skeleton code is available as open source at \url{https://github.com/applicationskeleton/Skeleton}~\cite{skeleton-software-v1.1} under the MIT license. We invite the community to try it and to contribute to it.
+The Application Skeleton code is available as open source at \url{https://github.com/applicationskeleton/Skeleton}~\cite{skeleton-software-v1.2} under the MIT license. We invite the community to try it and to contribute to it.
 
 We plan the following in the near future:
 \begin{itemize}
