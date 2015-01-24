@@ -1,0 +1,1141 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{pgf}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{subfigure}
+\usepackage{flushend} % equalizes columns on last page
+
+\definecolor{darkgreen}{rgb}{0,0.7,0}
+\definecolor{violet}{rgb}{0.5,0.0,0.5}
+
+\newcommand{\up}{\vspace*{-1em}}
+\newcommand{\upp}{\vspace*{-0.5em}}
+\lstset{language=bash, numbers=left, numberstyle=\tiny\color{gray}, numbersep=3pt, escapeinside={\$}, basicstyle=\footnotesize\ttfamily, escapeinside={\%*}{*)}}
+
+\newif\ifdraft
+\drafttrue
+%\draftfalse                                                                              
+\ifdraft
+\newcommand{\katznote}[1]{ {\textcolor{blue}    { ***Dan:      #1 }}}
+\newcommand{\zhaonote}[1]{{\textcolor{darkgreen}    { ***Zhao:      #1 }}}
+\newcommand{\note}[1]{ {\textcolor{red}    {\bf #1 }}}
+\else
+\newcommand{\katznote}[1]{}
+\newcommand{\zhaonote}[1]{}
+\newcommand{\note}[1]{}
+\fi
+
+\newenvironment{shortlist}{
+        \vspace*{-0.5em}
+  \begin{itemize}
+  \setlength{\itemsep}{-0.1em}
+}{
+  \end{itemize}
+        \vspace*{-0.5em}
+}
+
+\hyphenation{Map-Reduce stand-alone}
+
+
+\begin{document}
+\title{Using Application Skeletons to Improve eScience Infrastructure}
+
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+
+\author{\IEEEauthorblockN{Zhao Zhang}
+\IEEEauthorblockA{Department of Computer Science\\
+University of Chicago\\
+Email: zhaozhang@uchicago.edu}\\
+\and
+\IEEEauthorblockN{Daniel S. Katz}
+\IEEEauthorblockA{Computation Institute\\
+University of Chicago \&\\
+Argonne National Laboratory\\
+Email: d.katz@ieee.org}
+}
+
+
+% make the title area
+\maketitle
+
+
+\begin{abstract}
+Computer scientists who work on tools and systems to support
+eScience (a variety of parallel and distributed) applications usually use actual applications to prove that their
+systems will benefit science and engineering (e.g., improve application performance). Accessing and building the applications and necessary data sets can be difficult because of policy
+or technical issues, and it can be difficult to modify the characteristics of the applications to understand corner cases in the system design.
+In this paper, we present the Application Skeleton, a simple yet powerful 
+tool to build synthetic applications that represent real applications, with runtime and I/O 
+close to those of the real applications. This allows computer 
+scientists to focus on the system they are building; they can work with the simpler skeleton 
+applications and be sure that their work will also be applicable to the real applications. 
+In addition, skeleton applications support simple
+reproducible system experiments since they are represented by a compact set of parameters.
+
+Our Application Skeleton tool (available as open source at \url{https://github.com/applicationskeleton/Skeleton}) currently can create easy-to-access, easy-to-build, and easy-to-run bag-of-task, 
+(iterative) map-reduce, and (iterative) multistage workflow applications. The tasks can be
+serial or parallel or a mix of both. We select three representative applications (Montage, 
+BLAST, CyberShake Postprocessing), then describe and generate skeleton applications for each. 
+We show that the skeleton applications have identical (or close) performance to that of the real applications. 
+We then show examples of using skeleton applications to verify system optimizations such as
+data caching, I/O tuning, and task scheduling, as well as the system resilience mechanism, in some cases modifying the skeleton applications to emphasize some characteristic, and thus show that using skeleton applications 
+simplifies the process of designing, implementing, and testing these optimizations.
+
+\end{abstract}
+
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  breaklines=true
+}
+
+\up
+\section{Introduction}
+Computer scientists who build tools and systems (programming languages, runtime systems, file systems, workflow systems, etc.) 
+%to support distributed applications often have to work on real scientific applications to prove the effectiveness of
+%\zhaonote{put in the word ``eScience''}
+to enable eScience often have to work on real scientific applications to prove the effectiveness of 
+the system. Accessing and building the real applications can be time consuming or sometimes infeasible for one
+or more of the following reasons:
+\begin{shortlist}
+\item {} Some applications (source) are privately accessible.
+\item {} Some data is difficult to access.
+\item {} Some applications use legacy code and are dependent on out-of-date libraries.
+\item {} Some applications are hard to understand because of the knowledge gap between the computer scientists and domain scientists.
+\end{shortlist}
+In addition, real applications may be difficult to scale or modify in order to demonstrate
+system trends and characteristics~\cite{DPA-paper}.
+
+%\katznote{introduce AIMES as the source (initial motivation) of this idea?}
+Our Application Skeletons idea was created in the AIMES project, whose goal is to explore the role of abstractions
+and integrated middleware to support eScience at extreme scales. AIMES is co-designing middleware from an application and infrastructure
+perspective. Thus, it requires applications with various characteristics for better application coverage. We have previously encountered many problems
+when accessing real applications and when trying to distribute applications and data as test cases to other researchers. Application Skeletons are intended to overcome these issues.
+%\zhaonote{proposed text, please review}
+
+We previous  presented the Skeleton idea of working around such issues by quickly
+and easily producing a synthetic distributed application that is executable in a distributed environment, for example, grids, clusters, and clouds~\cite{Skeleton2013}. 
+The initial Application Skeleton tool took as input an application description file composed in a top-down approach: an application was described
+as a number of stages, and each stage had a number of tasks. Users specified the tasks at the stage level by articulating
+the number of tasks, task lengths, and input/output file sizes. Some of the parameters, such as task lengths and input file sizes, could be
+described as a statistical distribution.
+This Skeleton implementation could generate bag-of-task, map-reduce, and multistage workflow applications. 
+The task implementation was based on UNIX/Linux sleep and dd commands. The skeleton applications were executable with common
+distributed computing middleware, Swift~\cite{SWIFT2007, swift-ieee09, Swift_2011} and Pegasus~\cite{pegasus, pegasus-04}, as well as the ubiquitous UNIX shell on a single 
+site (a local cluster with a shared file system).
+We measured the performance error between the skeleton application against real Montage~\cite{montage1,montage2} and BLAST~\cite{ParallelBlast} applications
+on 64 processors of a BG/P supercomputer. Some stages had satisfying results while some had large performance gaps, as much as 13\%.
+
+%\zhaonote{remove the following paragraph?}
+%Our skeleton idea is motivated by both parallel and distributed systems, though we run experiments on a parallel system rather than a distributed
+%environment since a homogeneous supercomputer delivers better performance stability, 
+%while a distributed environment's site availability, network quality, and other factors can vary dramatically, potentially
+%leading to significant unpredictable noise in the measurements. We believe that our tools will be directly useful on distributed systems as well.
+
+In this paper, we show how the Application Skeleton tool has evolved, with improvements in multiple areas, so that the performance gap
+between skeleton applications and real applications has become much smaller, and we demonstrate the use of Application Skeletons in the design of a real middleware system: AMFORA~\cite{AMFS2013}.
+At the application level, the latest Skeleton implementation inherits the original top-down approach of describing an application by stages.
+Applications now covered include bag-of-task, (iterative) map-reduce, and (iterative) multistage workflow applications. In terms of
+application task type, the applications can be composed of serial tasks, parallel tasks, or a mix of both.
+At the stage level, we improved input file and task mapping with a less ambiguous way of declaring distinct sources of multiple input files. 
+%We also keep the external mapping option, with which users can define the mapping in an external script or a python function.
+At the task level, the new version of Skeleton has a completely new task design and implementation. 
+The task is implemented as a versatile C program, and the compiled executable can be serial or parallel dependent on how it is compiled. 
+Users can now specify a task's read/write buffer size, since such buffers are often used in real application code. 
+The Skeleton task can mimic real application tasks' interleaving behavior for reads, writes, and computation. 
+The tasks are C programs compiled to static executables, so they can run on supercomputers with an OS that doesn't have fork()/exec() support, such as the IBM Blue Gene/Q. 
+Once the real application is represented by a Skeleton description file, simply specifying the skeleton parameters and selecting
+which tool or middleware to use means the skeleton application is easily
+distributed.  And changing the parameters makes it easy to study how the system responds to different application characteristics.
+%\katznote{this is all already in this section, in the previous paragraph}
+%\zhaonote{add a brief summary and also explains why we run on a parallel system here.}
+%Our measurements are on 64 processors on a BG/P supercomputer for the Montage, BLAST, adnd CyberShake Postprocessing application
+%show differences of -1.3\%, 1.5\% and 2.4\% repectively. We particularly use a parallel system for its better performance stability,
+%while a distributed environment's (OSG or XSEDE) properties can vary dramatically, potentially leading to significant unpredictable
+%noise in the meauremetns. However, our work has been motivated by both parallel and distributed systems, and we believe that our 
+%tools are directly useful on distributed systems as well as the parallel systems we have used so far.
+
+
+%Many system optimizations for the skeleton applications can also be applied to the real applications, e.g., task scheduling and data management. 
+%\katznote{don't understand how the sentence up to here goes with the part after this} 
+%\zhaonote{I removed this sentence. I am a little bit concerned about our statement of the optimizations of systems on synthetic application can be guaranteed to work on real applications.
+%I think for task scheduling, data management (file granularity) it is true. But in the case of I/O system design, such as I/O daemon on I/O nodes of BG/Q, since the I/O traffic of the synthetic
+%application can not be guaranteed to have the same traffic as the real application, thus a specialized I/O optimization that works for the synthetic application might not be working for the real one. Or maybe it can, we need some discussion over this.}
+%so computer scientist now can focus on the system or tools they are building. 
+
+
+
+
+
+Providing an easy-to-use way to specify a Skeleton application with acceptable
+performance difference between Skeleton applications and real applications was the major challenge of this work. In many cases,
+we had to relax the behavioral similarities between it and a real application to promote ease of programming.
+%\zhaonote{I remove the details of this example and put them back in design section, please review the rest of this paragraph.}
+For example, while we want a skeleton task to mimic the exact behavior (operation sequence of computation and I/O) of a real 
+application task, doing so would result
+in reimplementing the actual task and thus eliminating the ease of programming. We therefore provide only a limited number of operation 
+interleaving options that users can choose from. 
+%To balance these requirements, we define four
+%interleaving options for a skeleton task:
+%\begin{itemize}
+%\item interleave-nothing: simply reads, computes then writes
+%\item interleave-read-compute: divides compute into pieces, and interleaves the computations with reads, and finally writes outputs
+%\item interleave-compute-write: reads
+%all inputs at beginning, then divides the writes into pieces and interleaves the writes with computation slices
+%\item interleave-all: divides computation and writes into slices, and interleave them along the reads
+%\end{itemize}
+A second challenge is the tradeoff between the ease of programming and expressiveness: we want  Skeletons to cover iterative
+applications, but we don't want to fully implement a new control flow language. As a compromise, an iterative Skeleton application can have only a fixed number of
+iterations over stages; that is, we don't support dynamic convergence checking. 
+
+%\katznote{update this}
+%\zhaonote{add one more item, please review}
+The contributions of this work include the following:
+\begin{shortlist}
+\item An application abstraction that gives users good expressiveness and ease of programming to capture the key performance elements of distributed applications
+\item A versatile Skeleton task implementation that is configurable (serial or parallel, number of processes, read/write buffer size, input/output files, interleaving options)
+\item An interoperable Skeleton implementation that works with mainstream workflow frameworks and systems (Swift, Pegasus, and Shell) 
+\item The usage of Skeleton applications to simplify system optimization implementation and highlight their impacts
+\end{shortlist}
+
+The rest of the paper is organized as follows: 
+%Section~\ref{lb:Survey} surveys a number of distributed applications that Application Skeletons are intended to cover. 
+Section~\ref{lb:Design} introduces the design of the Application Skeleton tool and the tradeoffs we made during the process.
+%Section~\ref{lb:Model} presents the Application Skeleton programming model with several examples.
+In Section \ref{lb:Perf}, we select three representative applications, and compare the Skeleton application performance against the real application performance. In Section \ref{lb:using}, we show how application skeletons can help eScience infrastructure developers.
+Section~\ref{lb:RFwork} discusses related work and envisions future work.
+Conclusions are drawn in Section \ref{lb:Con}. 
+
+%\section{A Survey of Distributed Applications}
+%\label{lb:Survey}
+
+
+\section{Application Skeleton Design}
+
+%\katznote{how much of this can we remove and just point to the previous workshop paper?} 
+\label{lb:Design}
+In addition to the design of application abstraction, stage characterization, and task configuration, the Application Skeleton's design involves
+other aspects, such as system tool compatibility and platform interoperability, to make it easy to build, easy to run, and easy to change. This section discusses
+the requirements in detail, the problems we encountered during the design process, and how we met those requirements and overcame the
+problems.
+
+We are motivated by a wide variety of eScience application types for which we want to be able to build representative skeleton applications. The Application Skeleton implementation
+currently allows the user to express the following:
+\begin{shortlist}
+\item {Bag of Tasks}: A set of independent tasks. Examples: MG-RAST~\cite{MG-RAST}, DOCK~\cite{dock5-06}
+\item {MapReduce}: A set of distributed application with key-value pairs as intermediate data. Examples: high energy physics histograms~\cite{SCIMP}, object ordering~\cite{PageRank2}
+\item {Multistage Workflow}: A set of distributed applications with multiple stages using files for intermediate data. Examples: Montage~\cite{montage1}, BLAST~\cite{ParallelBlast}, CyberShake postprocessing~\cite{SCEC07}
+\item {Iterative MapReduce}: MapReduce with iterations. Example: %linear algebra~\cite{MadLINQ},
+graph mining~\cite{PREGEL}
+\item {Campaign}: An iterative application with a varying set of tasks that must be run to completion in each iteration. Example: Kalman filtering~\cite{KALMAN}
+%\zhaonote{can we cover Campaign now? If my understanding is correct, we can now.}
+\end{shortlist}
+
+Application Skeletons of iterative applications are currently limited to those with a fixed number of iterations. Also, Application Skeletons  can express multiple task types, serial, parallel, or a mix of both. The Application Skeleton concept ideally should also allow a concurrent application to be expressed, though
+this is not yet implemented. (A concurrent application comprises a set of tasks that have to be executed at the same time, e.g., coupled fusion simulation~\cite{klasky:journphy:2005}.)
+%
+Examining several representative distributed applications, we observe
+that abstracting a distributed application stage by stage is expressive enough to cover the target applications.
+
+%\subsection{Application Abstraction}
+%\label{lb:Design:App}
+%\zhaonote{data flow, control flow, application type (serial, parallel, mixed)}
+%Application Skeletons can represent a group of distributed application types: bag-of-task, (iterative) map-reduce,
+%and (iterative) multi-stage workflow, where iterative applications are currently limited to those with a fixed number of iterations. Application Skeletons also can express multiple task types. The skeleton application 
+%can be composed of serial tasks or parallel tasks or a mix of both.
+
+
+%\zhaonote{maybe we can remove the paragraph below. It is arguing that abstracting application from stage is expressive enough.}
+%Bag-of-tasks, which is composed of a number of independent tasks without data or control dependencies, is naturally a single stage of computation.
+%Map-reduce can be divided into a map stage and a reduce stage. (There is also a shuffle stage involved implicitly in many system implementations.)
+%Workflow applications, which are often represented as a DAG, often can also be abstracted as a set of computation stages.
+%The iterative versions of map-reduce and workflow applications run computation stages multiple times. 
+
+%\zhaonote{the following paragraph can be replaced by saying "Application Skeletons support iterative applications with a fixed number of iterations."}
+%In some cases, iterative applications run for a fixed number of iterations, while in others, the iterations continue until some
+%condition is reached. Ideally, we would like Application Skeletons to cover both cases. However, implementing the iteration termination
+%based on condition checking requires the implementation of the whole control flow logic, which would lead Application Skeletons to become a complete
+%programming language. So we decide to only support the iterative applications with a fixed number of iterations.
+
+%\zhaonote{the following paragraph can be replaced by saying "Application Skeletons now can support both serial and parallel task."}
+%We aim to represent applications that are composed of multiple task types: serial, parallel or a mix of both. 
+%Some applications may contain some serial tasks while the others are parallel in one stage. 
+%From a conceptual data flow point of view, those
+%tasks belong to one stage. However, designing Application Skeletons in exactly this way would result in poor programmability. So in our design,
+%an Application Skeleton stage has a single task type, either serial
+%or parallel. To represent applications with both types of tasks in a stage, one can describe two computation stages, with serial and parallel task respectively. Since the
+%data dependencies remain the same, these two stages are still one virtual stage if we look at the data flow graph. And a system tool that resolves
+%task dependencies at the file level (e.g. Swift) will be able to launch both stages simultaneously.
+
+\subsection{Task Configuration}
+The core elements of tasks are computation and I/O. In the Application Skeleton design, time consumption of computation is represented
+by letting the task sleep for a user-specified period.
+A serial task
+only mimics the computation and I/O, since in many applications the communication between tasks is in the form of file production and consumption. Tasks with communication between processes (within a task) are referred to as parallel tasks. 
+%Parallel tasks can mimic the computation and I/O operations, 
+%while the communication within tasks are simplified as a barrier before the task exits. 
+%\katznote{last part is a little hard to understand}
+%A Skeleton parallel task simplifies the computation and I/O by let only one process mimic the operations, while other processes simply sleep. Right before the parallel task exits,
+%there is a barrier called to make sure all operations on all processes have finished.
+%\zhaonote{rephrased, please review}
+%\katznote{we say this later; I don't think we need it here too}
+
+An Application Skeleton task is implemented as a standalone C program. It  requires only the standard math library and MPI library to preserve the
+portability. A serial task can be compiled with a standard C compiler, while a parallel task needs to be compiled with an MPI C compiler. Users specify the task type in the stage description, and the Application Skeleton tool will produce 
+a compilation script that can compile the task code.
+
+Other task properties include number of processes, task length, read buffer size, write buffer size, input files, output files, and
+operation interleaving option. The number of processes is one if the task is serial and is greater than one if the task is parallel. 
+Task length is currently measured in seconds, which reflects the amount of computation in a task. An alternative would be flops. We select the runtime in seconds, because it is a direct indication of how long the task
+should run. Because the mapping of flops to time is, in general, not very predictable, we currently believe that the user can predict runtime more accurately than using flops.
+Additionally, we are currently investigating
+better ways to specify the task length that can reflect the difference of computing capacity on different machines.
+
+A serial task reads input files, sleeps (to represent computation), and writes output files. In a parallel task, the rank 0 process reads
+input files, sleeps (in place of computation), then writes output files, while other processes simply sleep for the computation time length.  All processes (including rank 0) wait at a barrier before the task exits. 
+%\katznote{is 'does computation' different than 'sleeps'?} 
+%\zhaonote{No, 'does computation' is exactly spleeping. I add one more sentence in the first paragraph of this subsection to explain computation is in the form of sleep}
+%There is a barrier point in every process before the program exits.
+
+We want to balance between mimicking the exact the operation sequence of the real application tasks' I/O and computation in the skeleton task, which requires
+reimplementing the actual task and results in poor programmability, and having very simple programming but very different performance. As a compromise,
+ we define four interleaving options for a skeleton task (the serial task or the rank 0 process in a parallel task): %, as visualized in Figure~\ref{fig:interleave}:
+\begin{enumerate}
+\item[0)] \textbf{interleave-nothing}: reads, computes, then writes
+\item{\textbf{interleave-read-compute}:} interleaves reads and computations, then writes outputs
+\item{\textbf{interleave-compute-write}:} reads all inputs, then interleaves writes and computations
+\item{\textbf{interleave-all}:} interleave reads, computations, and writes
+\end{enumerate}
+
+%\begin{figure}[h]
+%\begin{center}
+%    \includegraphics[width=85mm]{pictures/Interleave}
+%\caption {Visualization of the Interleaving Options
+%    \label{fig:interleave}
+%}
+%\end{center}
+%\end{figure}
+
+%Users do not have to specify the task configurations for each individual task. Instead, the automatic configuration is done at the stage level, 
+%where there is a better global view of many properties. 
+%\katznote{is this a paragraph by itself, or is it part of the previous one?  and is it different from the next paragraph?}
+%\zhaonote{I was thinking that after reading so much about task configuration, a reader might think he is going to specify every single task in Skeleton, so I put
+%this paragraph here to avoid that. I think we can also remove it, since we talk about it in the next subsection.}
+
+\subsection{Stage Characterization}
+We have previously shown basic examples of applications described using the Skeleton programming model~\cite{Skeleton2013}.
+In brief, we specify the task parameters at the stage level since it has a fairly global view of most of the task
+properties, which eases programming over specifying each task's parameters individually. The stage parameters are:
+\begin{shortlist}
+\item{\textbf{Stage\_Name}:} the stage name %The tasks of this stage are named: \$\{Stage\_Name\}\_\$\{Task\_id\}. (This is particularly useful when when external mappers are used)
+\item{\textbf{Stage\_Type}:}  the type of the tasks, serial or parallel
+\item{\textbf{Num\_Tasks}:}  the number of tasks
+\item{\textbf{Num\_Processes}:} the number of processes per task
+\item{\textbf{Task\_Length}:}  the length of the tasks
+\item{\textbf{Read\_Buffer}:} the read buffer size in the task
+\item{\textbf{Write\_Buffer}:} the write buffer size in the task
+\item{\textbf{Input\_Files\_Each\_Task}:}  the ratio between number of input files and the number of tasks
+\item{\textbf{Input\_Source}:}  the source of the input files, either filesystem or outputs of a previously defined stage
+\item{\textbf{Input\_File\_Size}:}  input file size for the stage, with distribution: uniform, normal, triangular, or lognorm
+\item{\textbf{Input\_Task\_Mapping}:} user-specified input file and task mapping, to support external mapping, letting the user override the mapping scheme implied by \textbf{Input\_Files\_Each\_Task}
+\item{\textbf{Output\_Files\_Each\_Task}:}  the number of output files per task in the stage (multiple tasks writing to one file are not currently supported)
+\item{\textbf{Output\_File\_Size}:}  the output file size
+\item{\textbf{Interleave\_Option}:} the interleaving option of the task
+\item{\textbf{Iteration\_Num}:} optional parameter specifying the number of iterations
+\item{\textbf{Iteration\_Stages}:} the names of the other stages involved in the iteration
+\item{\textbf{Iteration\_Substitute}:} the input file in tasks that will be replaced in the second and later iteration % (e.g., ``Stage\_1.output 1'' replaces the first input file of the tasks in Stage\_1 with its output files). 
+\end{shortlist}
+
+Task\_Length, Input\_File\_Size, and Output\_File\_Size can be stated as statistical distributions. The Application Skeleton tool currently supports uniform, normal, triangular, and lognorm distributions. Task\_Length 
+can also be specified as a polynomial function of Input\_File\_Size (of the first input file). Similarly, Output\_File\_Size
+can be specified as a polynomial function of Input\_File\_Size (of the first input file) or Task\_Length.
+
+
+\subsection{Mapping Files and Tasks}
+
+%Line 27 and 40 in Listing~\ref{lst:sample} specify the input file mapping option for the second and
+%third stage respectively.
+Instead of declaring every input file's source and size, we describe
+the mapping with a combinatorial function,
+{\it combination Stage\_1.Output 2},
+ interpreted as follows: choose two of the output files of Stage\_1 as input files for each task.
+Choosing two from $N$ files can have $N \choose 2$ different file combinations. 
+%\katznote{so which is chosen?}
+%\zhaonote{add some explanation}
+For example, choosing two files from \{output\_0, output\_1, output\_2, output\_3\} returns six pairs of files: 
+\{output\_0, output\_1\}, \{output\_0, output\_2\}, \{output\_0, output\_3\}, \{output\_1, output\_2\}, \{output\_1, output\_3\}, and \{output\_2, output\_3\}.
+These six file pairs will be assigned to six tasks, so if there are six tasks, each will get a distinct file pair as its input files. (If there are more than six tasks, inputs will be repeated.)
+%\katznote{so the number of tasks that consume the files needs to match the size of $N \choose 2$ for this to be unique?}
+%\zhaonote{the mapping is unique if the number of tasks is equal or less than $N \choose 2$, otherwise, we  will see tasks with the same set of input files.} \katznote{huh?  what does `we  will see tasks with the set of input files' mean?}\zhaonote{oops, I mean the same set of input files.}
+
+Another Input\_Task\_Mapping option is {\it external}. Here, a user-specified
+shell script or a Python function will be called by the Application Skeleton tool. An external script
+has to print the input files names of a task in a line, and a Python function needs to return a nested
+list of input file names.
+
+If the user specifies the source of the input files of the second stage as the output of the first stage
+but does not use the Input\_Task\_Mapping option, then the files are mapped to each task sequentially: the first and second file are mapped to the first task, the third and fourth file are mapped
+to the second task, and so on. If the mapping runs out of input files, it will go back to the beginning
+of the input file list, and multiple tasks will consume some input files.
+
+%\subsection{Task Specification}
+%\zhaonote{this subsectino can be removed too, we have explained the idea in previous section. This is tech details.}
+%At the task level, the Application Skeleton tool parses the input application description file and writes the
+%task command lines in a Bash script for each stage, for example:
+%\begin{shortlist}
+%\item[] /path/to/task task\_type num\_processes task\_length \\
+%read-\_buffer write\_buffer num\_input num\_output \\
+%interleave\_opt input\_filename [input\_filename...] \\
+%output\_filename output\_file\_size [output\_filename \\
+%output\_file\_size...] 
+%\end{shortlist}
+%All the task parameters are determined by the stage parameter specification.
+%If task length and file size settings are needed that are beyond the Application Skeleton tool's capability, customized scripts that generate the tasks with the above format can be used.
+
+\subsection{Iteration Support}
+%\zhaonote{newly added, please review}
+%\katznote{this is all details we either don't need or have already said}
+%The application generation command is in the following format:
+%\begin{shortlist}
+%\item[] skeleton.py app\_desc.input output\_format output\_prefix site\_desc.input
+%\end{shortlist}
+%Assumming the description file's name of the three stage workflow example in Listing~\ref{lst:sample} is multi-stage.input.
+%The actual command to generate the application is:
+%\begin{shortlist}
+%\item[] skeleton.py multi-stage.input Shell multi-stage local.input
+%\end{shortlist}
+%The site description file requires users to specify a couple of parameters of each site that the synthetic application
+%will run on. The format of site description file is csv, users specify the site name, compiler path, compiler flags, 
+%and remote the directory where the task will be compiled remotely. Listing~\ref{lst:site} shows an example to describe
+%the local site. We use two lines for each site, with one line specifying the options to compile serial task and the other
+%line referring to parallel task.
+%
+%\begin{lstlisting}[caption=An Example of Local Site Description, label=lst:site, linewidth=1.0\textwidth, xleftmargin=2.5ex]
+%localhost, gcc, -lm, /home/skeleton/
+%localhost, mpicc, -DMPI -lm, /home/skeleton/
+%\end{lstlisting}
+
+
+%With the description file in Listing~\ref{lst:sample}, the Skeletons generate three
+%preparation scripts (in Bash, one for each stage), two compilation scripts (one for serial task and the other for parallel task),
+%and three application scripts (one for each stage). Now, users can execute the preparations scripts to produce the input/output
+%directories and the initial input files. Then users call the compilation scripts to compile the tasks. If there are remote sites
+%involved, users need to transfer the task source file and compilation scripts to each remote site, and call the compilation scripts
+%on each site. The last step is to launch the application scripts. 
+
+%\zhaonote{proposed text below, please review}
+While many multistage workflows execute 
+each stage once, some involve iteration, which we had not previously implemented~\cite{Skeleton2013}. Application Skeletons now supports one or more stages that are executed a fixed number of times. 
+%\katznote{now we need to say what we have done to make this happen.  How do users specify it.  What do we do then. } % Does the next small paragraph help?  Or is it old and should be removed?}
+%Application Skeletons let users specify an iteration of multiple stages for a fixed number of iterations. 
+The optional Iteration\_Num parameter declares the number of times a single stage should be executed.
+If Iteration\_Num is used, Iteration\_Stages optionally specifies which stages are included in this iteration in addition to the current stage, and
+Iteration\_Substitute optionally specifies which input file of the tasks in the current stage will be replaced in the second and later iterations.
+%
+Iteration support in Application Skeletons requires that the number of output files of the last
+stage in the iteration be the same as the the number of initial input files that are going to be replaced in the iterations.
+%Application Skeletons does strict checking on the file numbers and exits exceptionally if these two numbers are not equal.
+
+One example is a single stage that iterates three times with the 
+first input file for all tasks in this stage replaced by the output files from the previous iteration, after the first iteration. Application Skeletons uses the iteration 
+number to differentiate the output files from each stage. In the first iteration, the stage consumes the input files
+declared in description (e.g., Stage\_1\_Input) and produces output files with names that include the iteration 
+number (e.g., Stage\_1\_Output\_Iter\_1). Starting with the second iteration, the stage consumes the output files from the previous
+iteration and increases the iteration number, then produces the outputs. In the last iteration,
+the synthetic stage produces output files with the names that are declared in the application description file.
+
+%Iterating over multiple stages depends on Iteration\_Stages, which specifies which stages to iterate. Iteration\_Substitute is again used to replace the input files in the second and later iterations  with outputs of the previous stage.
+
+
+
+%\katznote{what happens for input and output files in this case?  Imagine we run Montage with mAdd repeated twice.  What inputs are used the second time?  What is the second output?}
+%\zhaonote{A good catch! I was thinking enough about data. In the solution in the current text, the second iteration will take the input exactly as the first iteration, and their outputs overlap too. I think we could add another iteration option, telling the first stage of the iteration which set of files to take as input: Iteration\_intermediate = Stage\_2.Output }
+%\katznote{this seems a bit too simple.  Maybe we need something where an iteration number is added to a file?  maybe the first iteration uses the input file as specified and the last output writes the output file as specified, but others would substitute the file names somehow.  I think we need to write down and work through an example of how this would work (outside of the paper) before we decide what to write in the paper}
+
+%\katznote{overall, is this better than just saying that the user could specify a stage multiple times in the script?}
+%\zhaonote{Oh, I thought that generating application stage by stage idea was to let users specify the iterations in the script. But it seems not. Could you explain a bit about this solution? Does it mean the skeleton only generates application in stages, and users then modify the Bash or Swift script to support iterations?}
+%\katznote{I just meant that rather than the user saying that Stage 3 iterates 2 times, they could just add a Stage 4 that's a duplicate of Stage 3. I guess the main advantage is that our way is a bit easier to write, if we can figure out the data part.}
+
+%With these two iteration parameters, Application Skeletons can generate an iterative application (in the form of Bash script, Pegasus DAG, and Swift script) 
+%with an iteration over one stage and multiple stages.
+%User can specify the iterative option when calling Applications Skeleton as shown in the example below:
+%\begin{shortlist}
+%\item[] skeleton.py app.desc output\_format output\_prefix site.desc {\bf iterative}
+%\end{shortlist}
+%\katznote{this isn't a manual, we don't need calling sequences...}
+%The Application Skeleton tool can be run with an iterative flag set.
+%Instead of producing the whole application in a single Bash script, Pegasus DAG or Swift script, 
+%Application Skeletons will produce a number of Bash scripts, Pegasus DAGs or Swift scripts, with one script for each stage. 
+%Users can then launch the script or DAG corresponding to a specific stage multiple times to mimic the iterative
+%behavior of the real application.
+%\katznote{I thought we agreed this wasn't a good solution, and we wanted a single DAG / script for the application}
+%\zhaonote{yes, how about using this solution: for each stage, we define an iteration option, where user can specify the number of iterations of this stage. 
+%The user can also specify with which stage, the current stage iterate with. So this covers iteration over a single stage, and over multiple stages. And we can produce Bash, Pegasus, and Swift script accordingly.} \katznote{yes, that sounds good}
+%\zhaonote{proposed new text, please review}
+
+
+
+%Similarly in the case with Pegasus and Swift, Application Skeletons generate one Pegasus DAG or Swift script for each
+%stage in the description file. To run the synthetic application in an iterative way, an application script can be launched
+%for several times.
+
+%\zhaonote{this is a bit different with what we did before. To support iterative applications, this is a easier way to specify in all
+%Shell, Pegasus, and Swift. We can also generate one DAG or Swift script for the whole application, but I have no idea how to insert
+%iterations. So I took one step back, and generate one DAG or Swift script for each stage. This solution places an implicit barrier 
+%between stages, which makes it infeasible for Swift/Pegasus developers to work in a barrier-less way. } 
+%\katznote{I don't really like this.  I think we need to create a single DAG or Swift script.  And I think this section should go back to just talking about iteration support...}
+%\zhaonote{I have the same feeling. So let's do the whole application in the old way, and this way is the special case for iterative applications.}
+%\zhaonote{Shall we talk somewhere about the remote site support? (the commented out text)} \katznote{we already do at a high level in \S3.4}
+
+\subsection{System Tool Compatibility and Multiple Sites}
+The Application Skeleton tool is implemented with Python, compatible with both Python2 and Python3.  
+It reads an application configuration file, parses the text, and sets parameters for each stage.
+It then generates three types of files on the local site where it is launched:
+
+\begin{shortlist}
+\item[] \textbf{Preparation scripts}, to produce the input/output directories and input files for the Skeleton application
+\item[] \textbf{Compilation scripts}, to compile the task source code into executables 
+\item[] \textbf{Application}, the overall skeleton application, which can be implemented in one of three formats: a plain Bash shell script, with the command lines of each stage in a distinct script file; or a Pegasus DAG task description, with task, data and dependency declaration generated automatically; a functional Swift script that represents the complete application. 
+\end{shortlist}
+
+
+
+This design works well on a single site, such as a single computer or a local homogeneous architecture cluster with a shared file system. However, we also need to support distributed environments, such as running one application on multiple sites, where the sites can have
+heterogeneous architectures, resulting in difficult task compilation and deployment. We address this  issue by asking the user for site-specific
+information; site-specific information includes site name, serial C compiler path, MPI C compiler path, compilation 
+flags, and working directory. Then the Application Skeleton tool generates compilation scripts for each site. Those scripts are run on the remote machines to transfer
+the task source code and compile it. 
+%And users need to preserve the working directories consistency in the Application Skeleton and system tools such as Pegasus and Swift.
+
+%\section{Skeleton Programming Model}
+%\label{lb:Model}
+%
+
+%\katznote{again, how much of this can we remove and point to the workshop paper}
+%\zhaonote{I think we can remove the subsection below, as it is mostly the same as the example we showed in the workshop paper.}
+%%\zhaonote{introduce the programming interface}
+%In this section, we introduce the programming model of the Application Skeleton stage and task, and explain file mapping.
+%
+%\subsection{Stage Specification}
+%Specifying a Skeleton application starts with declaring the number of stages, as shown in the configuration file fragment in Listing~\ref{lst:stages}. 
+%
+%\begin{lstlisting}[caption=Declaring Number of Stages, label=lst:stages, linewidth=1.0\textwidth, xleftmargin=2.5ex]
+%Num_Stage = 3
+%
+%Stage_Name = Stage_1
+%    ...
+%Stage_Name = Stage_2
+%    ...
+%Stage_Name = Stage_3
+%    ...
+%\end{lstlisting}
+
+%\begin{table*}[ht]
+%\begin{center}
+%\caption{Skeleton Parameter Format}
+%\label{tb:parameter}
+%\vspace{4pt}
+%    \begin{scriptsize}
+%\begin{tabular}{|c|c|p{2.5cm}|p{7.5cm}|}
+%\hline
+%Parameter & Format & Example & notes  \\
+%\hline
+%\hline
+%Task\_Type & String & serial & the only options are serial and parallel\\
+%\hline
+%Num\_Tasks & Integer & 16 & \\
+%\hline
+%Task\_Length & dist [parameter][unit] & uniform 32s & other dists: normal, triangular, lognorm\\
+%\hline
+%Num\_Processes & Integer & 1 & 1 for serial tasks, other integers for parallel tasks\\
+%\hline
+%Read\_Buffer & Integer & 65536 & the buffer size is measured in bytes\\
+%\hline
+%Write\_Buffer & Integer & 65536 & the buffer size is measured in bytes\\
+%\hline
+%Input\_Files\_Each\_Task & Integer & 2 & \\
+%\hline
+%Input\_\${fileid}.source & filesystem|Stage\_\$.Output & Stage\_1.Output & \\
+%\hline
+%Input\_\${fileid}.size & dist [parameter][unit] & uniform 1048576 & the default unit is byte, other dists available\\
+%\hline
+%Input\_File\_Size & dist [parameter][unit] & uniform 1048576 & the default unit is byte, other dists available\\
+%\hline
+%Input\_Task\_Mapping & option parameters & external map.sh | combination 2 & the external mapping script prints the input files of a task in one line; the combination option choose a number of files from the source with a combinatorial function, if this option is specified, it will overwrite the per file source and size declaration\\
+%\hline
+%Output\_Files\_Each\_Task & Integer & 2 & \\
+%\hline
+%Output\_\${fileid}\_Size & dist [parameter][unit] & uniform 1048576 & the default unit is byte, other dists available\\
+%\hline
+%Interleave\_Option & Integer & 0 & 0--interleave nothing, 1--interleave read and computation, 2--interleave computation and write, 3--interleave all \\
+%\hline
+%\end{tabular}
+%\up
+%    \end{scriptsize}
+%\end{center}
+%\end{table*}
+
+%\begin{lstlisting}[caption=Sample input for a three-stage application,
+%%\zhaonote{This following code shows my latest thought about task and input mapping. In Stage2, we call the combination mapping option to tell the skeleton use N choose 2 to map the input files, and this option overwrites the individual file source and size declaration. In function N choose M, M has to be smaller or equal to the number of input files per task. Please review} \katznote{is this a unique mapping?},
+%label=lst:sample, linewidth=1.0\textwidth, xleftmargin=2.5ex, basicstyle=\ttfamily\scriptsize]
+%Num_Stage = 3
+%
+%Stage_Name = Stage_1
+%    Task_Type = serial
+%    Num_Tasks = 4  
+%    Task_Length = normal [10, 1]s
+%    Num_Processes = 1
+%    Read_Buffer = 65536
+%    Write_Buffer = 65536
+%    Tasks_Each_Input_File = 2
+%        Input_1.Source = filesystem
+%        Input_1.Size = normal [1048576, 1]B
+%        Input_2.Source = filesystem
+%        Input_2.Size = uniform 1048576B
+%    Output_Files_Each_Task = 1
+%    	Output_1.Size = normal [1048576, 1]B
+%    Interleave_Option = 0	
+%
+%Stage_Name = Stage_2
+%    Task_Type = serial
+%    Num_Tasks = 6
+%    Task_Length = uniform 32s
+%    Num_Processes = 1
+%    Read_Buffer = 65536
+%    Write_Buffer = 65536
+%    Input_Files_Each_Task = 2
+%    Input_Task_Mapping = combination Stage_1.Output 2    
+%    Output_Files_Each_Task = 1
+%    	Output_1.Size = uniform 1048576B
+%    Interleave_Option = 0
+%
+%Stage_Name = Stage_3
+%    Task_Type = serial
+%    Num_Tasks = 1
+%    Task_Length = uniform 32s
+%    Num_Processes = 1
+%    Read_Buffer = 65536
+%    Write_Buffer = 65536
+%    Input_Files_Each_Task = 6
+%    Input_Task_Mapping = combination Stage_2.Output 6
+%    Output_Files_Each_Task = 1
+%    	Output_1.Size = uniform 1048576B
+%    Interleave_Option = 0
+%\end{lstlisting}
+%
+%\begin{figure}[h!]
+%   \includegraphics[width=85mm]{pictures/sample}
+%\caption {Task flow of the three-stage application
+%%\katznote{does this figure match the listing?}
+%%\zhaonote{I gave it a double check, I fixed a couple of typoes. It most likely matches the listing. We won't be able to confirm this until the whole system is reimplemented. My check is based on our previous Skeleton implementation.}
+%   \label{fig:sample}
+%}
+%\end{figure}
+%
+%Listing~\ref{lst:sample} shows a complete three-stage application description file, with
+%the task flow of the skeleton application presented in Figure~\ref{fig:sample}.
+%%Table~\ref{tb:parameter} 
+%%\katznote{I don't think we need both table 1 and the list in \S3.3  I suggest we remove the table} 
+%%\zhaonote{yes, removed}
+%%explains the required data type and format of the parameters. 
+%
+%The first stage has four serial tasks. The runtime of each
+%task conforms to a normal distribution, described by a two-value tuple: [average, stdev]Unit.
+%Since they are serial tasks, the number of processes has to be one.
+%The read and write buffer are set to 65,536 bytes respectively. 
+%Each task reads two input files, and those input files reside on a file system.
+%The sizes of all first input files of the tasks conform to a normal distribution, while the sizes of
+%all second input files have uniform size of 1048576 bytes.
+%Each task writes one output file, with uniform size of 1048576 bytes.
+%The Interleave\_option is set to 0, indicating that the task will do the reads, computation, and writes
+%in a non-overlapped manner.
+
+
+\section{Performance Evaluation}
+\label{lb:Perf}
+To examine and understand the differences between skeleton and real application performance, 
+we select three applications (Montage, BLAST, and CyberShake PostProcessing), profile the application properties, 
+produce the skeleton versions with the Application Skeleton tool, and compare the skeleton and real 
+performance for each computation stage.
+
+We use 64 BG/P processors with GPFS as the shared file system. Each of the processors has a $\sim$500MB
+RAM disk. Each application stage is executed with AMFORA~\cite{AMFS2013}, a parallel scripting framework on supercomputers.
+With AMFORA, we can simply list all tasks of a stage in a Bash script, and instruct AMFORA to execute them (in parallel, subject to data dependencies.)
+
+To produce skeleton applications, we first find the stage parameters.
+Each task's length is measured as the time-to-solution with inputs and outputs cached in RAM disk. Although this method over counts the I/O
+time from/to RAM disk as task length, this is negligible compared with the time consumption of GPFS I/O due to the high-volume traffic 
+with high concurrency.  I/O traffic is profiled by collecting all system calls with the Linux strace command. As we have done previously~\cite{ENVELOPE}, we align I/O-related system calls of all tasks in a stage using sequence order. Assuming all tasks get to the
+same system call at the same time, we can determine I/O concurrency and I/O buffer size. %Another thing we learnt from the
+%I/O profile is that tasks read the input files multiple times in some cases. 
+ 
+To compare the performance of the skeleton and real applications, we run both with AMFORA. The tasks read/write files from/to GPFS.
+We run each stage five times and average the times-to-solution.
+
+\subsection{Montage}
+
+The Montage application in this work has eight stages. We build a 6x6 degree mosaic from 1,319 2MASS image files. Each file is $\sim$2~MB. The output of the last stage, mAdd, contains
+two files, each of $\sim$3.7~GB. 
+%Figure~\ref{fig:Montage} shows the data flow between Montage stages, and 
+Table~\ref{tb:montage-stats} shows basic statistics of each stage. 
+Measured Time Avg and Measured Time Stdev show the average and the standard deviation of the time-to-solution of all tasks in each stage, respectively.
+
+%\begin{figure}[h]
+%\begin{center}
+%    \includegraphics[width=85mm]{pictures/Montage}
+%\caption {Montage dataflow. Ovals represent tasks and boxes files. Solid lines show file transfers, dashed lines show additional control flow dependencies.\zhaonote{we can remove this figure, as the flow is explained in text}
+%    \label{fig:Montage}
+%}
+%\end{center}
+%\end{figure}
+
+\begin{table*}[ht]
+\begin{center}
+    \caption{Number of tasks, inputs, and outputs, and input and output size, for each Montage stage}
+    \up
+    \begin{scriptsize}
+    \begin{tabular}{ | p{1.6cm} | p{0.8cm} | p{0.8cm} | p{1.2cm} | p{1cm} | p{1.25cm} | p{2.5cm} | p{2.3cm} | p{2.2cm} |}
+    \hline
+    Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
+	mProject & 1319 & 1319 & 2594 & 2800 & 10400 & 11.6 & 2.5 & uniform 11.6\\ \hline
+	mImgtbl & 1 & 1297 & 1 & 5200 & 0.8 & N/A & 0 & uniform 30.1\\ \hline
+	mOverlaps & 1 & 1 & 1 & 0.8 & 0.4 & 9.1 & 0 & uniform 9.1\\ \hline
+	mDiffFit &  3883 & 7766 & 7766 & 31000 & 487 & 1.8 & 0.6 & uniform 1.8\\ \hline
+	mConcatFit & 1 & 3883 & 1 & 1.1 & 4.3 & 2.1 & 0 & uniform 2.1\\ \hline
+	mBgModel & 1 & 2 & 1 & 4.5 & 0.07 & 288 & 0 & uniform 288 \\ \hline
+	mBackground & 1297 & 1297 & 1297 & 5200 & 5200 & 0.4 & 0.08 & uniform 0.4\\ \hline
+	mAdd  & 1 & 1297 & 2 & 5200 & 7400 & N/A & 0 & uniform 519\\ \hline
+    \end{tabular}
+    \end{scriptsize}
+    \label{tb:montage-stats}
+    \up
+\end{center}   
+\end{table*} 
+
+
+%\zhaonote{explain how to set task length in each stage}
+For most stages,  
+we place the input and output files on RAM disk and use the average time-to-solution as the task length, as previously stated.  However,
+the input sizes for mImgtbl and mAdd exceed the maximum RAM disk size,
+so we cannot use this technique. 
+We observe that mAdd task's time-to-solution is proportional 
+to the number of input files when that number is small (10-30), so we project the time-to-solution 
+with the full input data set based on the measured time-to-solution on a smaller data set.
+This method did not work well for mImgtbl in our previous study~\cite{Skeleton2013}, so for this stage, we measure the time to copy the input data set from GPFS to RAM disk by directing
+the traffic to /dev/null and measure the time to copy output data from RAM disk to GPFS. 
+We then subtract these two times from the time-to-solution of mImgtbl measured on GPFS and use
+the result as the estimated task length. 
+
+\begin{table*}[]
+\begin{center}
+    \caption{Time-To-Solution Comparison of Skeleton Montage and Real Montage (seconds)}
+    \up
+    \begin{scriptsize}
+    \begin{tabular}{ | p{1cm} | p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | p{1.4cm} | p{1.2cm} | p{1.8cm} | p{1cm} | p{1cm} |}
+    \hline
+	& mProject & mImgtbl & mOverlaps & mDiffFit & mConcatFit & mBgModel & mBackground & mAdd & Total\\ \hline \hline
+	Montage & 282.3 & 139.7 & 10.2 & 426.7 & 60.1 & 288.0 & 107.9 &  788.8 & 2103.7\\ \hline
+	Skeleton & 281.8 & 136.8 & 10.0 & 412.5 & 59.2 & 288.1 & 106.2 &  781.8 & 2076.4\\ \hline
+	Error & -0.2\% & -2.1\% & -0.2\% & -3.3\% & -1.5\% & 0.03\% & -1.6\% & -0.9\% & -1.3\%\\ \hline
+    \end{tabular}
+    \end{scriptsize}
+    \label{tb:montage-results}
+    \up
+\end{center}   
+\end{table*}
+
+\begin{table*}[t]
+\begin{center}
+    \caption{Number of tasks, inputs, and outputs, and input and output size, for each BLAST stage}
+    \begin{scriptsize}
+    \begin{tabular}{ | p{1.6cm} | p{0.8cm} | p{0.8cm} | p{1.2cm} | p{1.1cm} | p{1.15cm} | p{2.4cm} | p{2.4cm} | p{2.4cm} |}
+    \hline
+    Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
+    split & 1 & 1 & 64 & 3800 & 3800 & 0 & N/A & 0\\ \hline
+	formatdb & 64 & 64 & 192 & 3800 & 4400 & 41.9 & 0.1 & uniform 42\\ \hline
+	blastp & 1024 & 4096 & 1024 & 70402 & 966 & 109.2 & 14.9 & normal[109.2, 14.9]\\ \hline
+	merge & 16 & 1024 & 16 & 966 & 867 & 4.4 & 4.1 & normal[4.4, 4.1]\\ \hline
+    \end{tabular}
+    \end{scriptsize}
+    \label{tb:blast-stats}
+    \up
+\end{center}   
+\end{table*}
+
+
+%\zhaonote{explain how to set file size}
+Profiling Montage tells us that the application uses a 64-KB buffer
+size for read and write %We show one example of mBackground in Figure~\ref{fig:mBack-io}. 
+%\katznote{I don't see this in figure 3 - can you tell me where I should see 64-KB?} 
+%\zhaonote{we can see a solid red a solid blue line in the figure, they correspond to the right hand side y axis, which tells that
+%for each read/write operation, they do with a chunk size of 64 KB.}
+%The figure also indicates 
+and that the reads and writes of mBackground mostly don't overlap. Thus we set the interleaving option of mBackground to 0--interleave-nothing. The other Montage stages
+also have this interleaving behavior, and they are also set to 0.
+%
+The input file sizes of each Montage stage are almost uniform, so we use a uniform set of  
+skeleton parameters for each stage. One exception is for mDiffFit, where we previously found a performance
+gap between the skeleton and real mDiffFit of about 13\%~\cite{Skeleton2013} when we set the Skeleton parameters to match the
+real number of files (two inputs and one output) and sizes. Examining the system call 
+trace shows us that each mDiffFit task reads each input file four times instead of one. So we set 
+the Skeleton parameters to eight input files, repeating the two input file names four times. This procedure produces
+good results, as shown in Table~\ref{tb:montage-results}.
+
+%\begin{figure}[h]
+%\begin{center}
+%    \includegraphics[width=85mm]{pictures/mBack-io}
+%\caption {I/O related system calls of all mBack tasks aligned with the sequence order. The left axis shows 
+%the accumulated I/O amount at a given system call. The right axis shows the I/O traffic amount per system
+%call.\zhaonote{we can delete this figure to save space}
+%    \label{fig:mBack-io}
+%}
+%\end{center}
+%\end{figure}
+
+
+
+
+Comparing with previous measured error~\cite{Skeleton2013}, we have now reduced the error of all eight stages by between 22.8\% and 91.8\%. The errors of all stages is now less than 4\%, and four are under 1\%. The error for the complete application is -1.3\%.
+
+\subsection{BLAST}
+
+BLAST is a widely used sequence alignment tool. The version we use here is parallelBLAST~\cite{ParallelBlast}, which has four stages. The first stage partitions a 3.8 GB data base into slices. The second stage formats each 
+partition. The third-stage tasks query each formatted database partition with an identical set of query sequences. The
+fourth stage merges the partial results from all partitions into an output file for each query sequence file 
+(since there could be multiple query sequences in one file). %In our experiments, we use the latter three stages of BLAST for profiling and comparison. 
+%\zhaonote{oops, I forgot to measure the partition stage, we didn't take partition into
+%account in Envelope or AMFS work as it can not run in parallel. We can measure it on other computers now. Shall we
+%do that?} \katznote{yes please}
+%
+%
+In our experiments, we run the first 1,024 queries of the NRxNR test case. 
+%Figure~\ref{fig:BLAST} shows the data flow and task dependencies between BLAST stages. 
+Table~\ref{tb:blast-stats}
+shows the basic statistics of each BLAST stage. 
+
+%\begin{figure}[h]
+%\begin{center}
+%    \includegraphics[width=85mm]{pictures/BLAST}
+%\caption {BLAST dataflow. Ovals represent tasks and boxes files. Solid lines show file transfers.\zhaonote{we can remove this figure, as the flow is explained in text}
+%    \label{fig:BLAST}
+%}
+%\end{center}
+%\end{figure}
+
+%\zhaonote{explain how to set task length}
+In general, we measure the time-to-solution of each task by executing them with the inputs and outputs on RAM disk.
+The split stage has a single task that reads the whole database and partitions it into several slices, so no significant 
+computation is involved. We simply set the split task's length to zero. 
+%\zhaonote{adding split}
+The I/O size of the formatdb, blastp, and merge stage tasks fit the BG/P compute node's RAM size, so we measure all times-to-solution
+directly.
+The times-to-solution of the formatdb stage is uniform, so we set all task lengths of this stage
+to that value. 
+The time-to-solution distribution of the blastp stage varies, so we used a normal distribution described by the average and standard deviation, although we also attempted to use a uniform value, since the actual distribution is between the two.
+We also used a normal task length distribution for the merge stage.
+
+
+%\zhaonote{explain how to set file size}
+All tasks of the four stages of BLAST read each input file just once. Each formatdb task reads one input file of $\sim$60~MB 
+and writes three output files of size 56~MB, 16~MB, and 1~MB, respectively. We simplify the skeleton formatdb task with three
+output files with identical size of 21~MB, since this setting results in the same amount of metadata operation and I/O traffic.
+
+%\zhaonote{explain how to set buffer size and interleaving option}
+The split task uses 4096 Bytes as its read and write buffer size. 
+Profiling of the formatdb stage showed us that each formatdb task reads the database with a 64-KB buffer. However,
+there are roughly 500,000 writes with a size of hundreds of Bytes.
+%, as shown in Figure~\ref{fig:formatdb-io}. 
+With our
+previous Skeleton implementation, we could not specify a buffer size and had to run the real and skeleton applications
+with all data in RAM to get close to real performance. With the new implementation, we are able to set the formatdb read buffer to 64~KB and the write buffer 
+to 512~Bytes. 
+In practice, 64 concurrent tasks each with $\sim$500,000 small writes can run for hours on
+GPFS. So when we compare the Skeleton formatdb and real formatdb, we run the real formatdb with data caching in RAM disk and
+run the skeleton formatdb in a similar way. For blastp and merge stage, we run the tasks with data in GPFS.
+
+%\begin{figure}[h]
+%\begin{center}
+%    \includegraphics[width=85mm]{pictures/formatdb-io}
+%\caption {I/O related system calls of all formatdb tasks aligned with the sequence order. The left axis shows 
+%the accumulated I/O amount at a given system call. The right axis shows the I/O traffic amount per system
+%call.
+%    \label{fig:formatdb-io}\zhaonote{we can delete this figure to save space}
+%}
+%\end{center}
+%\end{figure}
+
+For all tasks in the four stages of BLAST, we see an interleaved computation and I/O pattern. 
+In formatdb, % as shown in Figure~\ref{fig:formatdb-io},
+each task reads a sequence, formats that sequence, and writes the result to output files. 
+Thus, there are $\sim$500,000 writes with a size of hundreds of Bytes.
+In blastp, the task reads a sequence, computes the similarity score between this sequence and every sequence in one database partition, and writes the result. 
+The merge task also interleaves its work. 
+So we set the interleaving options as 3--interleave-all. The skeleton tasks read
+a piece of the input file, sleep for some time, and write a piece of the output, repeating these steps until all work is done.
+
+\begin{table}[t]
+\begin{center}
+    \caption{Time-To-Solution Comparison of Skeleton BLAST and Real BLAST (seconds)}
+    \up
+    \begin{scriptsize}
+    \begin{tabular}{ | p{1cm} | p{1cm} |p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | }
+    \hline
+	& split & formatdb & blastp & merge & Total \\ \hline \hline
+	BLAST & 74.4 & 82.1 & 1996.3 & 35.9 & 2188.7 \\ \hline
+	Skeleton & 72.9 & 81.6 & 2028.9 & 36.3 & 2219.7 \\ \hline
+	Error & -1.9\% & -0.6\% & 1.6\% & 1.1\% & 1.4\% \\ \hline
+    \end{tabular}
+    \end{scriptsize}
+    \label{tb:blast-results}
+    \up
+\end{center}   
+\end{table}
+
+\begin{table*}[t]
+\begin{center}
+    \caption{Number of tasks, inputs, and outputs, and input and output size, for each CyberShake Postprocessing stage}
+    \begin{scriptsize}
+    \begin{tabular}{ | p{1.0cm} | p{0.8cm} | p{0.8cm} | p{1.2cm} | p{1.0cm} | p{1.15cm} | p{2.4cm} | p{2.5cm} | p{2.4cm} |}
+    \hline
+    Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
+	Extract & 128 & 130 & 256 & 5400 & 11000 & 6.39 & 2.2 & uniform 6.39\\ \hline
+	Seis & 4096 & 4352 & 4096 & 11000 & 96 & 26.9 & 13.3 & normal[26.9, 13.3]\\ \hline
+	PeakGM & 4096 & 4096 & 4096 & 96 & 1.4 & 0.23 & 0.03 & uniform 0.23\\ \hline
+    \end{tabular}
+    \end{scriptsize}
+    \label{tb:cybershake-stats}
+    \up
+\end{center}   
+\end{table*}
+
+
+%\zhaonote{results}
+Table~\ref{tb:blast-results} compares the measured performance of the Skeleton BLAST and real BLAST.
+The error of each stage is -1.9\%, -0.6\%, 1.6\%, and 1.1\%, respectively. The measurements of the skeleton blastp stage uses the
+normal task length distribution. (Our attempt with a uniform distribution had a larger error: -2.7\%.) The overall application error is 1.4\%.
+
+\subsection{CyberShake}
+
+
+CyberShake~\cite{SCEC07, SCEC10} finds the probabilistic peak ground movement at a physical site caused by a set of potential earthquakes. The first step of the application generates strain Green tensors (SGTs), by running two MPI calculations that each produce one SGT file for the physical site. The second step is Postprocessing, which performs a parameter sweep over two dimensions: ruptures that could affect the site, and the variations of every rupture. For each rupture, Postprocessing extracts a subset of the SGT files, and then for each variation of that rupture, Postprocessing calculates a computational seismogram and finds the peak ground motion in the seismogram.
+In our experiments, we run the first 128 Extract tasks, and 4,096 Seis and PeakGM tasks.
+%Figure~\ref{fig:cybershake} shows the data flow and task dependencies of CyberShake Postprocessing. 
+Table~\ref{tb:cybershake-stats} shows the basic statistics of each CyberShake Postprocessing stage. 
+
+\begin{table}[t]
+\begin{center}
+    \caption{Time-To-Solution Comparison of Skeleton CyberShake and Real CyberShake (seconds)}
+    \up
+    \begin{scriptsize}
+    \begin{tabular}{ | p{1.5cm} | p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | }
+    \hline
+	& Extract & Seis & PeakGM & Total \\ \hline \hline
+	CyberShake & 571.5 & 2386.5 & 81.5 & 3039.4 \\ \hline
+	Skeleton & 586.3 & 2443.3 & 83.3 & 3112.9 \\ \hline
+	Error & 2.6\% & 2.4\% & 2.3\% & 2.4\% \\ \hline
+    \end{tabular}
+    \end{scriptsize}
+    \label{tb:cybershake-results}
+    \up
+\end{center}   
+\end{table}
+
+
+%\begin{figure}[h]
+%\begin{center}
+%    \includegraphics[width=85mm]{pictures/SCEC-PostProcessing}
+%\caption {CyberShake Postprocessing Dataflow Pattern \zhaonote{we can remove this figure, as the flow is explained in text}
+%    \label{fig:cybershake}
+%}
+%\end{center}
+%\end{figure}
+
+
+%\zhaonote{explain how to set task length}
+%We wanted to run the tasks in every stage with data cached RAM and use the time-to-solution as task length in Application Skeletons. 
+Our methodology to determine a skeleton task length is to use the time-to-solution of the real task with data cached in RAM disk. 
+However, each Extract task needs to access the two SGT files and a rupture variation file, and the SGT file's size is 5.4 GB, which is too large for a compute node's RAM disk.
+So instead we ran the first 50 tasks manually on each compute node in sequence order, measured the times-to-solution and 
+then computed the average and standard deviation. 
+Although the tasks access data on GPFS, running one task at a time excludes the overhead  incurred  by highly concurrent I/O operations. 
+The Seis and PeakGM tasks' I/O fits in RAM disk, so we directly measure the time-to-solution of each task. For task lengths of the Seis
+stage, we use a normal distribution specified by the average and standard deviation. The task lengths of the PeakGM tasks is uniform.
+
+%\zhaonote{explain how to set file size}
+The two SGT input files for each Extract task are about 2.7 GB each. %When we specify the skeleton Extract task's input size as 2.7 GB, the operating
+%system failed 
+%\katznote{what does this mean?  Is this a BGP limitation?  Or an AMFORA limitation? Is it really the OS?} 
+%\zhaonote{It is the ZeptoOS on BGP. It can not access the file size that is larger than 1,000,000,000 bytes, though it can read the file content. I am not exactly sure if it is the ZeptoOS or the BGP system.}
+%when the task accesses file metadata since 2.7 GB is beyond the file size that the OS supports. Also, 
+We observe from the strace profile that
+an Extract task does not read the whole input file; rather it reads only  about 200 MB. So we %decided to 
+set the skeleton parameters for two SGT input
+files with  size of 200~MB, which %. This %removes the too large file issue and it 
+preserves the I/O traffic that actually happens
+in an Extract task. We set the output files of the Extract, Seis, and PeakGM stage to a size of 34~MB, 36~KB, and 240~Bytes, respectively.
+The interleaving option for all three stages is set to 0--interleave nothing.
+
+%\zhaonote{one skeleton limitation of file mapping}
+In the real CyberShake Postprocessing application, the file usage of the Extract output files (a subset of the SGT files) in the Seis stage is not uniform. Some files are used more than  others. Computer scientists who want to implement an automatic file usage-based runtime 
+replication system might find it infeasible to specify such unbalanced file usage with the current Application Skeletons implementation. One
+solution for this problem is the external file option, which can customize file mappings to tasks and  can generate
+uneven file usage.
+Here however, we simply set the Seis tasks to read each pair of Extract output files evenly, which suffices to give performance matching that of the real application on our test system.
+%In our Skeleton settings for the Seis stage, we simplify this problem by unifying the input file usage. 
+%\katznote{what does this sentence mean?}
+%\zhaonote{In our experiment settings,  the 4096 Seis task consumes each output pair of Extract (128 in total) 32 times. While ideally, one can use the external mapper to specify the exact file usage as the real Seis stage.}
+%\katznote{see if my edit above is ok.  If so, please remove these comments}
+
+Table~\ref{tb:cybershake-results} presents the comparison between the skeleton CyberShake Postprocessing applications and the real applications. 
+All three stages have errors under 3\%, with a total error of 2.4\%.
+
+
+\section{Using Application Skeletons}\label{lb:using}
+%\zhaonote{this section is new, please review}
+We show four examples of using application skeletons for system improvements: data caching, task scheduling, I/O tuning, and resilience. 
+Various system optimizations are implemented with the AMFORA~\cite{AMFS2013} system. 
+The experiments are carried out on the Google Compute Engine environment (referred to as GCE in the rest of the manuscript). 
+Throughout all these experiments, we use the ``n1-highmem-2'' instances, which have two vCPU cores and 13~GB RAM. 
+
+
+\subsection{Data Caching}
+Data caching is a common technique when application data fits in RAM. Here, we run real-mProjectPP from Montage and skeleton-mProjectPP.
+with files located on PVFS and AMFORA to show improved performance. PVFS and AMFORA use four GCE compute nodes.
+The real-mProjectPP workload finishes in 285.2~s with PVFS and 100.9~s on AMFORA.
+Skeleton-mProjectPP runs in 273.7~s on PVFS and 101.3~s on AMFORA.
+The data-caching optimization on skeleton-mProjectPP workload (63.0\%) has identical improvement on the real-mProjectPP workload (64.6\%). This example shows that skeleton applications can be used for designing, implementing, and testing the system optimizations, in place of the more complex real applications.
+
+
+\subsection{Task Scheduling}
+In this example, we seek to show the time-to-solution improvement of data-aware scheduling over the FIFO (first-in, first-out) scheduling algorithm.
+We implement both scheduling algorithms in the AMFORA task engine and run both  real-mProjectPP  and skeleton-mProjectPP
+on 16 compute nodes of GCE. The real-mProjectPP workload and skeleton-mProjectPP workload both have insignificant improvements of 0.7\% and 1.6\%, respectively, because of the nature of the mProjectPP tasks. 
+The ratio of I/O to task length is the root cause of these insignificant improvements.
+When we modify the skeleton-mProjectPP with a 5x larger input file size, we can see a 16.4\% time-to-solution improvement with data-aware scheduling over FIFO.  This shows an additional benefit of skeleton applications: we can use them in place of real applications and easily modify them to better understand when system optimizations will have a significant effect.
+
+\subsection{I/O Tuning}
+For applications that have highly concurrent and frequent metadata operations, using multiple metadata servers can improve the overall application performance~\cite{GIGA+, PVFS2009}.
+We built AMFORA with a configurable metadata server design, and we want to use the mProjectPP workload to verify that multiple metadata servers can actually improve
+the performance with a single metadata server.
+With 16 compute nodes of GCE,  real-mProjectPP and skeleton-mProjectPP show only  1.1\% and 1.2\% improvements, respectively,  with multiple metadata servers over a single metadata server, although
+the improvement is stable. 
+The marginal improvement is again due to the nature of the mProjectPP tasks: the task execution is dominated by computation, which makes  improvement in metadata access negligible.
+When we modify the skeleton-mProjectPP task with a 10x shorter task length, we see a 31.2\% improvement with multiple metadata servers over a single metadata server.  Similar to the last example, this shows a benefit of using skeleton applications over real applications.
+
+\subsection{Resilience Mechanism}
+In the AMFORA system resilience design, we proposed a dynamic replication approach that combines both task re-execution and file replication. 
+The decision is made by calculating the expected recovery time using each replication strategy and choosing the one with lower overhead.
+Originally, we used the mBackground stage from Montage since it has a mix of tasks: some tasks' output files should be recovered by re-execution, while
+some should be recovered by file replication. 
+We want to show that this dynamic replication approach has the best recovery performance over either pure re-execution or pure file replication when there
+is a node failure during execution.
+We ran the workload on various scales on GCE, but the improvements are marginal. 
+The reason is that the recovery overhead difference of mBackground tasks is not significant, so even if we make the right decision for every task, the accumulated
+improvement is still not significant.
+%\zhaonote{proposed new text below, please review.}
+To prove the benefit of this dynamic resilience strategy, we need to show  a more significant improvement of the recovery performance. We first profiled the mBackground tasks' time-to-solution and I/O parameters, and generated a skeleton-mBackground workload with similar performance as real-mBackground. We then provisionally executed the skeleton-mBackground workload with AMFORA and recorded which files were replicated by re-execution and replications.
+We next modified the skeleton-mBackground workload to have 10x longer tasks for the tasks whose output files
+should be replicated, and 10x larger output files for the tasks whose output files should be recovered by re-execution. 
+%\katznote{this needs more explanation - it sounds like we are setting up the problem so we can't fail}
+%\zhaonote{can you be more specific about additional explanation? I think our point is to use this modified mBackground workload to show the recovery performance
+%with a significant improvement, it can certainly fail if the dynamic replication is incorrectly implemented.} 
+%\katznote{I think you need to explain a bit about how you know which tasks should be 10x longer, and which should have 10x bigger outputs.}
+In other words, we magnified the penalty of the wrong replication decision.
+With this modified skeleton-mBackground work load, we see an increased improvement of 9.1\%, 4.4\%, and 4.9\% on 4, 16, and 64 compute nodes of GCE, respectively.
+
+
+\section{Related Work}\label{lb:RFwork}
+
+We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
+the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
+a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
+WGL~\cite{WGL} abstracts an application from a dataflow point of view and lets users generate a Swift script for a workflow application by 
+describing the dataflow patterns between stages.
+%Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
+%programs based on the algorithmic skeletons.
+
+\section{Conclusion and Future Work}\label{lb:Con}
+ 
+Application Skeletons are motivated by the difficulties of real application access and modification that computer scientists who work on tools and systems have. We use a top-down approach to abstract a distributed application in Application Skeletons: applications 
+are composed of a number of stages, while each stage is composed of a number of tasks, with task parameters specified at the stage level. The stage is built on a versatile task design that can handle different task types, various buffer
+sizes, multiple input/output files, and different interleaving scenarios. Overall, one can create easy-to-access, easy-to-build, easy-to-change, and easy-to-run bag-of-tasks, 
+(iterative) map-reduce, and (iterative) multistage workflow applications. Our Application Skeleton  tool is designed to work with mainstream workflow
+frameworks and systems: Bash Shell, Pegasus, and Swift.
+
+%\katznote{Also, we might say that now once a skeleton code represents a real code, it can be easily distributed (through just the parameters) to make middleware and tool experiments repeatable/reproducible, and it can make it easy to scale experiments - some of this also perhaps should go in the intro or abstract as motivation}
+Representing an application by a set of skeleton parameters means that the skeleton application  can be easily shared, making 
+middleware and tool experiments more reproducible.  Changes in these parameters can be used to
+study particular aspects of system performance.
+Computer scientists can then focus on the system or tools they are building.
+%, and in some cases, the optimizations of skeleton applications can
+%also be applied to the real applications. 
+%\zhaonote{Not very confident with the last sentence, as the skeleton application's I/O trace is not exactly the same as the real ones'. Need to think about this.} 
+%\katznote{and as I said, we should think about making some of these points in the abstract and introduction, too|}
+%\zhaonote{yes, fixed for now, please review}
+
+We have shown that the skeleton applications generated by our Application Skeleton tool have performance close to that of the real applications.  We profiled three representative distributed applications---Montage, BLAST, CyberShake PostProcessing---to understand their computation and I/O behavior and then derived parameters required to specify
+the skeletons. 
+%\katznote{we may need to say something somewhere about why we keep saying distributed but actually use a single parallel systems.  If so, we would need to say this here, in the abstract maybe, and in the introduction - perhaps something like that these applications can and are run on both distributed and parallel systems, and our skeletons can similarly be run on both, but that we use parallel systems for testing because they are simpler, but our results should carry over to distributed systems.  Do you think this is true?  In any case, we should think about where we say distributed...} 
+%\zhaonote{yes I agree, I think one of the reasons we measure it on parallel system is the performance stability. For example, it is hard for OSG to have identical performance between two experiments with exactly the same settings.  put a few words here, please review.}
+
+%\zhaonote{we can remove the next two paragraphs. The first one is arguing that we use parallel systems, but now we are running on GCE also. The next explains some tech details}
+%Our measurements are on a parallel system rather than a distributed
+%environment such as OSG or XSEDE, since a homogeneous supercomputer delivers better performance stability, 
+%while a distributed environment's properties can vary dramatically, potentially
+%leading to significant unpredictable noise in the measurements. However, our work has been motivated by both parallel and distributed systems, and we believe that our tools are directly useful on distributed systems as well as the parallel systems we have used so far.
+
+
+%%\katznote{maybe say that our previous work showed this to be generally true, but not always, and here, we discovered some issues we had missed previously.} 
+%%\zhaonote{add the following paragraph to address the above comment, please review.}
+%Our previous work showed this profiling approach generally, worked with a few exceptions. 
+%We looked at those exceptions and found some cases we did not address very well, including task length distribution (BLAST-blastp), 
+%interleaved computation and I/O (BLAST-formatdb), and overlooked repeated reads over the same input files (Montage-mDiffFit). We have now improved our methods, and we show that we can now determine skeleton parameters that more accurately describe applications.
+
+The Application Skeleton tool can produce skeleton applications that correctly capture important distributed properties of real applications but 
+are much simpler to define and use.
+Comparing performance shows overall errors of  -1.3\%, 1.5\%, and 2.4\%  for Montage, BLAST, and CyberShake PostProcessing, respectively.
+At the stage level, fourteen out of fifteen stages have errors of less than 3\%, ten have errors less than 2\%, and four have errors of less than 1\%.
+
+The four examples of system improvements (data caching, task scheduling, I/O tuning, and resilience mechanism) 
+showed that using skeleton applications simplifies the process of system optimization design, implementation, and verification, and that by making small changes to the skeletons, we can highlight the effects of optimizations.
+
+%In the near future, we will release the Application Skeleton code as open source, and invite users and contributors from a wider community to try it and expand it.
+%Later, we plan the following: 
+%\katznote{changes here?}
+%\zhaonote{add ``cloud environments'' in the last item.}
+The Application Skeleton code is available as open source at \url{https://github.com/applicationskeleton/Skeleton}~\cite{skeleton-software} under the MIT license. We invite the community to try it and to contribute to it.
+
+We plan the following in the near future:
+\begin{shortlist}
+\item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance.
+\item {} Determine a way to represent the computational work in a task that when combined with a particular platform can give an accurate runtime for that task.
+\item {} Support concurrent tasks that need to run at the same time to exchange information.
+\item {} Test on distributed systems where latencies, particular file usage, and other issues may be more important than on the parallel systems and cloud environments.
+%\katznote{add an item about testing on distributed systems where latencies and particular file usage and other issues may be more important than on the parallel systems we have used so far}
+%\zhaonote{add one item, please review.}
+%\item{} Work within the AIMES project to integrate Application Skeletons with the AIMES framework. \katznote{not sure this is really meaningful to readers - let's see what the AIMES folks say}
+%\katznote{I'm not sure what the rest of this means} 
+%\zhaonote{tryied to explain why we need to integrate, nevermind, we can remove it.}
+%to extend AIMES's application coverage by providing applications with a wide range of characteristics.
+%\zhaonote{Mention integration with AIMES framework. do we have an AIMES reference? Does the above sentence look ok?}
+\end{shortlist}
+
+\section*{Acknowledgments}
+
+This work was supported in part by the U.S. Department of Energy 
+under the ASCR award DE-SC0008617 (the AIMES project).
+It has benefited from discussions with Shantenu Jha, Andre Merzky, Matteo Turilli, Jon Weissman, and Lavanya Ramakrishnan.
+Computing resources were provided by the
+Argonne Leadership Computing Facility and Google. Work by Katz was supported by 
+the National Science Foundation while working at the Foundation.  Any 
+opinion, finding, and conclusions or recommendations expressed in this
+ material are those of the author(s) and do not necessarily reflect 
+ the views of the National Science Foundation.
+ 
+\bibliographystyle{abbrv}
+\bibliography{Skeleton}
+
+% that's all folks
+\end{document}
