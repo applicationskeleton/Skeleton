@@ -41,6 +41,7 @@
 \usepackage{amssymb}
 \usepackage{url}
 \usepackage{color}
+\usepackage{xspace}
 
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
@@ -54,15 +55,19 @@
 \drafttrue
 %\draftfalse                                                                              
 \ifdraft
-\newcommand{\katznote}[1]{ {\textcolor{blue}    { ***Dan:      #1 }}}
-\newcommand{\zhaonote}[1]{{\textcolor{darkgreen}    { ***Zhao:      #1 }}}
+\newcommand{\katznote}[1]{ {\textcolor{blue}    { ***Dan:   #1 }}}
+\newcommand{\zhaonote}[1]{{\textcolor{darkgreen}{ ***Zhao:  #1 }}}
+\newcommand{\amnote}[1]{{\textcolor{magenta}    { ***Andre: #1 }}}
 \newcommand{\note}[1]{ {\textcolor{red}    {\bf #1 }}}
 \else
 \newcommand{\katznote}[1]{}
 \newcommand{\zhaonote}[1]{}
+\newcommand{\amnote}[1]{}
 \newcommand{\note}[1]{}
 \fi
 
+\newcommand{\I}[1]{\textit{#1}\xspace}
+\newcommand{\T}[1]{\texttt{#1}\xspace}
 
 \journal{FGCS}
 
@@ -352,6 +357,7 @@ reimplementing the actual task and results in poor programmability, and having v
 %this paragraph here to avoid that. I think we can also remove it, since we talk about it in the next subsection.}
 
 \subsection{Stage Characterization}
+\label{ssec:stage_char}
 We have previously shown basic examples of applications described using the Skeleton programming model~\cite{Skeleton2013}.
 In brief, we specify the task parameters at the stage level since it has a fairly global view of most of the task
 properties, which eases programming over specifying each task's parameters individually. The stage parameters are:
@@ -682,9 +688,92 @@ the task source code and compile it.
 \section{Determining Skeleton Parameters}
 \label{lb:Params}
 
+\subsection{Manual Application Profiling}
 \katznote{how to manually profile apps and get parameters}
 
-\katznote{synapse stuff to go here}
+\subsection{System Independent Profiling}
+\amnote{synapse profiling stuff to go here}
+
+
+Several of the application characteristics listed in
+section~\ref{ssec:stage_char} are system independend, ie. have values
+which allow to truthfully reproduce the application behaviour on any
+target system.  For example, the data input size (in Bytes) is the
+same, no matter if the application is executed on a local desktop, on
+a remote cluster, or on a supercomputer.  Some metrics are, however,
+not system-indepent.  For example, the application runtime depends
+from the specific resource performance, such as from CPU type and
+clock speed.  It is thus often difficult to apply the results of the
+application profiling towards the execution of skeletons on arbitrary
+target resources.
+
+The underlying reason for this difficulty is that some metrics do not
+really denote a metric of resource consumption, but rather describe
+the \I{effect} of that consumption.  That is most obvious for any
+metric which is specified as time duration or frequency, but similarly
+holds, for example, for the interleaving or concurrency of disk I/O,
+memory I/O, network I/O and computation, whose realization and
+performance depends on the underlying system architecture.
+
+We partially address this problem by internally using FLOPs as a
+normalized representation of compute resource consumption, and we then
+derive an \I{expected} application runtime, based on the specific
+target system's architecture.  While it would be interesting to apply
+similar system independent metrics to other resources types (like, as
+mentioned, to the I/O-Compute concurrency), we found it difficult to
+extrapolate the respective system parameters without a complete model
+of the hardware and OS layer, and also found those effects to be small
+compared to the other characteristics used -- it is only the CPU
+consumption which sticks out as a worthwhile metric to formulated
+system independently.
+
+To derive the number of cycles consumed by an application, we use the
+linux system tool \T{'perf'}, which provides access to a number of low
+level system counters.  We use the total number of cycles reported to
+be consumed, but also include estimations of CPU utilization (what
+percentage of the CPU has been used) and CPU efficiency (what
+percentage of the used cycles has been spent toward conputation,
+versus for example spent on cache misses and failed branch
+predictions).  The underlying assumption here is that the same
+application code shows similar utilization and efficiency on different
+CPUs.  That assumption can only indirectly be confirmed: while we do
+not have the option to use \T{'perf'} on the target resources (it
+requires OS level support which is generally not available), we can
+show that the derived runtime estimates are in good agreement with
+actually observed values -- see figure~\ref{fig:synapse_estimates}.
+
+To summarize: the focus on metrics which represent resource
+consumptions instead of metrics which represent the effects of
+resource consumptions (such as runtime) allows a more truthful
+representation of the application behaviour on arbitrary target
+resources.
+
+
+\subsection{Extrapolation of Application Profiles}
+
+Users often have an good intuition about certain resource consumption
+metrics of their application: they usually know how many data the
+application will consume, and can estimate how much data will be
+produced, and can guess how long the application will run on resources
+which they frequently use.  Exact and system independent profiling of
+applications is, however, non-trivial and often very technical, and
+can be cumbersome to do on arbitrary machines.  In general it is an
+effort which a user is ideally not burdened with.  
+
+Further, most application's resource consumptions are dependent on
+application parameters and control files, on input data, user
+interactions, and sometimes on chance.  It is not realistically
+feasible to cover the complete parameter space of application
+configurations with exact application profiles.  For the use case
+which motivates the presented work it is not really necessary to
+\I{completely} do so -- but in order to cover corner cases of system
+design, a certain ability to extrapolate application profiles towards
+other application configurations is required.
+
+\amnote{describe that we profile at specific points in the parameter
+    space (potentially only at one point though), and extrapolate
+    from there.  Include plot to show how that extrapolation works in
+    simple cases, and how it is of limited power in other cases}
 
 
 \section{Performance Evaluation}
