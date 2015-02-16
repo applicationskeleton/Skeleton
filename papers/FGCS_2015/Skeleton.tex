@@ -689,22 +689,21 @@ the task source code and compile it.
 \label{lb:Params}
 
 \subsection{Manual Application Profiling}
-\katznote{how to manually profile apps and get parameters}
+\katznote{how to manually profile apps and get parameters - Zhao, can you add a bit on this?}
 
 \subsection{System Independent Profiling}
 \amnote{synapse profiling stuff to go here}
 
-
 Several of the application characteristics listed in
-section~\ref{ssec:stage_char} are system independend, ie. have values
-which allow to truthfully reproduce the application behaviour on any
-target system.  For example, the data input size (in Bytes) is the
-same, no matter if the application is executed on a local desktop, on
+Section~\ref{ssec:stage_char} are system independent, i.e., they have values
+that allow faithful reproduce of application behavior on any
+target system.  For example, the data input size (in Bytes) is constant,
+whether the application is executed on a local desktop, on
 a remote cluster, or on a supercomputer.  Some metrics are, however,
-not system-indepent.  For example, the application runtime depends
-from the specific resource performance, such as from CPU type and
-clock speed.  It is thus often difficult to apply the results of the
-application profiling towards the execution of skeletons on arbitrary
+not system-independent.  For example, the application runtime depends
+from the specific resource performance, such as the CPU type and
+clock speed.  It is thus difficult to apply some of the results of manual
+application profiling to the execution of skeletons on arbitrary
 target resources.
 
 The underlying reason for this difficulty is that some metrics do not
@@ -719,53 +718,54 @@ We partially address this problem by internally using FLOPs as a
 normalized representation of compute resource consumption, and we then
 derive an \I{expected} application runtime, based on the specific
 target system's architecture.  While it would be interesting to apply
-similar system independent metrics to other resources types (like, as
-mentioned, to the I/O-Compute concurrency), we found it difficult to
+similar system independent metrics to other resources types (for example, as
+mentioned, the I/O-Compute concurrency), we found it difficult to
 extrapolate the respective system parameters without a complete model
-of the hardware and OS layer, and also found those effects to be small
-compared to the other characteristics used -- it is only the CPU
-consumption which sticks out as a worthwhile metric to formulated
-system independently.
+of the hardware and OS layer, and we also found those effects to be small
+compared to the other characteristics used --  CPU
+consumption is the only metric we've found that is clearly worth formulating
+system-independently.
 
 To derive the number of cycles consumed by an application, we use the
-linux system tool \T{'perf'}, which provides access to a number of low
+Linux system tool \T{`perf'}, which provides access to a number of low
 level system counters.  We use the total number of cycles reported to
 be consumed, but also include estimations of CPU utilization (what
 percentage of the CPU has been used) and CPU efficiency (what
-percentage of the used cycles has been spent toward conputation,
-versus for example spent on cache misses and failed branch
-predictions).  The underlying assumption here is that the same
-application code shows similar utilization and efficiency on different
-CPUs.  That assumption can only indirectly be confirmed: while we do
-not have the option to use \T{'perf'} on the target resources (it
+percentage of the used cycles has been spent on computation,
+versus, for example, on cache misses and failed branch
+predictions.) The underlying assumption here is that the same
+application code will show similar utilization and efficiency on different
+CPUs.  This assumption can only indirectly be confirmed: while we are
+not able to use \T{`perf'} on our target resources (because it
 requires OS level support which is generally not available), we can
-show that the derived runtime estimates are in good agreement with
-actually observed values -- see figure~\ref{fig:synapse_estimates}.
+however show that the derived runtime estimates are in good agreement with
+actually observed values -- see \figurename~\ref{fig:synapse_estimates}.
 
-To summarize: the focus on metrics which represent resource
-consumptions instead of metrics which represent the effects of
-resource consumptions (such as runtime) allows a more truthful
-representation of the application behaviour on arbitrary target
+In summary, the focus on metrics that represent resource
+consumption instead of metrics that represent the effects of
+resource consumption (such as runtime) allows a more accurate
+representation of the application behavior on arbitrary target
 resources.
 
 
 \subsection{Extrapolation of Application Profiles}
 
-Users often have an good intuition about certain resource consumption
-metrics of their application: they usually know how many data the
+Users often have an good intuition for certain resource consumption
+metrics of their application: they usually know how much data the
 application will consume, and can estimate how much data will be
 produced, and can guess how long the application will run on resources
 which they frequently use.  Exact and system independent profiling of
 applications is, however, non-trivial and often very technical, and
 can be cumbersome to do on arbitrary machines.  In general it is an
-effort which a user is ideally not burdened with.  
+effort which a user is ideally not burdened with.  \katznote{but we will describe how we do it in Section 3.1...}
 
-Further, most application's resource consumptions are dependent on
+Further, most application's resource consumption is dependent on
 application parameters and control files, on input data, user
-interactions, and sometimes on chance.  It is not realistically
+interactions, and sometimes on events beyond the users control,
+such as other user activity on shared systems.  It is not realistically
 feasible to cover the complete parameter space of application
 configurations with exact application profiles.  For the use case
-which motivates the presented work it is not really necessary to
+that motivates the presented work, it is not really necessary to
 \I{completely} do so -- but in order to cover corner cases of system
 design, a certain ability to extrapolate application profiles towards
 other application configurations is required.
