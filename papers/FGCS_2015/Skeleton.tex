@@ -662,7 +662,7 @@ the task source code and compile it.
 %   \includegraphics[width=85mm]{pictures/sample}
 %\caption {Task flow of the three-stage application
 %%\katznote{does this figure match the listing?}
-%%\zhaonote{I gave it a double check, I fixed a couple of typoes. It most likely matches the listing. We won't be able to confirm this until the whole system is reimplemented. My check is based on our previous Skeleton implementation.}
+%%\zhaonote{I gave it a double check, I fixed a couple of typos. It most likely matches the listing. We won't be able to confirm this until the whole system is reimplemented. My check is based on our previous Skeleton implementation.}
 %   \label{fig:sample}
 %}
 %\end{figure}
@@ -689,7 +689,17 @@ the task source code and compile it.
 \label{lb:Params}
 
 \subsection{Manual Application Profiling}
-\katznote{how to manually profile apps and get parameters - Zhao, can you add a bit on this?}
+
+Skeleton parameters can be determined by manually running and analyzing an application.
+Specifically, to measure task length, we place both input
+and output files on RAMdisk and use \T{`time'} to measure the the time-to-solution of the tasks.
+After gathering this data, it can be examined to determine
+the average task length and variance, and this can then be used to generate the skeleton
+parameters that give the needed task length distribution.
+We use \T{`strace'} to determine the number of reads and writes, and the amount of data
+that is read and written by a task.  \T{`strace'} also shows the pattern of interleaving
+between computation and I/O.  While this process is manual and a bit time-consuming, it
+has also proven to be successful.~\cite{Skeleton2014}
 
 \subsection{System Independent Profiling}
 \amnote{synapse profiling stuff to go here}
