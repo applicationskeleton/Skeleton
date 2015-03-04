@@ -137,7 +137,8 @@ reproducible system experiments since they are represented by a compact set of p
 
 Our Application Skeleton tool (available as open source at \url{https://github.com/applicationskeleton/Skeleton}) currently can create easy-to-access, easy-to-build, and easy-to-run bag-of-task, 
 (iterative) map-reduce, and (iterative) multistage workflow applications. The tasks can be
-serial or parallel or a mix of both. We select three representative applications (Montage, 
+serial, parallel, or a mix of both. The parameters to represent the tasks can either be
+discovered through a manual profiling of the applications or through \note{synapse...} We select three representative applications (Montage, 
 BLAST, CyberShake Postprocessing), then describe and generate skeleton applications for each. 
 We show that the skeleton applications have identical (or close) performance to that of the real applications. 
 We then show examples of using skeleton applications to verify system optimizations such as
@@ -173,9 +174,9 @@ the system. Accessing and building the real applications can be time consuming o
 or more of the following reasons:
 \begin{itemize}
 \item {} Some applications (source) are privately accessible.
-\item {} Some data is difficult to access.
+\item {} Some data are difficult to access.
 \item {} Some applications use legacy code and are dependent on out-of-date libraries.
-\item {} Some applications are hard to understand because of the knowledge gap between the computer scientists and domain scientists.
+\item {} Some applications are hard to understand because they implicitly assume domain knowledge.
 \end{itemize}
 In addition, real applications may be difficult to scale or modify in order to demonstrate
 system trends and characteristics~\cite{DPA-paper}.
@@ -204,9 +205,7 @@ The skeleton applications are executable with common
 distributed computing middleware, Swift~\cite{SWIFT2007, swift-ieee09, Swift_2011} and Pegasus~\cite{pegasus, pegasus-04}, as well as the ubiquitous UNIX shell on a single 
 site (a local cluster with a shared file system), and the skeleton set of tasks can also be output as a generic JSON object that can be used by other systems, such as in our case, by our AIMES middleware.
 
-Once the real application is represented by a Skeleton description file, simply specifying the skeleton parameters and selecting
-which tool or middleware to use means the skeleton application is easily
-distributed.  
+Skeleton parameters can be discovered by manually profiling the application, by \note{synapse}. Once the real application is represented by a Skeleton description file it can easily be reused.  
 We measured the performance error between the skeleton application against three real applications (Montage~\cite{montage1,montage2}, BLAST~\cite{ParallelBlast}, and CyberShake PostProcessing~\cite{SCEC07}) on 64 processors of a BG/P supercomputer with per stage and total errors of between 1 and 3\%.
 And changing the parameters makes it easy to study how the system responds to different application characteristics, specifically data caching, task scheduling, I/O tuning, and resilience mechanism.
 
@@ -265,11 +264,10 @@ graph mining~\cite{PREGEL}
 %\zhaonote{can we cover Campaign now? If my understanding is correct, we can now.}
 \end{itemize}
 
-Application Skeletons of iterative applications are currently limited to those with a fixed number of iterations. Also, Application Skeletons  can express multiple task types, serial, parallel, or a mix of both. The Application Skeleton concept ideally should also allow a concurrent application to be expressed, though
-this is not yet implemented. (A concurrent application comprises a set of tasks that have to be executed at the same time, e.g., coupled fusion simulation~\cite{klasky:journphy:2005}.)
-%
+Application Skeletons of iterative applications are currently limited to those with a fixed number of iterations. Also, Application Skeletons  can express multiple task types, serial, parallel, or a mix of both. 
 Examining several representative distributed applications, we observe
 that abstracting a distributed application stage by stage is expressive enough to cover the target applications.
+The Application Skeleton concept ideally should also allow a concurrent application (a set of tasks that have to be executed at the same time, e.g., coupled fusion simulation~\cite{klasky:journphy:2005}) to be expressed; this is future work.
 
 %\subsection{Application Abstraction}
 %\label{lb:Design:App}
@@ -320,7 +318,7 @@ a compilation script that can compile the task code.
 
 Other task properties include number of processes, task length, read buffer size, write buffer size, input files, output files, and
 operation interleaving option. The number of processes is one if the task is serial and is greater than one if the task is parallel. 
-Task length is currently measured in seconds, which reflects the amount of computation in a task. An alternative would be flops. We select the runtime in seconds, because it is a direct indication of how long the task
+Task length is currently measured in seconds, which reflects the amount of computation in a task. An alternative would be flops. \katznote{Andre: any changes needed to the following for synapse?} We select the runtime in seconds, because it is a direct indication of how long the task
 should run. Because the mapping of flops to time is, in general, not very predictable, we currently believe that the user can predict runtime more accurately than using flops.
 Additionally, we are currently investigating
 better ways to specify the task length that can reflect the difference of computing capacity on different machines.
@@ -1201,8 +1199,8 @@ sizes, multiple input/output files, and different interleaving scenarios. Overal
 frameworks and systems: Bash Shell, Pegasus, and Swift.
 
 %\katznote{Also, we might say that now once a skeleton code represents a real code, it can be easily distributed (through just the parameters) to make middleware and tool experiments repeatable/reproducible, and it can make it easy to scale experiments - some of this also perhaps should go in the intro or abstract as motivation}
-Representing an application by a set of skeleton parameters means that the skeleton application  can be easily shared, making 
-middleware and tool experiments more reproducible.  Changes in these parameters can be used to
+Representing an application by a set of skeleton parameters means that the skeleton application  can be easily repeated and easily shared, making 
+middleware and tool experiments more reproducible.  Changes to these parameters can be used to
 study particular aspects of system performance.
 Computer scientists can then focus on the system or tools they are building.
 %, and in some cases, the optimizations of skeleton applications can
@@ -1245,10 +1243,11 @@ The Application Skeleton code is available as open source at \url{https://github
 
 We plan the following in the near future:
 \begin{itemize}
-\item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance.
+\item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance. \note{synapse?}
 \item {} Determine a way to represent the computational work in a task that when combined with a particular platform can give an accurate runtime for that task.
 \item {} Support concurrent tasks that need to run at the same time to exchange information.
 \item {} Test on distributed systems where latencies, particular file usage, and other issues may be more important than on the parallel systems and cloud environments.
+\item {} Allow more varieties of I/O behavior for parallel tasks than just process 0 performing all I/O.
 %\katznote{add an item about testing on distributed systems where latencies and particular file usage and other issues may be more important than on the parallel systems we have used so far}
 %\zhaonote{add one item, please review.}
 %\item{} Work within the AIMES project to integrate Application Skeletons with the AIMES framework. \katznote{not sure this is really meaningful to readers - let's see what the AIMES folks say}
