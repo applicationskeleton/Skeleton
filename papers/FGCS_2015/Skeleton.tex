@@ -1,4 +1,4 @@
-%% 
+%%   
 %% Copyright 2007, 2008, 2009 Elsevier Ltd
 %% 
 %% This file is part of the 'Elsarticle Bundle'.
@@ -137,7 +137,8 @@ reproducible system experiments since they are represented by a compact set of p
 
 Our Application Skeleton tool (available as open source at \url{https://github.com/applicationskeleton/Skeleton}) currently can create easy-to-access, easy-to-build, and easy-to-run bag-of-task, 
 (iterative) map-reduce, and (iterative) multistage workflow applications. The tasks can be
-serial or parallel or a mix of both. We select three representative applications (Montage, 
+serial, parallel, or a mix of both. The parameters to represent the tasks can either be
+discovered through a manual profiling of the applications or through \note{synapse...} We select three representative applications (Montage, 
 BLAST, CyberShake Postprocessing), then describe and generate skeleton applications for each. 
 We show that the skeleton applications have identical (or close) performance to that of the real applications. 
 We then show examples of using skeleton applications to verify system optimizations such as
@@ -173,9 +174,9 @@ the system. Accessing and building the real applications can be time consuming o
 or more of the following reasons:
 \begin{itemize}
 \item {} Some applications (source) are privately accessible.
-\item {} Some data is difficult to access.
+\item {} Some data are difficult to access.
 \item {} Some applications use legacy code and are dependent on out-of-date libraries.
-\item {} Some applications are hard to understand because of the knowledge gap between the computer scientists and domain scientists.
+\item {} Some applications are hard to understand because they implicitly assume domain knowledge.
 \end{itemize}
 In addition, real applications may be difficult to scale or modify in order to demonstrate
 system trends and characteristics~\cite{DPA-paper}.
@@ -204,9 +205,7 @@ The skeleton applications are executable with common
 distributed computing middleware, Swift~\cite{SWIFT2007, swift-ieee09, Swift_2011} and Pegasus~\cite{pegasus, pegasus-04}, as well as the ubiquitous UNIX shell on a single 
 site (a local cluster with a shared file system), and the skeleton set of tasks can also be output as a generic JSON object that can be used by other systems, such as in our case, by our AIMES middleware.
 
-Once the real application is represented by a Skeleton description file, simply specifying the skeleton parameters and selecting
-which tool or middleware to use means the skeleton application is easily
-distributed.  
+Skeleton parameters can be discovered by manually profiling the application, by \note{synapse}. Once the real application is represented by a Skeleton description file it can easily be reused.  
 We measured the performance error between the skeleton application against three real applications (Montage~\cite{montage1,montage2}, BLAST~\cite{ParallelBlast}, and CyberShake PostProcessing~\cite{SCEC07}) on 64 processors of a BG/P supercomputer with per stage and total errors of between 1 and 3\%.
 And changing the parameters makes it easy to study how the system responds to different application characteristics, specifically data caching, task scheduling, I/O tuning, and resilience mechanism.
 
@@ -265,11 +264,10 @@ graph mining~\cite{PREGEL}
 %\zhaonote{can we cover Campaign now? If my understanding is correct, we can now.}
 \end{itemize}
 
-Application Skeletons of iterative applications are currently limited to those with a fixed number of iterations. Also, Application Skeletons  can express multiple task types, serial, parallel, or a mix of both. The Application Skeleton concept ideally should also allow a concurrent application to be expressed, though
-this is not yet implemented. (A concurrent application comprises a set of tasks that have to be executed at the same time, e.g., coupled fusion simulation~\cite{klasky:journphy:2005}.)
-%
+Application Skeletons of iterative applications are currently limited to those with a fixed number of iterations. Also, Application Skeletons  can express multiple task types, serial, parallel, or a mix of both. 
 Examining several representative distributed applications, we observe
 that abstracting a distributed application stage by stage is expressive enough to cover the target applications.
+The Application Skeleton concept ideally should also allow a concurrent application (a set of tasks that have to be executed at the same time, e.g., coupled fusion simulation~\cite{klasky:journphy:2005}) to be expressed; this is future work.
 
 %\subsection{Application Abstraction}
 %\label{lb:Design:App}
@@ -320,7 +318,7 @@ a compilation script that can compile the task code.
 
 Other task properties include number of processes, task length, read buffer size, write buffer size, input files, output files, and
 operation interleaving option. The number of processes is one if the task is serial and is greater than one if the task is parallel. 
-Task length is currently measured in seconds, which reflects the amount of computation in a task. An alternative would be flops. We select the runtime in seconds, because it is a direct indication of how long the task
+Task length is currently measured in seconds, which reflects the amount of computation in a task. An alternative would be flops. \katznote{Andre: any changes needed to the following for synapse?} We select the runtime in seconds, because it is a direct indication of how long the task
 should run. Because the mapping of flops to time is, in general, not very predictable, we currently believe that the user can predict runtime more accurately than using flops.
 Additionally, we are currently investigating
 better ways to specify the task length that can reflect the difference of computing capacity on different machines.
@@ -662,7 +660,7 @@ the task source code and compile it.
 %   \includegraphics[width=85mm]{pictures/sample}
 %\caption {Task flow of the three-stage application
 %%\katznote{does this figure match the listing?}
-%%\zhaonote{I gave it a double check, I fixed a couple of typoes. It most likely matches the listing. We won't be able to confirm this until the whole system is reimplemented. My check is based on our previous Skeleton implementation.}
+%%\zhaonote{I gave it a double check, I fixed a couple of typos. It most likely matches the listing. We won't be able to confirm this until the whole system is reimplemented. My check is based on our previous Skeleton implementation.}
 %   \label{fig:sample}
 %}
 %\end{figure}
@@ -688,23 +686,43 @@ the task source code and compile it.
 \section{Determining Skeleton Parameters}
 \label{lb:Params}
 
-\subsection{Manual Application Profiling}
-\katznote{how to manually profile apps and get parameters}
+\subsection{Manual Application Profiling}\label{sec:manual-profiling}
+
+Skeleton parameters can be determined by manually running and analyzing an application.
+Specifically, to measure task length, we place both input
+and output files on RAMdisk and use \T{`time'} to measure the the time-to-solution of the tasks.
+Although this method includes the I/O
+time from/to RAM disk as part of the task length, this extra time is generally negligible
+compared with the I/O time using shared disk, which involves
+high-volume traffic and high concurrency.
+After gathering this data, it can be examined to determine
+the average task length and variance, and this can then be used to generate the skeleton
+parameters that give the needed task length distribution.
+\T{`strace'} is used to profile the I/O traffic, determining the number of reads and writes
+and the amount of data
+that is read and written by a task.
+As we have shown previously~\cite{ENVELOPE}, I/O-related system calls
+of all tasks in a stage can be aligned using sequence order. By assuming all tasks get to the
+same system call at the same time, I/O concurrency and I/O buffer size can be determined.
+This also can be used to determine the interleaving pattern between computation and I/O.  
+While this process is manual and a bit time-consuming, it
+has also proven to generally be successful~\cite{Skeleton2014}, though with some modifications needed, as described in Section~\ref{lb:Perf}.
+
+
 
 \subsection{System Independent Profiling}
 \amnote{synapse profiling stuff to go here}
 
-
 Several of the application characteristics listed in
-section~\ref{ssec:stage_char} are system independend, ie. have values
-which allow to truthfully reproduce the application behaviour on any
-target system.  For example, the data input size (in Bytes) is the
-same, no matter if the application is executed on a local desktop, on
+Section~\ref{ssec:stage_char} are system independent, i.e., they have values
+that allow faithful reproduce of application behavior on any
+target system.  For example, the data input size (in Bytes) is constant,
+whether the application is executed on a local desktop, on
 a remote cluster, or on a supercomputer.  Some metrics are, however,
-not system-indepent.  For example, the application runtime depends
-from the specific resource performance, such as from CPU type and
-clock speed.  It is thus often difficult to apply the results of the
-application profiling towards the execution of skeletons on arbitrary
+not system-independent.  For example, the application runtime depends
+from the specific resource performance, such as the CPU type and
+clock speed.  It is thus difficult to apply some of the results of manual
+application profiling to the execution of skeletons on arbitrary
 target resources.
 
 The underlying reason for this difficulty is that some metrics do not
@@ -719,53 +737,56 @@ We partially address this problem by internally using FLOPs as a
 normalized representation of compute resource consumption, and we then
 derive an \I{expected} application runtime, based on the specific
 target system's architecture.  While it would be interesting to apply
-similar system independent metrics to other resources types (like, as
-mentioned, to the I/O-Compute concurrency), we found it difficult to
+similar system independent metrics to other resources types (for example, as
+mentioned, the I/O-Compute concurrency), we found it difficult to
 extrapolate the respective system parameters without a complete model
-of the hardware and OS layer, and also found those effects to be small
-compared to the other characteristics used -- it is only the CPU
-consumption which sticks out as a worthwhile metric to formulated
-system independently.
+of the hardware and OS layer, and we also found those effects to be small
+compared to the other characteristics used --  CPU
+consumption is the only metric we've found that is clearly worth formulating
+system-independently.
 
 To derive the number of cycles consumed by an application, we use the
-linux system tool \T{'perf'}, which provides access to a number of low
+Linux system tool \T{`perf'}, which provides access to a number of low
 level system counters.  We use the total number of cycles reported to
 be consumed, but also include estimations of CPU utilization (what
 percentage of the CPU has been used) and CPU efficiency (what
-percentage of the used cycles has been spent toward conputation,
-versus for example spent on cache misses and failed branch
-predictions).  The underlying assumption here is that the same
-application code shows similar utilization and efficiency on different
-CPUs.  That assumption can only indirectly be confirmed: while we do
-not have the option to use \T{'perf'} on the target resources (it
+percentage of the used cycles has been spent on computation,
+versus, for example, on cache misses and failed branch
+predictions.) The underlying assumption here is that the same
+application code will show similar utilization and efficiency on different
+CPUs.  This assumption can only indirectly be confirmed: while we are
+not able to use \T{`perf'} on our target resources (because it
 requires OS level support which is generally not available), we can
-show that the derived runtime estimates are in good agreement with
-actually observed values -- see figure~\ref{fig:synapse_estimates}.
+however show that the derived runtime estimates are in good agreement with
+actually observed values -- see \figurename~\ref{fig:synapse_estimates}.
 
-To summarize: the focus on metrics which represent resource
-consumptions instead of metrics which represent the effects of
-resource consumptions (such as runtime) allows a more truthful
-representation of the application behaviour on arbitrary target
+In summary, the focus on metrics that represent resource
+consumption instead of metrics that represent the effects of
+resource consumption (such as runtime) allows a more accurate
+representation of the application behavior on arbitrary target
 resources.
 
 
 \subsection{Extrapolation of Application Profiles}
 
-Users often have an good intuition about certain resource consumption
-metrics of their application: they usually know how many data the
+Users often have an good intuition for certain resource consumption
+metrics of their application: they usually know how much data the
 application will consume, and can estimate how much data will be
 produced, and can guess how long the application will run on resources
 which they frequently use.  Exact and system independent profiling of
 applications is, however, non-trivial and often very technical, and
-can be cumbersome to do on arbitrary machines.  In general it is an
-effort which a user is ideally not burdened with.  
+can be cumbersome to do on arbitrary machines.  While we have
+described some simple profiling in Section~\ref{sec:manual-profiling},
+in general it is an effort with which the average user should not be
+burdened.  
 
-Further, most application's resource consumptions are dependent on
+Further, most application's resource consumption is dependent on
 application parameters and control files, on input data, user
-interactions, and sometimes on chance.  It is not realistically
+interactions, and sometimes on events beyond the users control,
+such as other user activity on shared systems.  It is not realistically
 feasible to cover the complete parameter space of application
 configurations with exact application profiles.  For the use case
-which motivates the presented work it is not really necessary to
+that motivates the presented work, it is not really necessary to
 \I{completely} do so -- but in order to cover corner cases of system
 design, a certain ability to extrapolate application profiles towards
 other application configurations is required.
@@ -787,17 +808,15 @@ We use 64 BG/P processors with GPFS as the shared file system. Each of the proce
 RAM disk. Each application stage is executed with AMFORA~\cite{AMFS2013}, a parallel scripting framework on supercomputers.
 With AMFORA, we can simply list all tasks of a stage in a Bash script, and instruct AMFORA to execute them (in parallel, subject to data dependencies.)
 
-To produce skeleton applications, we first find the stage parameters.
-Each task's length is measured as the time-to-solution with inputs and outputs cached in RAM disk. Although this method over counts the I/O
-time from/to RAM disk as task length, this is negligible compared with the time consumption of GPFS I/O due to the high-volume traffic 
-with high concurrency.  I/O traffic is profiled by collecting all system calls with the Linux strace command. As we have done previously~\cite{ENVELOPE}, we align I/O-related system calls of all tasks in a stage using sequence order. Assuming all tasks get to the
-same system call at the same time, we can determine I/O concurrency and I/O buffer size. %Another thing we learnt from the
+To produce skeleton applications, we first find the stage parameters,
+mostly using the methods in Section~\ref{sec:manual-profiling}.
+ %Another thing we learnt from the
 %I/O profile is that tasks read the input files multiple times in some cases. 
- 
+% 
 To compare the performance of the skeleton and real applications, we run both with AMFORA. The tasks read/write files from/to GPFS.
 We run each stage five times and average the times-to-solution.
 
-\subsection{Montage}
+\subsection{Montage}\label{sec:Montage}
 
 The Montage application in this work has eight stages. We build a 6x6 degree mosaic from 1,319 2MASS image files. Each file is $\sim$2~MB. The output of the last stage, mAdd, contains
 two files, each of $\sim$3.7~GB. 
@@ -838,9 +857,9 @@ Measured Time Avg and Measured Time Stdev show the average and the standard devi
 
 %\zhaonote{explain how to set task length in each stage}
 For most stages,  
-we place the input and output files on RAM disk and use the average time-to-solution as the task length, as previously stated.  However,
+we measure skeleton parameters as previously described (see Section~\ref{sec:manual-profiling}.)  However,
 the input sizes for mImgtbl and mAdd exceed the maximum RAM disk size,
-so we cannot use this technique. 
+so we cannot use our standard technique of running the tasks with data in RAM disk. 
 We observe that mAdd task's time-to-solution is proportional 
 to the number of input files when that number is small (10-30), so we project the time-to-solution 
 with the full input data set based on the measured time-to-solution on a smaller data set.
@@ -883,23 +902,27 @@ the result as the estimated task length.
 \end{table*}
 
 
-%\zhaonote{explain how to set file size}
-Profiling Montage tells us that the application uses a 64-KB buffer
-size for read and write %We show one example of mBackground in Figure~\ref{fig:mBack-io}. 
-%\katznote{I don't see this in figure 3 - can you tell me where I should see 64-KB?} 
-%\zhaonote{we can see a solid red a solid blue line in the figure, they correspond to the right hand side y axis, which tells that
-%for each read/write operation, they do with a chunk size of 64 KB.}
-%The figure also indicates 
-and that the reads and writes of mBackground mostly don't overlap. Thus we set the interleaving option of mBackground to 0--interleave-nothing. The other Montage stages
-also have this interleaving behavior, and they are also set to 0.
+%%\zhaonote{explain how to set file size}
+%Profiling Montage tells us that the application uses a 64-KB buffer
+%size for read and write %We show one example of mBackground in Figure~\ref{fig:mBack-io}. 
+%%\katznote{I don't see this in figure 3 - can you tell me where I should see 64-KB?} 
+%%\zhaonote{we can see a solid red a solid blue line in the figure, they correspond to the right hand side y axis, which tells that
+%%for each read/write operation, they do with a chunk size of 64 KB.}
+%%The figure also indicates 
+%and that the reads and writes of mBackground mostly don't overlap.
+%Thus we set the interleaving option of mBackground to 0--interleave-nothing. The other Montage stages
+%also have this interleaving behavior, and they are also set to 0.
+
 %
-The input file sizes of each Montage stage are almost uniform, so we use a uniform set of  
-skeleton parameters for each stage. One exception is for mDiffFit, where we previously found a performance
+%The input file sizes of each Montage stage are almost uniform, so we use a uniform set of  
+%skeleton parameters for each stage. 
+Additionally, for mDiffFit, we previously found a performance
 gap between the skeleton and real mDiffFit of about 13\%~\cite{Skeleton2013} when we set the Skeleton parameters to match the
 real number of files (two inputs and one output) and sizes. Examining the system call 
 trace shows us that each mDiffFit task reads each input file four times instead of one. So we set 
-the Skeleton parameters to eight input files, repeating the two input file names four times. This procedure produces
-good results, as shown in Table~\ref{tb:montage-results}.
+the Skeleton parameters to eight input files, repeating the two input file names four times.
+%This procedure produces good results, as shown in Table~\ref{tb:montage-results}.
+%Montage tasks don't have any interleaving behavior, so the skeleton parameter for all of them is set to 0--interleave-nothing.
 
 %\begin{figure}[h]
 %\begin{center}
@@ -913,9 +936,7 @@ good results, as shown in Table~\ref{tb:montage-results}.
 %\end{figure}
 
 
-
-
-Comparing with previous measured error~\cite{Skeleton2013}, we have now reduced the error of all eight stages by between 22.8\% and 91.8\%. The errors of all stages is now less than 4\%, and four are under 1\%. The error for the complete application is -1.3\%.
+We measure the error of all eight stages as less than 4\%, with four are under 1\%, as shown in Table~\ref{tb:montage-results}. The error for the complete application is -1.3\%.
 
 \subsection{BLAST}
 
@@ -942,36 +963,26 @@ shows the basic statistics of each BLAST stage.
 %\end{center}
 %\end{figure}
 
-%\zhaonote{explain how to set task length}
-In general, we measure the time-to-solution of each task by executing them with the inputs and outputs on RAM disk.
-The split stage has a single task that reads the whole database and partitions it into several slices, so no significant 
-computation is involved. We simply set the split task's length to zero. 
-%\zhaonote{adding split}
-The I/O size of the formatdb, blastp, and merge stage tasks fit the BG/P compute node's RAM size, so we measure all times-to-solution
-directly.
-The times-to-solution of the formatdb stage is uniform, so we set all task lengths of this stage
-to that value. 
-The time-to-solution distribution of the blastp stage varies, so we used a normal distribution described by the average and standard deviation, although we also attempted to use a uniform value, since the actual distribution is between the two.
-We also used a normal task length distribution for the merge stage.
+In general, we measure the task parameters as described in Section~\ref{sec:manual-profiling}.
+The split stage has a single task does no significant 
+computation, so we simply set the split task's length to zero. 
 
 
-%\zhaonote{explain how to set file size}
-All tasks of the four stages of BLAST read each input file just once. Each formatdb task reads one input file of $\sim$60~MB 
+Also, all tasks of the four stages of BLAST read each input file just once. Each formatdb task reads one input file of $\sim$60~MB 
 and writes three output files of size 56~MB, 16~MB, and 1~MB, respectively. We simplify the skeleton formatdb task with three
-output files with identical size of 21~MB, since this setting results in the same amount of metadata operation and I/O traffic.
+output files with identical size of 21~MB, since this results in the same amount of metadata operations and I/O traffic.
 
 %\zhaonote{explain how to set buffer size and interleaving option}
-The split task uses 4096 Bytes as its read and write buffer size. 
-Profiling of the formatdb stage showed us that each formatdb task reads the database with a 64-KB buffer. However,
-there are roughly 500,000 writes with a size of hundreds of Bytes.
-%, as shown in Figure~\ref{fig:formatdb-io}. 
-With our
-previous Skeleton implementation, we could not specify a buffer size and had to run the real and skeleton applications
-with all data in RAM to get close to real performance. With the new implementation, we are able to set the formatdb read buffer to 64~KB and the write buffer 
-to 512~Bytes. 
-In practice, 64 concurrent tasks each with $\sim$500,000 small writes can run for hours on
-GPFS. So when we compare the Skeleton formatdb and real formatdb, we run the real formatdb with data caching in RAM disk and
-run the skeleton formatdb in a similar way. For blastp and merge stage, we run the tasks with data in GPFS.
+%The split task uses 4096 Bytes as its read and write buffer size. 
+%Profiling of the formatdb stage showed us that each formatdb task reads the database with a 64-KB buffer. However,
+%there are roughly 500,000 writes with a size of hundreds of Bytes.
+%%, as shown in Figure~\ref{fig:formatdb-io}. 
+%With our
+%previous Skeleton implementation, we could not specify a buffer size and had to run the real and skeleton applications
+%with all data in RAM to get close to real performance. With the new implementation, we are able to set the formatdb read buffer to 64~KB and the write buffer 
+%to 512~Bytes. 
+Finally, 64 concurrent formatdb tasks each with $\sim$500,000 small writes can run for hours on
+GPFS. So when we compare the Skeleton and real formatdb, we run the both with data caching in RAM disk. For blastp and merge stage, we run the tasks with data in GPFS.
 
 %\begin{figure}[h]
 %\begin{center}
@@ -984,14 +995,15 @@ run the skeleton formatdb in a similar way. For blastp and merge stage, we run t
 %\end{center}
 %\end{figure}
 
-For all tasks in the four stages of BLAST, we see an interleaved computation and I/O pattern. 
-In formatdb, % as shown in Figure~\ref{fig:formatdb-io},
-each task reads a sequence, formats that sequence, and writes the result to output files. 
-Thus, there are $\sim$500,000 writes with a size of hundreds of Bytes.
-In blastp, the task reads a sequence, computes the similarity score between this sequence and every sequence in one database partition, and writes the result. 
-The merge task also interleaves its work. 
-So we set the interleaving options as 3--interleave-all. The skeleton tasks read
-a piece of the input file, sleep for some time, and write a piece of the output, repeating these steps until all work is done.
+%For all tasks in the four stages of BLAST, we see an interleaved computation and I/O pattern. 
+%%In formatdb, % as shown in Figure~\ref{fig:formatdb-io},
+%%each task reads a sequence, formats that sequence, and writes the result to output files. 
+%%Thus, there are $\sim$500,000 writes with a size of hundreds of Bytes.
+%%In blastp, the task reads a sequence, computes the similarity score between this sequence and every sequence in one database partition, and writes the result. 
+%%The merge task also interleaves its work. 
+%So we set the interleaving options as 3--interleave-all. 
+%%The skeleton tasks read
+%%a piece of the input file, sleep for some time, and write a piece of the output, repeating these steps until all work is done.
 
 \begin{table}[t]
 \begin{center}
@@ -1028,8 +1040,10 @@ a piece of the input file, sleep for some time, and write a piece of the output,
 
 %\zhaonote{results}
 Table~\ref{tb:blast-results} compares the measured performance of the Skeleton BLAST and real BLAST.
-The error of each stage is -1.9\%, -0.6\%, 1.6\%, and 1.1\%, respectively. The measurements of the skeleton blastp stage uses the
-normal task length distribution. (Our attempt with a uniform distribution had a larger error: -2.7\%.) The overall application error is 1.4\%.
+The error of each stage is -1.9\%, -0.6\%, 1.6\%, and 1.1\%, respectively. 
+%The measurements of the skeleton blastp stage uses the
+%normal task length distribution. (Our attempt with a uniform distribution had a larger error: -2.7\%.) 
+The overall application error is 1.4\%.
 
 \subsection{CyberShake}
 
@@ -1068,16 +1082,16 @@ Table~\ref{tb:cybershake-stats} shows the basic statistics of each CyberShake Po
 
 %\zhaonote{explain how to set task length}
 %We wanted to run the tasks in every stage with data cached RAM and use the time-to-solution as task length in Application Skeletons. 
-Our methodology to determine a skeleton task length is to use the time-to-solution of the real task with data cached in RAM disk. 
+We generally use the previously discussed methods to determine skeleton parameters.
 However, each Extract task needs to access the two SGT files and a rupture variation file, and the SGT file's size is 5.4 GB, which is too large for a compute node's RAM disk.
 So instead we ran the first 50 tasks manually on each compute node in sequence order, measured the times-to-solution and 
 then computed the average and standard deviation. 
 Although the tasks access data on GPFS, running one task at a time excludes the overhead  incurred  by highly concurrent I/O operations. 
-The Seis and PeakGM tasks' I/O fits in RAM disk, so we directly measure the time-to-solution of each task. For task lengths of the Seis
-stage, we use a normal distribution specified by the average and standard deviation. The task lengths of the PeakGM tasks is uniform.
+%The Seis and PeakGM tasks' I/O fits in RAM disk, so we directly measure the time-to-solution of each task. For task lengths of the Seis
+%stage, we use a normal distribution specified by the average and standard deviation. The task lengths of the PeakGM tasks is uniform.
 
 %\zhaonote{explain how to set file size}
-The two SGT input files for each Extract task are about 2.7 GB each. %When we specify the skeleton Extract task's input size as 2.7 GB, the operating
+In addition, the two SGT input files for each Extract task are about 2.7 GB each. %When we specify the skeleton Extract task's input size as 2.7 GB, the operating
 %system failed 
 %\katznote{what does this mean?  Is this a BGP limitation?  Or an AMFORA limitation? Is it really the OS?} 
 %\zhaonote{It is the ZeptoOS on BGP. It can not access the file size that is larger than 1,000,000,000 bytes, though it can read the file content. I am not exactly sure if it is the ZeptoOS or the BGP system.}
@@ -1087,15 +1101,16 @@ an Extract task does not read the whole input file; rather it reads only  about 
 set the skeleton parameters for two SGT input
 files with  size of 200~MB, which %. This %removes the too large file issue and it 
 preserves the I/O traffic that actually happens
-in an Extract task. We set the output files of the Extract, Seis, and PeakGM stage to a size of 34~MB, 36~KB, and 240~Bytes, respectively.
-The interleaving option for all three stages is set to 0--interleave nothing.
+in an Extract task. 
+%We set the output files of the Extract, Seis, and PeakGM stage to a size of 34~MB, 36~KB, and 240~Bytes, respectively.
+%The interleaving option for all three stages is set to 0--interleave nothing.
 
 %\zhaonote{one skeleton limitation of file mapping}
 In the real CyberShake Postprocessing application, the file usage of the Extract output files (a subset of the SGT files) in the Seis stage is not uniform. Some files are used more than  others. Computer scientists who want to implement an automatic file usage-based runtime 
 replication system might find it infeasible to specify such unbalanced file usage with the current Application Skeletons implementation. One
 solution for this problem is the external file option, which can customize file mappings to tasks and  can generate
 uneven file usage.
-Here however, we simply set the Seis tasks to read each pair of Extract output files evenly, which suffices to give performance matching that of the real application on our test system.
+However, we simply set the Seis tasks to read each pair of Extract output files evenly, which suffices to give performance matching that of the real application on our test system.
 %In our Skeleton settings for the Seis stage, we simplify this problem by unifying the input file usage. 
 %\katznote{what does this sentence mean?}
 %\zhaonote{In our experiment settings,  the 4096 Seis task consumes each output pair of Extract (128 in total) 32 times. While ideally, one can use the external mapper to specify the exact file usage as the real Seis stage.}
@@ -1107,10 +1122,10 @@ All three stages have errors under 3\%, with a total error of 2.4\%.
 
 \section{Using Application Skeletons}\label{lb:using}
 %\zhaonote{this section is new, please review}
-We show four examples of using application skeletons for system improvements: data caching, task scheduling, I/O tuning, and resilience. 
-Various system optimizations are implemented with the AMFORA~\cite{AMFS2013} system. 
-The experiments are carried out on the Google Compute Engine environment (referred to as GCE in the rest of the manuscript). 
-Throughout all these experiments, we use the ``n1-highmem-2'' instances, which have two vCPU cores and 13~GB RAM. 
+Here, we show examples of using application skeletons (with manually generated parameters) to study four system improvements: data caching, task scheduling, I/O tuning, and resilience. 
+Various system optimizations were implemented with the AMFORA~\cite{AMFS2013} system. 
+The experiments were carried out on the Google Compute Engine (GCE) environment. 
+Throughout all these experiments, we used ``n1-highmem-2'' instances, which have two vCPU cores and 13~GB RAM. 
 
 
 \subsection{Data Caching}
@@ -1161,6 +1176,8 @@ With this modified skeleton-mBackground work load, we see an increased improveme
 
 \section{Related Work}\label{lb:RFwork}
 
+\katznote{need to update this section}
+
 We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
 a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
@@ -1170,7 +1187,11 @@ describing the dataflow patterns between stages.
 %programs based on the algorithmic skeletons.
 
 \section{Conclusion and Future Work}\label{lb:Con}
- 
+
+\katznote{need to update this section}
+
+\katznote{add text about how skeletons can be used in education}
+
 Application Skeletons are motivated by the difficulties of real application access and modification that computer scientists who work on tools and systems have. We use a top-down approach to abstract a distributed application in Application Skeletons: applications 
 are composed of a number of stages, while each stage is composed of a number of tasks, with task parameters specified at the stage level. The stage is built on a versatile task design that can handle different task types, various buffer
 sizes, multiple input/output files, and different interleaving scenarios. Overall, one can create easy-to-access, easy-to-build, easy-to-change, and easy-to-run bag-of-tasks, 
@@ -1178,8 +1199,8 @@ sizes, multiple input/output files, and different interleaving scenarios. Overal
 frameworks and systems: Bash Shell, Pegasus, and Swift.
 
 %\katznote{Also, we might say that now once a skeleton code represents a real code, it can be easily distributed (through just the parameters) to make middleware and tool experiments repeatable/reproducible, and it can make it easy to scale experiments - some of this also perhaps should go in the intro or abstract as motivation}
-Representing an application by a set of skeleton parameters means that the skeleton application  can be easily shared, making 
-middleware and tool experiments more reproducible.  Changes in these parameters can be used to
+Representing an application by a set of skeleton parameters means that the skeleton application  can be easily repeated and easily shared, making 
+middleware and tool experiments more reproducible.  Changes to these parameters can be used to
 study particular aspects of system performance.
 Computer scientists can then focus on the system or tools they are building.
 %, and in some cases, the optimizations of skeleton applications can
@@ -1222,10 +1243,11 @@ The Application Skeleton code is available as open source at \url{https://github
 
 We plan the following in the near future:
 \begin{itemize}
-\item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance.
+\item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance. \note{synapse?}
 \item {} Determine a way to represent the computational work in a task that when combined with a particular platform can give an accurate runtime for that task.
 \item {} Support concurrent tasks that need to run at the same time to exchange information.
 \item {} Test on distributed systems where latencies, particular file usage, and other issues may be more important than on the parallel systems and cloud environments.
+\item {} Allow more varieties of I/O behavior for parallel tasks than just process 0 performing all I/O.
 %\katznote{add an item about testing on distributed systems where latencies and particular file usage and other issues may be more important than on the parallel systems we have used so far}
 %\zhaonote{add one item, please review.}
 %\item{} Work within the AIMES project to integrate Application Skeletons with the AIMES framework. \katznote{not sure this is really meaningful to readers - let's see what the AIMES folks say}
@@ -1237,9 +1259,9 @@ We plan the following in the near future:
 
 \section*{Acknowledgments}
 
-This work was supported in part by the U.S. Department of Energy 
+\katznote{update this?}  This work was supported in part by the U.S. Department of Energy 
 under the ASCR award DE-SC0008617 (the AIMES project).
-It has benefited from discussions with Shantenu Jha, Andre Merzky, Matteo Turilli, Jon Weissman, and Lavanya Ramakrishnan.
+It has benefited from discussions with Matteo Turilli, Jon Weissman, and Lavanya Ramakrishnan.
 Computing resources were provided by the
 Argonne Leadership Computing Facility and Google. Work by Katz was supported by 
 the National Science Foundation while working at the Foundation.  Any 
