@@ -25,10 +25,10 @@ then
     rm -rf statdir
     rm -rf stats.tbl
     rm -rf template.hdr
+    rm -rf *.log
     rm -rf cleanme
-
+    echo 'all clean'
     exit
-
 fi
 
 mkdir projdir diffdir statdir corrdir final
