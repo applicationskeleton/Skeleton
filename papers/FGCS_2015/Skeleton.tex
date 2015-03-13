@@ -67,6 +67,7 @@
 \fi
 
 \newcommand{\I}[1]{\textit{#1}\xspace}
+\newcommand{\B}[1]{\textbf{#1}\xspace}
 \newcommand{\T}[1]{\texttt{#1}\xspace}
 
 \journal{FGCS}
@@ -713,37 +714,40 @@ has also proven to generally be successful~\cite{Skeleton2014}, though with some
 \subsection{System Independent Profiling}
 \amnote{synapse profiling stuff to go here}
 
-Several of the application characteristics listed in
+Most, but not all, of the application characteristics listed in
 Section~\ref{ssec:stage_char} are system independent, i.e., they have values
 that allow faithful reproduce of application behavior on any
 target system.  For example, the data input size (in Bytes) is constant,
 whether the application is executed on a local desktop, on
 a remote cluster, or on a supercomputer.  Some metrics are, however,
-not system-independent.  For example, the application runtime depends
-from the specific resource performance, such as the CPU type and
-clock speed.  It is thus difficult to apply some of the results of manual
-application profiling to the execution of skeletons on arbitrary
-target resources.
+not system-independent.  Specifically, the application runtime depends
+from the respective resource performance, such as the CPU type and
+clock speed.  
 
-The underlying reason for this difficulty is that some metrics do not
-really denote a metric of resource consumption, but rather describe
+The underlying reason is that some metrics do not
+really denote a metric of \I{resource consumption}, but rather describe
 the \I{effect} of that consumption.  That is most obvious for any
-metric which is specified as time duration or frequency, but similarly
-holds, for example, for the interleaving or concurrency of disk I/O,
+metric which is specified as time duration or frequency, but can similarly
+apply, for example, to the concurrency of disk I/O,
 memory I/O, network I/O and computation, whose realization and
-performance depends on the underlying system architecture.
+performance can depend on the underlying system architecture.
 
-We partially address this problem by internally using FLOPs as a
-normalized representation of compute resource consumption, and we then
-derive an \I{expected} application runtime, based on the specific
-target system's architecture.  While it would be interesting to apply
-similar system independent metrics to other resources types (for example, as
-mentioned, the I/O-Compute concurrency), we found it difficult to
-extrapolate the respective system parameters without a complete model
-of the hardware and OS layer, and we also found those effects to be small
-compared to the other characteristics used --  CPU
-consumption is the only metric we've found that is clearly worth formulating
-system-independently.
+We partially address this problem by by investigating purely system
+independent metrics.  For example, the number of FLoating-point
+OPerations (FLOPs\footnote{\I{'FLOPs'} denotes the plural of \I{'1
+FLOP'}, whereas \I{'FLOPS'} denotes \I{'FLoating-point
+OPerations per Second'}}) is a representation of compute
+resource consumption, from which one can \I{derive} an expected
+application runtime, based on the specific target system's
+architecture and configuration.  While it would be interesting to
+apply similar system independent metrics to other resources types (for
+example, as mentioned, the I/O-Compute concurrency), we found it
+difficult to extrapolate the respective system parameters without a
+complete model of the hardware and OS layer.  We also found those
+effects to be small compared to the other characteristics used: the
+system dependent metrics for those seem to be fairly portable, for the
+applications and resources used in our experiments. CPU consumption is
+the only metric we've found worth formulating system-independently.
 
 To derive the number of cycles consumed by an application, we use the
 Linux system tool \T{`perf'}, which provides access to a number of low
@@ -765,6 +769,9 @@ consumption instead of metrics that represent the effects of
 resource consumption (such as runtime) allows a more accurate
 representation of the application behavior on arbitrary target
 resources.
+
+
+\subsection{Automated Application Profiling}
 
 
 \subsection{Extrapolation of Application Profiles}
@@ -795,6 +802,9 @@ other application configurations is required.
     space (potentially only at one point though), and extrapolate
     from there.  Include plot to show how that extrapolation works in
     simple cases, and how it is of limited power in other cases}
+
+
+
 
 
 \section{Performance Evaluation}
