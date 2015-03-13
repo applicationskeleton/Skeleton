@@ -2,7 +2,7 @@
 
 . ve/bin/activate
 
-export EXPERIMENT=synapse_2mass_m101_j_3_3
+export EXPERIMENT=synapse_2mass_m101_j_6_6
 export SYNAPSE_DBURL=mongodb://localhost:27017/$EXPERIMENT
 export SYNAPSE_PROFILE=radical-synapse-profile.py
 

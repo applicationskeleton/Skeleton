@@ -42,6 +42,11 @@
 \usepackage{url}
 \usepackage{color}
 \usepackage{xspace}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{ifpdf}
 
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
@@ -50,6 +55,13 @@
 %% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
 %% for the whole article with \linenumbers.
 %% \usepackage{lineno}
+
+\ifpdf
+ \DeclareGraphicsExtensions{.pdf, .jpg, .tif, .png}
+\else
+ \DeclareGraphicsExtensions{.jpg, .png, .ps}
+\fi
+
 
 \newif\ifdraft
 \drafttrue
@@ -687,11 +699,12 @@ the task source code and compile it.
 \section{Determining Skeleton Parameters}
 \label{lb:Params}
 
-\subsection{Manual Application Profiling}\label{sec:manual-profiling}
+\subsection{Manual Application Profiling}
+\label{sec:manual-profiling}
 
 Skeleton parameters can be determined by manually running and analyzing an application.
 Specifically, to measure task length, we place both input
-and output files on RAMdisk and use \T{`time'} to measure the the time-to-solution of the tasks.
+and output files on RAM disk and use \T{`time'} to measure the time-to-solution of the tasks.
 Although this method includes the I/O
 time from/to RAM disk as part of the task length, this extra time is generally negligible
 compared with the I/O time using shared disk, which involves
@@ -710,9 +723,24 @@ While this process is manual and a bit time-consuming, it
 has also proven to generally be successful~\cite{Skeleton2014}, though with some modifications needed, as described in Section~\ref{lb:Perf}.
 
 
+\subsection{Automated Application Profiling via SYNAPSE}
+
+The process of manual application profiling as described in
+section~\ref{sec:manual-profiling} is time consuming.  As alternative
+approach we investigated the use of the
+\I{SYNAPSE}~\cite{synapse_url}, automated application profiler and
+emulator.  While synapse also requires specific system preparations
+for its profiling step (specifically Linux kernel support for low
+level hardware counters), it fully automates the application profiling
+on a comparable level of granularity as our manual approach.  In many
+ways it is a complementary element to the work described
+in~\cite{ENVELOPE} -- where the latter aims to describe system
+performance in an application independent way, synapse describes
+application performance independently from the system's envelope, by
+focusing on system independent performance metrics.
+
 
 \subsection{System Independent Profiling}
-\amnote{synapse profiling stuff to go here}
 
 Most, but not all, of the application characteristics listed in
 Section~\ref{ssec:stage_char} are system independent, i.e., they have values
@@ -724,87 +752,117 @@ not system-independent.  Specifically, the application runtime depends
 from the respective resource performance, such as the CPU type and
 clock speed.  
 
-The underlying reason is that some metrics do not
-really denote a metric of \I{resource consumption}, but rather describe
-the \I{effect} of that consumption.  That is most obvious for any
-metric which is specified as time duration or frequency, but can similarly
-apply, for example, to the concurrency of disk I/O,
-memory I/O, network I/O and computation, whose realization and
-performance can depend on the underlying system architecture.
+The underlying reason is that some metrics do not really denote
+metrics of \I{resource consumption}, but rather describe the
+\I{effect} of that consumption.  That is most obvious for any metric
+which is specified as time duration or frequency, but can similarly
+apply to the concurrency of disk I/O, memory I/O, network I/O and
+computation, whose realization and performance can depend on the
+underlying system architecture.
 
-We partially address this problem by by investigating purely system
-independent metrics.  For example, the number of FLoating-point
+For example, the manual application profiling described in
+section~\ref{sec:manual-profiling} outlines how RAM disks are used to
+separate the effects of I/O on concurrent computation -- exactly
+because the computation is measured as runtime, which is influenced by
+the overall system performance and load.
+
+Synapse addresses this by estimating the number of FLoating-point
 OPerations (FLOPs\footnote{\I{'FLOPs'} denotes the plural of \I{'1
-FLOP'}, whereas \I{'FLOPS'} denotes \I{'FLoating-point
-OPerations per Second'}}) is a representation of compute
-resource consumption, from which one can \I{derive} an expected
-application runtime, based on the specific target system's
-architecture and configuration.  While it would be interesting to
-apply similar system independent metrics to other resources types (for
-example, as mentioned, the I/O-Compute concurrency), we found it
-difficult to extrapolate the respective system parameters without a
-complete model of the hardware and OS layer.  We also found those
-effects to be small compared to the other characteristics used: the
-system dependent metrics for those seem to be fairly portable, for the
-applications and resources used in our experiments. CPU consumption is
-the only metric we've found worth formulating system-independently.
+FLOP'}, whereas \I{'FLOPS'} denotes \I{'FLoating-point OPerations per
+Second'}}) performed by the application, which is a representation of
+compute resource consumption, and which is thus independent from the
+specific target system's architecture, configuration and load.  While
+it would be interesting to apply similar system independent metrics to
+other resources types (for example, as mentioned, the I/O-Compute
+concurrency), we found it difficult to extrapolate the respective
+system parameters without a complete model of the hardware and OS
+layer.  We also found those effects to be small compared to the other
+characteristics used: the system dependent metrics for those seem to
+be fairly portable, for the applications and resources used in our
+experiments. CPU consumption is the only metric we've found worth
+formulating system-independently.  \amnote{this argument needs to be
+improved, and verified with some numbers.  It mostly boils down that
+concurrency between I/O and compute maps nicely to the hardware level
+concurrency which modern systems have, apart from edge cases like I/O
+or network dominated applications.}
 
-To derive the number of cycles consumed by an application, we use the
-Linux system tool \T{`perf'}, which provides access to a number of low
-level system counters.  We use the total number of cycles reported to
-be consumed, but also include estimations of CPU utilization (what
-percentage of the CPU has been used) and CPU efficiency (what
-percentage of the used cycles has been spent on computation,
-versus, for example, on cache misses and failed branch
-predictions.) The underlying assumption here is that the same
-application code will show similar utilization and efficiency on different
-CPUs.  This assumption can only indirectly be confirmed: while we are
-not able to use \T{`perf'} on our target resources (because it
-requires OS level support which is generally not available), we can
-however show that the derived runtime estimates are in good agreement with
-actually observed values -- see \figurename~\ref{fig:synapse_estimates}.
+\begin{wrapfigure}{l}{0.5\textwidth}
+  \centering
+  \includegraphics[width=0.5\textwidth]{experiments/synapse_montage/rs_synapse_2mass_m101_j_6_6_mprojectpp_mem}
+  \caption {
+      \footnotesize
+      \B{Memory consumption profiles for Montage \T{mProjectPP} tasks:}
+      Two clusters of memory loads can be identified, where the
+      cluster of smaller memory consumption generally correlates to
+      smaller runtimes.  For the majority of tasks (the larger
+      cluster), the memory consumption is constant, and runtime is not
+      influenced by other factors.
+      \label{fig:interleave}
+      }
+ \end{wrapfigure}
+To quantify the hardware resources consumed by an application, synapse
+inspects Linux kernel and hardware counters, via the \T{/proc/}
+filesystem and the Linux system tool \T{`perf'}.  Sampling the
+application's resource consumption at frequent intervals results in
+application profiles which describe the application behaviour over its
+runtime.  Other metrics are not gathered as totals (ie. are not
+sampled during the runtime), as the sampling either depends too much
+on system load and configuration (eg. CPU utilization), or is only
+meaningful as an integrated total (eg. peak memory size or number of
+spawned threads).
+Exemplarily, figure~\ref{fig:synapse_mem_6_6} shows the time variation of
+memory consumption over the set of \T{mProjectPP} tasks, which shows a
+certain clustering into tasks which allocate two distinctly different
+amounts of memory, and the relation of that to the overall runtime
+(presumably due to less work being performed).
 
-In summary, the focus on metrics that represent resource
-consumption instead of metrics that represent the effects of
-resource consumption (such as runtime) allows a more accurate
-representation of the application behavior on arbitrary target
+The consumed FLOPs are derived from the total number of consumed CPU
+cycles, average CPU utilization (what percentage of the CPU has been
+used) and average CPU efficiency (what percentage of the used cycles
+has been spent on computation, versus, for example, on cache misses
+and failed branch predictions). The underlying assumption here is that
+the same application code will show similar utilization and efficiency
+on comparable architectures.  Figure~\ref{fig:synapse_cpu} shows the
+strong correlation between runtime and consumption \B{rates} of CPU
 resources.
 
-
-\subsection{Automated Application Profiling}
-
-
-\subsection{Extrapolation of Application Profiles}
-
-Users often have an good intuition for certain resource consumption
-metrics of their application: they usually know how much data the
-application will consume, and can estimate how much data will be
-produced, and can guess how long the application will run on resources
-which they frequently use.  Exact and system independent profiling of
-applications is, however, non-trivial and often very technical, and
-can be cumbersome to do on arbitrary machines.  While we have
-described some simple profiling in Section~\ref{sec:manual-profiling},
-in general it is an effort with which the average user should not be
-burdened.  
-
-Further, most application's resource consumption is dependent on
-application parameters and control files, on input data, user
-interactions, and sometimes on events beyond the users control,
-such as other user activity on shared systems.  It is not realistically
-feasible to cover the complete parameter space of application
-configurations with exact application profiles.  For the use case
-that motivates the presented work, it is not really necessary to
-\I{completely} do so -- but in order to cover corner cases of system
-design, a certain ability to extrapolate application profiles towards
-other application configurations is required.
-
-\amnote{describe that we profile at specific points in the parameter
-    space (potentially only at one point though), and extrapolate
-    from there.  Include plot to show how that extrapolation works in
-    simple cases, and how it is of limited power in other cases}
+ \begin{figure}
+ \centering
+ \begin{subfigure}{.5\textwidth}
+   \centering
+   \includegraphics[width=\textwidth]{experiments/synapse_montage/rs_synapse_2mass_m101_j_6_6_mprojectpp_cpu_3}
+ \end{subfigure}%
+ \begin{subfigure}{.5\textwidth}
+   \centering
+   \includegraphics[width=\textwidth]{experiments/synapse_montage/rs_synapse_2mass_m101_j_6_6_mprojectpp_cpu_4}
+ \end{subfigure}
+  \caption {
+      \footnotesize
+      \B{Variation of task runtime depending on resource
+      consumption:}  (left) a fraction of tasks with smaller reads consume
+      less FLOPs and thus have shorter runtimes.  Overall, the CPU utilization 
+      has dominant influence on runtime, and negates the effects of lower FLOP
+      consumption; (right) the resulting CPU consumption \B{rate}
+      shows strong correlation to observed application runtime,
+      independent of I/O performance.
+      \label{fig:synapse_cpu}
+      }
+ \label{fig:test}
+ \end{figure}
 
 
 
+In summary, the focus on metrics that represent resource consumption
+instead of metrics that represent the \I{effects} of resource
+consumption (such as runtime) allows a more accurate representation of
+the application behavior on arbitrary target resources, and thus
+provides adequate input to the application emulation via skeletons.
+We will discuss in section~\ref{sec:Montage} to what extent the
+profiles provided by synapse supports the results of the manual
+profiling, which have been used in the skeleton emulation experiments.
+\amnote{In the later section on skeleton parameters, we need to pick
+    this up and show how that specifically confirms the manually
+    derived skeleton parameters.}
 
 
 \section{Performance Evaluation}
