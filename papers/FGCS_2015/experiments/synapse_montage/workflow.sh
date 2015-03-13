@@ -2,8 +2,19 @@
 
 . ve/bin/activate
 
-export SYNAPSE_DBURL=mongodb://localhost:27017/synapse_montage_01
+export EXPERIMENT=synapse_2mass_m101_j_3_3
+export SYNAPSE_DBURL=mongodb://localhost:27017/$EXPERIMENT
 export SYNAPSE_PROFILE=radical-synapse-profile.py
+
+
+if test -f plotme
+then
+  # radical-synapse-stats.py -m plot -u $SYNAPSE_DBURL 
+    radical-synapse-stats.py -m plot -u $SYNAPSE_DBURL -f mProjectPP
+  # radical-synapse-stats.py -m plot -u $SYNAPSE_DBURL -f mAdd,mJPEG
+    gnuplot -e "experiment='$EXPERIMENT'" workflow.plot 
+    exit
+fi
 
 export PATH="`pwd`/../Montage_v3.3/bin:$PATH"
 
@@ -25,10 +36,10 @@ then
     rm -rf statdir
     rm -rf stats.tbl
     rm -rf template.hdr
+    rm -rf *.log
     rm -rf cleanme
-
+    echo 'all clean'
     exit
-
 fi
 
 mkdir projdir diffdir statdir corrdir final
@@ -90,6 +101,9 @@ done < corrections.tbl
 $SYNAPSE_PROFILE mImgtbl  corrdir corr-images.tbl
 $SYNAPSE_PROFILE mAdd     -n -p corrdir corr-images.tbl template.hdr final/m101_corrected.fits
 $SYNAPSE_PROFILE mJPEG    -gray final/m101_corrected.fits 0s max gaussian-log -out final/m101_corrected.jpg
+
+radical-synapse-stats.py -m plot -u $SYNAPSE_DBURL
+
 
 touch cleanme
 
