@@ -728,7 +728,7 @@ has also proven to generally be successful~\cite{Skeleton2014}, though with some
 The process of manual application profiling as described in
 Section~\ref{sec:manual-profiling} is time consuming.  As an alternative
 approach, we investigated the use of the
-\I{SYNAPSE}~\cite{synapse_url}, an automated application profiler and
+\I{SYNAPSE}~\cite{synapse-software}, an automated application profiler and
 emulator.  While SYNAPSE requires specific system preparations
 for its profiling step (specifically Linux kernel support for low
 level hardware counters), it fully automates the application profiling
@@ -805,9 +805,8 @@ inspects the Linux kernel and hardware counters, via the \T{/proc/}
 filesystem and the Linux system tool \T{`perf'}.  Sampling the
 application's resource consumption at frequent intervals results in
 application profiles that describe the application behavior over its
-runtime.  Other metrics are not gathered as totals \katznote{could we remove `as totals'?} (i.e., they are not
-sampled during the runtime), as the sampling either depends too much
-on system load and configuration (e.g., CPU utilization), or is only
+runtime.  Sampling is not appropriate for metrics which are very 
+sensitive to system load (e.g., CPU utilization), or which are only
 meaningful as an integrated total (e.g., peak memory size or number of
 spawned threads).
 Exemplarily, \figurename~\ref{fig:synapse_mem_6_6} shows the time variation of
