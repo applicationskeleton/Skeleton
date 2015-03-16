@@ -741,6 +741,7 @@ focusing on system independent performance metrics.
 
 
 \subsection{System Independent Profiling}
+\label{ssec:si_profiling}
 
 Most, but not all, of the application characteristics listed in
 Section~\ref{ssec:stage_char} are system independent, i.e., they have values
@@ -775,16 +776,21 @@ specific target system's architecture, configuration, and load.  While
 it would be interesting to apply similar system independent metrics to
 other resources types (for example, as mentioned, the I/O-Compute
 concurrency), we found it difficult to extrapolate the respective
-system parameters without a complete model of the hardware and OS
-layer.  We also found those effects to be small compared to the other
-characteristics used: the system dependent metrics for those seem to
-be fairly portable, at least for the applications and resources used in our
-experiments. CPU consumption is the only metric we've found worth
-formulating system-independently.  \amnote{this argument needs to be
-improved, and verified with some numbers.  It mostly boils down that
-concurrency between I/O and compute maps nicely to the hardware level
-concurrency which modern systems have, apart from edge cases like I/O
-or network dominated applications.}
+parameters without a complete model of the hardware and OS
+layer -- without resorting to code inspection, it is difficult to distinguish 
+if I/O concurrency on the physcical layer is caused by explicit 
+instructions from the application, or by caching and latency hiding 
+in the operating system layers. 
+
+% We also found those effects to be small compared to the other
+% characteristics used: the system dependent metrics for those seem to
+% be fairly portable, at least for the applications and resources used in our
+% experiments. CPU consumption is the only metric we've found worth
+% formulating system-independently.  \amnote{this argument needs to be
+% improved, and verified with some numbers.  It mostly boils down that
+% concurrency between I/O and compute maps nicely to the hardware level
+% concurrency which modern systems have, apart from edge cases like I/O
+% or network dominated applications.}
 
 \begin{wrapfigure}{l}{0.5\textwidth}
   \centering
@@ -857,9 +863,9 @@ provides adequate input to the application emulation via skeletons.
 In Section~\ref{sec:Montage} we will discuss the extent to which the
 profiles provided by SYNAPSE support the results of the manual
 profiling, which have been used in the skeleton emulation experiments.
-\amnote{In the later section on skeleton parameters, we need to pick
-    this up and show how that specifically confirms the manually
-    derived skeleton parameters.}
+% \amnote{In the later section on skeleton parameters, we need to pick
+%     this up and show how that specifically confirms the manually
+%     derived skeleton parameters.}
 
 
 \section{Performance Evaluation}
@@ -905,14 +911,14 @@ Measured Time Avg and Measured Time Stdev show the average and the standard devi
     \begin{tabular}{ | p{1.65cm} | p{0.6cm} | p{0.65cm} | p{0.75cm} | p{0.85cm} | p{0.85cm} | p{1.2cm} | p{1.3cm} | p{1.7cm} |}
     \hline
     Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
-	mProject & 1319 & 1319 & 2594 & 2800 & 10400 & 11.6 & 2.5 & uniform 11.6\\ \hline
-	mImgtbl & 1 & 1297 & 1 & 5200 & 0.8 & N/A & 0 & uniform 30.1\\ \hline
-	mOverlaps & 1 & 1 & 1 & 0.8 & 0.4 & 9.1 & 0 & uniform 9.1\\ \hline
-	mDiffFit &  3883 & 7766 & 7766 & 31000 & 487 & 1.8 & 0.6 & uniform 1.8\\ \hline
-	mConcatFit & 1 & 3883 & 1 & 1.1 & 4.3 & 2.1 & 0 & uniform 2.1\\ \hline
-	mBgModel & 1 & 2 & 1 & 4.5 & 0.07 & 288 & 0 & uniform 288 \\ \hline
-	mBackground & 1297 & 1297 & 1297 & 5200 & 5200 & 0.4 & 0.08 & uniform 0.4\\ \hline
-	mAdd  & 1 & 1297 & 2 & 5200 & 7400 & N/A & 0 & uniform 519\\ \hline
+	mProject    & 1319 & 1319 & 2594 &  2800 & 10400 & 11.6 &  2.5 & uniform 11.6\\ \hline
+	mImgtbl     &    1 & 1297 &    1 &  5200 &   0.8 &  N/A &    0 & uniform 30.1\\ \hline
+	mOverlaps   &    1 &    1 &    1 &   0.8 &   0.4 &  9.1 &    0 & uniform  9.1\\ \hline
+	mDiffFit    & 3883 & 7766 & 7766 & 31000 &   487 &  1.8 &  0.6 & uniform  1.8\\ \hline
+	mConcatFit  &    1 & 3883 &    1 &   1.1 &   4.3 &  2.1 &    0 & uniform  2.1\\ \hline
+	mBgModel    &    1 &    2 &    1 &   4.5 &  0.07 &  288 &    0 & uniform  288\\ \hline
+	mBackground & 1297 & 1297 & 1297 &  5200 &  5200 &  0.4 & 0.08 & uniform  0.4\\ \hline
+	mAdd        &    1 & 1297 &    2 &  5200 &  7400 &  N/A &    0 & uniform  519\\ \hline
     \end{tabular}
     \end{scriptsize}
     \label{tb:montage-stats}
@@ -988,6 +994,65 @@ trace shows us that each mDiffFit task reads each input file four times instead 
 the Skeleton parameters to eight input files, repeating the two input file names four times.
 %This procedure produces good results, as shown in Table~\ref{tb:montage-results}.
 %Montage tasks don't have any interleaving behavior, so the skeleton parameter for all of them is set to 0--interleave-nothing.
+difficult or impossible to perform.
+
+We measure the error of all eight stages as less than 4\%, with four are under 1\%, as shown in Table~\ref{tb:montage-results}. The error for the complete application is -1.3\%.
+
+
+We also compare the measured skeleton parameters as listed in Table~\ref{tb:montage-stats} to the values derived from the system indepentent profiling, as discussed in Section~\ref{ssec:si_profiling}.  The disk I/O parameters are found in exact agreement with the manual profiling -- the size of the input data files is, after all, a given constant.  The synapse profiling though did automatically pick up the repeated file reads of the mDiffFit tasks.  For the task runtimes, we calculated the expected runtimes $t_{task}$ as follows:
+ 
+
+$$
+  t_{task} = f_{task} / e_{task} / u_{task} / p_{resource}^{scaled} 
+$$
+
+where $f_{task}$ is the number of FLOPs the task consumes, $e_{task}$
+is the code efficiency, $u_{task}$ is the CPU utilization, and
+$p_{peak}^{scaled}$ is a scalability factor which is derived from the
+target CPU's peak FLOPS performance, scaled by the actually observed
+performance in performance benchmarks.  The latter value is, for the
+specific BG/P used for the experiments, set to $191 GFlops/sec / 557
+GFlops/sec = 0.34$, based on a 2008 HPC challange entry for that
+target
+machine\footnote{\url{http://www.hpcchallenge.org/custom/index.html?lid=103&slid=229}}.
+The code efficiency and CPU utilization are masured on an
+architecturally very different x86 CPU.
+
+\begin{table*}[t]
+\begin{center}
+    \caption{runtime observation vs. runtime prediction}
+    \begin{scriptsize}
+    \begin{tabular}{|l|r|r|r|}
+    \hline
+    Stage       & measurement & prediction &  deviation \\\hline
+	mProject    &        11.6 &       8.54 &       1.35 \\ \hline
+	mImgtbl     &         N/A &      27.41 &        N/A \\ \hline
+	mOverlaps   &         9.1 &       7.36 &       1.23 \\ \hline
+	mDiffFit    &         1.8 &        N/A &        N/A \\ \hline
+	mConcatFit  &         2.1 &        N/A &        N/A \\ \hline
+	mBgModel    &       288.0 &     386.69 &       0.74 \\ \hline
+	mBackground &         0.4 &       0.62 &       0.64 \\ \hline
+	mAdd        &         N/A &    1477.54 &        N/A \\ \hline
+    \end{tabular}
+    \end{scriptsize}
+    \label{tb:prof-compare}
+\end{center}   
+\end{table*}
+
+
+While most predicted runtimes are in the correct order of magnitude,
+compared to the values observed via manual profiling, the deviations
+are around 25\% in either direction.  
+This is not surprising, given the effort which is
+usually spent on optimizing the core computational libraries and
+application codes toward a specific target architecture, which makes
+the code efficiency and CPU utilization not easily portable from one
+archutecture and operating system to another.  The manual
+profiling on any target architecture thus gives, naturally, more
+precise runtime values for that architecture -- but the automated
+profiling via system independent variables provides reasonable
+estimates for resources consumptions on resources for which manual
+profiling is difficult or impossible to perform.
 
 %\begin{figure}[h]
 %\begin{center}
@@ -1000,8 +1065,6 @@ the Skeleton parameters to eight input files, repeating the two input file names
 %\end{center}
 %\end{figure}
 
-
-We measure the error of all eight stages as less than 4\%, with four are under 1\%, as shown in Table~\ref{tb:montage-results}. The error for the complete application is -1.3\%.
 
 \subsection{BLAST}
 
