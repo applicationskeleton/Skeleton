@@ -777,8 +777,8 @@ it would be interesting to apply similar system independent metrics to
 other resources types (for example, as mentioned, the I/O-Compute
 concurrency), we found it difficult to extrapolate the respective
 parameters without a complete model of the hardware and OS
-layer -- without resorting to code inspection, it is difficult to distinguish 
-if I/O concurrency on the physcical layer is caused by explicit 
+layer. Without resorting to code inspection, it is difficult to distinguish 
+if I/O concurrency on the physical layer is caused by explicit 
 instructions from the application, or by caching and latency hiding 
 in the operating system layers. 
 
@@ -994,14 +994,18 @@ trace shows us that each mDiffFit task reads each input file four times instead 
 the Skeleton parameters to eight input files, repeating the two input file names four times.
 %This procedure produces good results, as shown in Table~\ref{tb:montage-results}.
 %Montage tasks don't have any interleaving behavior, so the skeleton parameter for all of them is set to 0--interleave-nothing.
-difficult or impossible to perform.
 
-We measure the error of all eight stages as less than 4\%, with four are under 1\%, as shown in Table~\ref{tb:montage-results}. The error for the complete application is -1.3\%.
+Using the manually-generated parameters, we measure the error of all eight stages as less than 4\%, with four under 1\%, as shown in Table~\ref{tb:montage-results}. The error for the complete application is -1.3\%.
 
-
-We also compare the measured skeleton parameters as listed in Table~\ref{tb:montage-stats} to the values derived from the system indepentent profiling, as discussed in Section~\ref{ssec:si_profiling}.  The disk I/O parameters are found in exact agreement with the manual profiling -- the size of the input data files is, after all, a given constant.  The synapse profiling though did automatically pick up the repeated file reads of the mDiffFit tasks.  For the task runtimes, we calculated the expected runtimes $t_{task}$ as follows:
+We also compare the measured skeleton parameters as listed in
+Table~\ref{tb:montage-stats} to the values derived from the system
+independent profiling, as discussed in Section~\ref{ssec:si_profiling}. 
+The disk I/O parameters are found in exact agreement with the manual
+profiling -- the size of the input data files is fixed after all.
+The synapse profiling though did automatically pick up the repeated file
+reads of the mDiffFit tasks.  For the task runtimes, we calculated the
+expected runtimes $t_{task}$ as follows:
  
-
 $$
   t_{task} = f_{task} / e_{task} / u_{task} / p_{resource}^{scaled} 
 $$
@@ -1010,12 +1014,13 @@ where $f_{task}$ is the number of FLOPs the task consumes, $e_{task}$
 is the code efficiency, $u_{task}$ is the CPU utilization, and
 $p_{peak}^{scaled}$ is a scalability factor which is derived from the
 target CPU's peak FLOPS performance, scaled by the actually observed
-performance in performance benchmarks.  The latter value is, for the
-specific BG/P used for the experiments, set to $191 GFlops/sec / 557
-GFlops/sec = 0.34$, based on a 2008 HPC challange entry for that
+performance in performance benchmarks.  The latter value, for the
+specific BG/P used for the experiments, is set to 
+$\frac{191 GFlops/sec}{557 GFlops/sec} = 0.34$,
+based on a 2008 HPC challenge entry for that
 target
 machine\footnote{\url{http://www.hpcchallenge.org/custom/index.html?lid=103&slid=229}}.
-The code efficiency and CPU utilization are masured on an
+The code efficiency and CPU utilization are measured on an
 architecturally very different x86 CPU.
 
 \begin{table*}[t]
@@ -1040,19 +1045,21 @@ architecturally very different x86 CPU.
 \end{table*}
 
 
-While most predicted runtimes are in the correct order of magnitude,
-compared to the values observed via manual profiling, the deviations
-are around 25\% in either direction.  
-This is not surprising, given the effort which is
+\tablename~\ref{tb:prof-compare} shows that
+while most runtimes predicted by system
+independent profiling have the correct order of magnitude,
+they deviate from the values observed via manual profiling by
+about 25\%, either positively or negatively.  
+This is not surprising, given the effort that is
 usually spent on optimizing the core computational libraries and
 application codes toward a specific target architecture, which makes
 the code efficiency and CPU utilization not easily portable from one
-archutecture and operating system to another.  The manual
+architecture and operating system to another.  The manual
 profiling on any target architecture thus gives, naturally, more
-precise runtime values for that architecture -- but the automated
+precise runtime values for that architecture, but the automated
 profiling via system independent variables provides reasonable
 estimates for resources consumptions on resources for which manual
-profiling is difficult or impossible to perform.
+profiling is difficult or impossible to perform. \katznote{need to follow-up on this in conclusions section.}
 
 %\begin{figure}[h]
 %\begin{center}
@@ -1304,7 +1311,7 @@ With this modified skeleton-mBackground work load, we see an increased improveme
 
 \section{Related Work}\label{lb:RFwork}
 
-\katznote{need to update this section}
+\katznote{need to update this section -- is there anything that we should add from the SYNAPSE work?}
 
 We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
