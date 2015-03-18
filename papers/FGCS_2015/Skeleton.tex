@@ -1390,9 +1390,16 @@ The Application Skeleton code is available as open source at \url{https://github
 We plan the following in the near future:
 \begin{itemize}
 \item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance.
+<<<<<<< HEAD
 \item {} Investigate how well Skeletons represent applications when
     configured with system independent parameters, as derived by SYNAPSE.
 \item {} Determine a way to represent the computational work in a task that when combined with a particular platform can give an accurate runtime for that task.
+=======
+\item {} Investigate how well Skeletons represent applications when configured with system independent parameters, as derived by Synapse.  
+% \katznote{Andre: update for synapse? - maybe mention measuring application performance with synapse-set parameters?}
+\item {} Determine a way to represent the computational work in a task that when combined with a particular platform can give an accurate runtime for that task.
+\amnote{This item has some overlap with the previous one, but I think it makes sense to keep both}
+>>>>>>> a10a1825d0c925d74ffcc6ac9676d13e20db3c90
 \item {} Support concurrent tasks that need to run at the same time to exchange information.
 \item {} Test on distributed systems where latencies, particular file usage, and other issues may be more important than on the parallel systems and cloud environments.
 \item {} Allow more varieties of I/O behavior for parallel tasks than just process 0 performing all I/O.
