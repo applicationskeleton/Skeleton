@@ -234,11 +234,16 @@ And changing the parameters makes it easy to study how the system responds to di
 %iterations over stages; that is, we don't support dynamic convergence checking. 
 
 
-This paper summerizes our previous work~\cite{Skeleton2013,Skeleton2014} and adds \katznote{synapse definition and demonstration?}. The contributions of this work include the following:
+This paper summerizes our previous work~\cite{Skeleton2013,Skeleton2014} and adds further work towards automated, system independent application profiling. 
+% katznote{synapse definition and demonstration?}. 
+The contributions of this work include the following:
 \begin{itemize}
 \item An application abstraction that gives users good expressiveness and ease of programming to capture the key performance elements of distributed applications
-\item \katznote{add a bullet for new synapse stuff? - a method for determining skeleton? task? paramenters}
 \item A versatile Skeleton task implementation that is configurable (serial or parallel, number of processes, read/write buffer size, input/output files, interleaving options)
+\item A comparison of manual, system specific application profiling
+    versus automated, system independent profiling, for the estimation
+    of Skeleton parameters
+% \item \katznote{add a bullet for new synapse stuff? - a method for determining skeleton? task? paramenters}
 \item An interoperable Skeleton implementation that works with mainstream workflow frameworks and systems (Swift, Pegasus, and Shell), and allow general output for other systems
 \item The usage of Skeleton applications to simplify system optimization implementation and highlight their impacts
 \end{itemize}
@@ -331,10 +336,14 @@ a compilation script that can compile the task code.
 
 Other task properties include number of processes, task length, read buffer size, write buffer size, input files, output files, and
 operation interleaving option. The number of processes is one if the task is serial and is greater than one if the task is parallel. 
-Task length is currently measured in seconds, which reflects the amount of computation in a task. An alternative would be flops. \katznote{Andre: any changes needed to the following for synapse?} We select the runtime in seconds, because it is a direct indication of how long the task
-should run. Because the mapping of flops to time is, in general, not very predictable, we currently believe that the user can predict runtime more accurately than using flops.
-Additionally, we are currently investigating
-better ways to specify the task length that can reflect the difference of computing capacity on different machines.
+Task length is currently measured in seconds, which reflects the amount of computation in a task. 
+% An alternative would be flops. 
+% \katznote{Andre: any changes needed to the following for synapse?} We select the runtime in seconds, because it is a direct indication of how long the task
+% should run. Because the mapping of flops to time is, in general, not very predictable, we currently believe that the user can predict runtime more accurately than using flops.
+% Additionally, we are currently investigating
+% better ways to specify the task length that can reflect the difference of computing capacity on different machines.
+Section~\ref{ssec:si_profiling} discusses the trade-offs of an
+alternative representation of compute load, via FLOPs.
 
 A serial task reads input files, sleeps (to represent computation), and writes output files. In a parallel task, the rank 0 process reads
 input files, sleeps (in place of computation), then writes output files, while other processes simply sleep for the computation time length.  All processes (including rank 0) wait at a barrier before the task exits. 
@@ -1059,7 +1068,8 @@ profiling on any target architecture thus gives, naturally, more
 precise runtime values for that architecture, but the automated
 profiling via system independent variables provides reasonable
 estimates for resources consumptions on resources for which manual
-profiling is difficult or impossible to perform. \katznote{need to follow-up on this in conclusions section.}
+profiling is difficult or impossible to perform. 
+% \katznote{need to follow-up on this in conclusions section.}
 
 %\begin{figure}[h]
 %\begin{center}
@@ -1312,6 +1322,7 @@ With this modified skeleton-mBackground work load, we see an increased improveme
 \section{Related Work}\label{lb:RFwork}
 
 \katznote{need to update this section -- is there anything that we should add from the SYNAPSE work?}
+\amnote{no, not really}
 
 We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
@@ -1345,7 +1356,16 @@ Computer scientists can then focus on the system or tools they are building.
 %\zhaonote{yes, fixed for now, please review}
 
 We have shown that the skeleton applications generated by our Application Skeleton tool have performance close to that of the real applications.  We profiled three representative distributed applications---Montage, BLAST, CyberShake PostProcessing---to understand their computation and I/O behavior and then derived parameters required to specify
-the skeletons. 
+the skeletons.  
+
+We also investigated the benefits and trade-offs of
+automated, system independent profile metrics, compared to profiling the
+applications manually on the target resources: while system
+independent metrics are harder to obtain and are less precise for a
+specific system configuration, they do represent reasonable
+estimates for resources consumptions on resources for which manual
+profiling is difficult or impossible to perform.
+
 %\katznote{we may need to say something somewhere about why we keep saying distributed but actually use a single parallel systems.  If so, we would need to say this here, in the abstract maybe, and in the introduction - perhaps something like that these applications can and are run on both distributed and parallel systems, and our skeletons can similarly be run on both, but that we use parallel systems for testing because they are simpler, but our results should carry over to distributed systems.  Do you think this is true?  In any case, we should think about where we say distributed...} 
 %\zhaonote{yes I agree, I think one of the reasons we measure it on parallel system is the performance stability. For example, it is hard for OSG to have identical performance between two experiments with exactly the same settings.  put a few words here, please review.}
 
