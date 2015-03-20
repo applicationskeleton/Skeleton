@@ -1,0 +1,10 @@
+Shantenu Jha is an Associate Professor of Computer Engineering at
+Rutgers University. His research interests lie at the triple point of
+Cyberinfrastructure R&D, Applied Computing and Computational
+Science. Shantenu leads the RADICAL-Cybertools
+(http://radical-cybertools.github.com) project which are a suite of
+standards-driven and abstractions-based tools used to support
+large-scale science and engineering applications. Away from work, Jha
+tries middle-distance running and biking, tends to indulge in random
+musings as an economics-junky, and tries to use his copious amounts of
+free time with a conscience.
