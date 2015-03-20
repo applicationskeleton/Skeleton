@@ -703,6 +703,10 @@ the task source code and compile it.
 \section{Determining Skeleton Parameters}
 \label{lb:Params}
 
+In this section, we describe how Skeleton parameters are determined, both manually and
+automatically.  We also discuss how automatic generation of Skeleton parameters can lead
+to Skeletons that are system independent.
+
 \subsection{Manual Application Profiling}
 \label{sec:manual-profiling}
 
@@ -1329,8 +1333,6 @@ describing the dataflow patterns between stages.
 
 \section{Conclusion and Future Work}\label{lb:Con}
 
-\katznote{Dan to add text about how skeletons can be used in education}
-
 Application Skeletons are motivated by the difficulties of real application access and modification that computer scientists who work on tools and systems have. We use a top-down approach to abstract a distributed application in Application Skeletons: applications 
 are composed of a number of stages, while each stage is composed of a number of tasks, with task parameters specified at the stage level. The stage is built on a versatile task design that can handle different task types, various buffer
 sizes, multiple input/output files, and different interleaving scenarios. Overall, one can create easy-to-access, easy-to-build, easy-to-change, and easy-to-run bag-of-tasks, 
@@ -1339,7 +1341,12 @@ frameworks and systems: Bash Shell, Pegasus, and Swift.
 
 %\katznote{Also, we might say that now once a skeleton code represents a real code, it can be easily distributed (through just the parameters) to make middleware and tool experiments repeatable/reproducible, and it can make it easy to scale experiments - some of this also perhaps should go in the intro or abstract as motivation}
 Representing an application by a set of skeleton parameters means that the skeleton application  can be easily repeated and easily shared, making 
-middleware and tool experiments more reproducible.  Changes to these parameters can be used to
+middleware and tool experiments more reproducible.  This leads in two directions: computer science education and computer science research.
+
+In computer science education, skeleton applications can be used by students in classes and exercises to allow them to understand important properties of parallel and distributed applications.  
+\katznote{more needed here}
+
+In computer science research, skeleton application and changes to their parameters can be used to
 study particular aspects of system performance.
 Computer scientists can then focus on the system or tools they are building.
 %, and in some cases, the optimizations of skeleton applications can
@@ -1407,9 +1414,9 @@ We plan the following in the near future:
 
 \section*{Acknowledgments}
 
-\katznote{update this?}  This work was supported in part by the U.S. Department of Energy 
+This work was supported in part by the U.S. Department of Energy 
 under the ASCR award DE-SC0008617 (the AIMES project).
-It has benefited from discussions with Matteo Turilli, Jon Weissman, and Lavanya Ramakrishnan.
+It has benefited from discussions with Matteo Turilli, Jon Weissman, Lavanya Ramakrishnan, and Simon Caton.
 Computing resources were provided by the
 Argonne Leadership Computing Facility and Google. Work by Katz was supported by 
 the National Science Foundation while working at the Foundation.  Any 
