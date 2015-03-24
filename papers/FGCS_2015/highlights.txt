@@ -1,3 +1,5 @@
+Highlights:
+
 Skeleton Applications represent the key parameters of parallel and distributed eScience applications.
 
 Skeleton Applications are easy-to-program, easy-to-build, and easy-to-use, and easy-to-share.
@@ -7,4 +9,20 @@ Skeleton Applications have similar performance to the real applications on which
 Skeletons Application are built from an open source: https://github.com/applicationskeleton/Skeleton
 
 Skeleton Applications can be used to demonstrate system optimizations.
+
+
+
+Changes from eScience conference paper:
+
+The main change in this paper are in the discussion of manual vs automated skeleton parameter estimation.  The automated skeleton parameter work is completely new.
+
+In general, all sections of the paper have been changed to reflect this, but mostly with minor changes.
+
+The major changes are:
+
+- Section 3, Determining Skeleton Parameters, is almost all new, though some of Section 3.1 was previously scattered elsewhere in the paper, mostly in Section 4.
+
+- Section 4, Performance Evaluation, has had the main points condensed from the previous paper, and also has had information added based on the automated skeleton parameter methods discussed in Section 3.
+
+- Section 7, Conclusions and Future Work, has had some discussion added about how Skeletons can be used in education.
 
