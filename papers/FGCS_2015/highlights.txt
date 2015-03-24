@@ -1,0 +1,10 @@
+Skeleton Applications represent the key parameters of parallel and distributed eScience applications.
+
+Skeleton Applications are easy-to-program, easy-to-build, and easy-to-use, and easy-to-share.
+
+Skeleton Applications have similar performance to the real applications on which they are based.
+
+Skeletons Application are built from an open source: https://github.com/applicationskeleton/Skeleton
+
+Skeleton Applications can be used to demonstrate system optimizations.
+
