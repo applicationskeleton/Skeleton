@@ -1325,9 +1325,16 @@ With this modified skeleton-mBackground work load, we see an increased improveme
 %\katznote{need to update this section -- is there anything that we should add from the SYNAPSE work?}
 %\amnote{no, not really}
 
-We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
+We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.
+
+Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance skeletons,
+but these are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications, unlike our work, which produces a simplified versions of full distributed applications. 
+This work overlaps our work in the approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on MPI applications that do not have disk I/O.
+
+Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
 a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
+
 WGL~\cite{WGL} abstracts an application from a dataflow point of view and lets users generate a Swift script for a workflow application by 
 describing the dataflow patterns between stages.
 %Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
