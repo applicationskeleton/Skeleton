@@ -181,7 +181,7 @@ class Application(object):
                     dir_name = words[0]+'_'+words[1]+'_'+words[2]+'_'+words[3]+'_'+words[4]
                 else:
                     dir_name = words[0]+'_'+words[1]+'_'+words[2]
-                s.inputdir.append(dir_name) 
+                s.inputdir.append(dir_name)
 
             for o in s.task_list[0].outputlist:
                 fname = o.name
@@ -352,7 +352,7 @@ class Application(object):
                                         flist.append(t.inputlist[idd])
                                 elif usage == "Output":
                                     for t in s.task_list:
-                                        flist.append(t.outputlist[idd])             
+                                        flist.append(t.outputlist[idd])
                         for t in range(stage.num_tasks):
                             stage.task_list[t].inputlist.append(flist[t*len(stage.input_para)+tpointer])
                         tpointer = tpointer+1
