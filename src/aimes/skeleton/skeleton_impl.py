@@ -356,6 +356,7 @@ class Application(object):
                         for t in range(stage.num_tasks):
                             stage.task_list[t].inputlist.append(flist[t*len(stage.input_para)+tpointer])
                         tpointer = tpointer+1
+                    tpointer = 0    
             
             #overwrite the task file mapping here
             #print(stage.input_task_mapping)
@@ -777,8 +778,8 @@ class Application(object):
             for task in stage.task_list:
                 t = Pegasus.DAX3.Job(namespace=self.name, name=task.taskid, version="1.0")
                 t.addArguments(task.args)
+                i = 0
                 for f in task.inputlist:
-                    i = 0
                     if f.name not in infilemap:
                         path = os.path.join(stage.inputdir[i], f.name)
                         fh = Pegasus.DAX3.File(path)
@@ -787,8 +788,8 @@ class Application(object):
                         i = i+1
                     else:
                         t.uses(infilemap[f.name], link=Pegasus.DAX3.Link.INPUT)
+                i = 0
                 for f in task.outputlist:
-                    i = 0
                     if f.name not in outfilemap:
                         path = os.path.join(stage.outputdir[i], f.name)
                         fh = Pegasus.DAX3.File(path)

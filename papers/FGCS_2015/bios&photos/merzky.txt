@@ -1,0 +1,7 @@
+
+Andre Merzky is a Computer Scientist at Rutgers University. 
+He studied Physics in Germany and Scotland.  He has
+worked on topics in distributed computing concerning 
+visualization, data management, and high level APIs, 
+and is actively involved in the Open Grid Forum (OGF).  
+

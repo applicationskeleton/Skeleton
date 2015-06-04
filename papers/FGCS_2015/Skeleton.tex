@@ -108,7 +108,7 @@
 %% \address{Address\fnref{label3}}
 %% \fntext[label3]{}
 
-\title{Using Application Skeletons to Improve eScience Infrastructure}
+\title{Application Skeletons: Construction and Use in eScience}
 
 %% use optional labels to link authors explicitly to addresses:
 %% \author[label1,label2]{}
@@ -129,9 +129,9 @@
 
 \cortext[cor1]{Corresponding author} 
 
-\address[ucanl]{Computation Institute, University of Chicago and Argonne National Laboratory, Chicago, IL, USA}
+\address[ucanl]{Computation Institute, University of Chicago \& Argonne National Laboratory, Chicago, IL, USA}
 \address[rutgers]{RADICAL Laboratory, Rutgers University, New Brunswick, NJ, USA}
-\address[ucb]{Electrical Engineering \& Computer Science, University of California, Berkeley, CA, USA}
+\address[ucb]{AMPLab, University of California, Berkeley, CA, USA}
 
 
 \begin{abstract}
@@ -151,7 +151,8 @@ reproducible system experiments since they are represented by a compact set of p
 Our Application Skeleton tool (available as open source at \url{https://github.com/applicationskeleton/Skeleton}) currently can create easy-to-access, easy-to-build, and easy-to-run bag-of-task, 
 (iterative) map-reduce, and (iterative) multistage workflow applications. The tasks can be
 serial, parallel, or a mix of both. The parameters to represent the tasks can either be
-discovered through a manual profiling of the applications or through \note{synapse...} We select three representative applications (Montage, 
+discovered through a manual profiling of the applications or through an automated method.
+We select three representative applications (Montage, 
 BLAST, CyberShake Postprocessing), then describe and generate skeleton applications for each. 
 We show that the skeleton applications have identical (or close) performance to that of the real applications. 
 We then show examples of using skeleton applications to verify system optimizations such as
@@ -161,6 +162,8 @@ simplifies the process of designing, implementing, and testing these optimizatio
 \end{abstract}
 
 \begin{keyword}
+computational science \sep data science \sep application modeling \sep system modeling \sep performance modeling \sep parallel and distributed systems
+
 %% keywords here, in the form: keyword \sep keyword
 
 %% PACS codes here, in the form: \PACS code \sep code
@@ -218,7 +221,8 @@ The skeleton applications are executable with common
 distributed computing middleware, Swift~\cite{SWIFT2007, swift-ieee09, Swift_2011} and Pegasus~\cite{pegasus, pegasus-04}, as well as the ubiquitous UNIX shell on a single 
 site (a local cluster with a shared file system), and the skeleton set of tasks can also be output as a generic JSON object that can be used by other systems, such as in our case, by our AIMES middleware.
 
-Skeleton parameters can be discovered by manually profiling the application, by \note{synapse}. Once the real application is represented by a Skeleton description file it can easily be reused.  
+Skeleton parameters can be discovered by either by manually or automatically profiling the application.
+Once the real application is represented by a Skeleton description file it can easily be reused.  
 We measured the performance error between the skeleton application against three real applications (Montage~\cite{montage1,montage2}, BLAST~\cite{ParallelBlast}, and CyberShake PostProcessing~\cite{SCEC07}) on 64 processors of a BG/P supercomputer with per stage and total errors of between 1 and 3\%.
 And changing the parameters makes it easy to study how the system responds to different application characteristics, specifically data caching, task scheduling, I/O tuning, and resilience mechanism.
 
@@ -234,11 +238,14 @@ And changing the parameters makes it easy to study how the system responds to di
 %iterations over stages; that is, we don't support dynamic convergence checking. 
 
 
-This paper summerizes our previous work~\cite{Skeleton2013,Skeleton2014} and adds \katznote{synapse definition and demonstration?}. The contributions of this work include the following:
+This paper summarizes our previous work~\cite{Skeleton2013,Skeleton2014} and adds further work towards automated, system independent application profiling. 
+The contributions of this work include the following:
 \begin{itemize}
 \item An application abstraction that gives users good expressiveness and ease of programming to capture the key performance elements of distributed applications
-\item \katznote{add a bullet for new synapse stuff? - a method for determining skeleton? task? paramenters}
 \item A versatile Skeleton task implementation that is configurable (serial or parallel, number of processes, read/write buffer size, input/output files, interleaving options)
+\item A comparison of two methods for the estimation
+    of Skeleton parameters: manual, system specific application profiling
+    versus automated, system independent profiling 
 \item An interoperable Skeleton implementation that works with mainstream workflow frameworks and systems (Swift, Pegasus, and Shell), and allow general output for other systems
 \item The usage of Skeleton applications to simplify system optimization implementation and highlight their impacts
 \end{itemize}
@@ -331,10 +338,9 @@ a compilation script that can compile the task code.
 
 Other task properties include number of processes, task length, read buffer size, write buffer size, input files, output files, and
 operation interleaving option. The number of processes is one if the task is serial and is greater than one if the task is parallel. 
-Task length is currently measured in seconds, which reflects the amount of computation in a task. An alternative would be flops. \katznote{Andre: any changes needed to the following for synapse?} We select the runtime in seconds, because it is a direct indication of how long the task
-should run. Because the mapping of flops to time is, in general, not very predictable, we currently believe that the user can predict runtime more accurately than using flops.
-Additionally, we are currently investigating
-better ways to specify the task length that can reflect the difference of computing capacity on different machines.
+Task length is currently measured in seconds, which reflects the amount of computation in a task. 
+Section~\ref{ssec:si_profiling} discusses the tradeoffs between this approach and an
+alternative representation of compute load, via FLOPs.
 
 A serial task reads input files, sleeps (to represent computation), and writes output files. In a parallel task, the rank 0 process reads
 input files, sleeps (in place of computation), then writes output files, while other processes simply sleep for the computation time length.  All processes (including rank 0) wait at a barrier before the task exits. 
@@ -699,6 +705,10 @@ the task source code and compile it.
 \section{Determining Skeleton Parameters}
 \label{lb:Params}
 
+In this section, we describe how Skeleton parameters are determined, both manually and
+automatically.  We also discuss how automatic generation of Skeleton parameters can lead
+to Skeletons that are system independent.
+
 \subsection{Manual Application Profiling}
 \label{sec:manual-profiling}
 
@@ -762,10 +772,10 @@ computation, whose realization and performance can depend on the
 underlying system architecture.
 
 For example, the manual application profiling described in
-section~\ref{sec:manual-profiling} outlines how RAM disks are used to
+Section~\ref{sec:manual-profiling} outlines how RAM disks are used to
 separate the effects of I/O on concurrent computation -- exactly
 because the computation is measured as runtime, which is influenced by
-the overall system performance and load. \katznote{Zhao, any comments?}
+the overall system performance and load.
 
 SYNAPSE addresses this by estimating the number of FLoating-point
 OPerations (FLOPs\footnote{We use \I{`FLOPs'} as the plural of \I{`1
@@ -777,8 +787,8 @@ it would be interesting to apply similar system independent metrics to
 other resources types (for example, as mentioned, the I/O-Compute
 concurrency), we found it difficult to extrapolate the respective
 parameters without a complete model of the hardware and OS
-layer -- without resorting to code inspection, it is difficult to distinguish 
-if I/O concurrency on the physcical layer is caused by explicit 
+layer. Without resorting to code inspection, it is difficult to distinguish 
+if I/O concurrency on the physical layer is caused by explicit 
 instructions from the application, or by caching and latency hiding 
 in the operating system layers. 
 
@@ -889,7 +899,7 @@ We run each stage five times and average the times-to-solution.
 
 \subsection{Montage}\label{sec:Montage}
 
-The Montage application in this work has eight stages. We build a 6x6 degree mosaic from 1,319 2MASS image files. Each file is $\sim$2~MB. The output of the last stage, mAdd, contains
+The Montage application used in this work has eight stages. We build a 6x6 degree mosaic from 1,319 2MASS image files. Each file is $\sim$2~MB. The output of the last stage, mAdd, contains
 two files, each of $\sim$3.7~GB. 
 %Figure~\ref{fig:Montage} shows the data flow between Montage stages, and 
 Table~\ref{tb:montage-stats} shows basic statistics of each stage. 
@@ -994,14 +1004,18 @@ trace shows us that each mDiffFit task reads each input file four times instead 
 the Skeleton parameters to eight input files, repeating the two input file names four times.
 %This procedure produces good results, as shown in Table~\ref{tb:montage-results}.
 %Montage tasks don't have any interleaving behavior, so the skeleton parameter for all of them is set to 0--interleave-nothing.
-difficult or impossible to perform.
 
-We measure the error of all eight stages as less than 4\%, with four are under 1\%, as shown in Table~\ref{tb:montage-results}. The error for the complete application is -1.3\%.
+Using the manually-generated parameters, we measure the error of all eight stages as less than 4\%, with four under 1\%, as shown in Table~\ref{tb:montage-results}. The error for the complete application is -1.3\%.
 
-
-We also compare the measured skeleton parameters as listed in Table~\ref{tb:montage-stats} to the values derived from the system indepentent profiling, as discussed in Section~\ref{ssec:si_profiling}.  The disk I/O parameters are found in exact agreement with the manual profiling -- the size of the input data files is, after all, a given constant.  The synapse profiling though did automatically pick up the repeated file reads of the mDiffFit tasks.  For the task runtimes, we calculated the expected runtimes $t_{task}$ as follows:
+We also compare the measured skeleton parameters as listed in
+Table~\ref{tb:montage-stats} to the values derived from the system
+independent profiling, as discussed in Section~\ref{ssec:si_profiling}. 
+The disk I/O parameters are found in exact agreement with the manual
+profiling -- the size of the input data files is fixed after all.
+The SYNAPSE profiling though did automatically pick up the repeated file
+reads of the mDiffFit tasks.  For the task runtimes, we calculated the
+expected runtimes $t_{task}$ as follows:
  
-
 $$
   t_{task} = f_{task} / e_{task} / u_{task} / p_{resource}^{scaled} 
 $$
@@ -1010,12 +1024,13 @@ where $f_{task}$ is the number of FLOPs the task consumes, $e_{task}$
 is the code efficiency, $u_{task}$ is the CPU utilization, and
 $p_{peak}^{scaled}$ is a scalability factor which is derived from the
 target CPU's peak FLOPS performance, scaled by the actually observed
-performance in performance benchmarks.  The latter value is, for the
-specific BG/P used for the experiments, set to $191 GFlops/sec / 557
-GFlops/sec = 0.34$, based on a 2008 HPC challange entry for that
+performance in performance benchmarks.  The latter value, for the
+specific BG/P used for the experiments, is set to 
+$\frac{191 GFlops/sec}{557 GFlops/sec} = 0.34$,
+based on a 2008 HPC challenge entry for that
 target
 machine\footnote{\url{http://www.hpcchallenge.org/custom/index.html?lid=103&slid=229}}.
-The code efficiency and CPU utilization are masured on an
+The code efficiency and CPU utilization are measured on an
 architecturally very different x86 CPU.
 
 \begin{table*}[t]
@@ -1040,19 +1055,22 @@ architecturally very different x86 CPU.
 \end{table*}
 
 
-While most predicted runtimes are in the correct order of magnitude,
-compared to the values observed via manual profiling, the deviations
-are around 25\% in either direction.  
-This is not surprising, given the effort which is
+\tablename~\ref{tb:prof-compare} shows that
+while most runtimes predicted by system
+independent profiling have the correct order of magnitude,
+they deviate from the values observed via manual profiling by
+about 25\%, either positively or negatively.  
+This is not surprising, given the effort that is
 usually spent on optimizing the core computational libraries and
 application codes toward a specific target architecture, which makes
 the code efficiency and CPU utilization not easily portable from one
-archutecture and operating system to another.  The manual
+architecture and operating system to another.  The manual
 profiling on any target architecture thus gives, naturally, more
-precise runtime values for that architecture -- but the automated
+precise runtime values for that architecture, but the automated
 profiling via system independent variables provides reasonable
 estimates for resources consumptions on resources for which manual
-profiling is difficult or impossible to perform.
+profiling is difficult or impossible to perform. 
+% \katznote{need to follow-up on this in conclusions section.}
 
 %\begin{figure}[h]
 %\begin{center}
@@ -1304,21 +1322,25 @@ With this modified skeleton-mBackground work load, we see an increased improveme
 
 \section{Related Work}\label{lb:RFwork}
 
-\katznote{need to update this section}
+%\katznote{need to update this section -- is there anything that we should add from the SYNAPSE work?}
+%\amnote{no, not really}
 
-We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
+We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.
+
+Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance skeletons,
+but these are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications, unlike our work, which produces a simplified versions of full distributed applications. 
+This work overlaps our work in the approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on MPI applications that do not have disk I/O.
+
+Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
 a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
+
 WGL~\cite{WGL} abstracts an application from a dataflow point of view and lets users generate a Swift script for a workflow application by 
 describing the dataflow patterns between stages.
 %Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
 %programs based on the algorithmic skeletons.
 
 \section{Conclusion and Future Work}\label{lb:Con}
-
-\katznote{need to update this section}
-
-\katznote{add text about how skeletons can be used in education}
 
 Application Skeletons are motivated by the difficulties of real application access and modification that computer scientists who work on tools and systems have. We use a top-down approach to abstract a distributed application in Application Skeletons: applications 
 are composed of a number of stages, while each stage is composed of a number of tasks, with task parameters specified at the stage level. The stage is built on a versatile task design that can handle different task types, various buffer
@@ -1328,7 +1350,12 @@ frameworks and systems: Bash Shell, Pegasus, and Swift.
 
 %\katznote{Also, we might say that now once a skeleton code represents a real code, it can be easily distributed (through just the parameters) to make middleware and tool experiments repeatable/reproducible, and it can make it easy to scale experiments - some of this also perhaps should go in the intro or abstract as motivation}
 Representing an application by a set of skeleton parameters means that the skeleton application  can be easily repeated and easily shared, making 
-middleware and tool experiments more reproducible.  Changes to these parameters can be used to
+middleware and tool experiments more reproducible.  This leads in two directions: computer science education and computer science research.
+
+In computer science education, skeleton applications can be used by students to allow them to understand important properties of parallel and distributed applications.  Simple skeletons can be used as instantiations of application abstractions, and more complex skeletons can be used in place of real applications.
+
+In computer science research, including but not limited to the educational process,
+skeleton application and changes to their parameters can be used to
 study particular aspects of system performance.
 Computer scientists can then focus on the system or tools they are building.
 %, and in some cases, the optimizations of skeleton applications can
@@ -1338,7 +1365,14 @@ Computer scientists can then focus on the system or tools they are building.
 %\zhaonote{yes, fixed for now, please review}
 
 We have shown that the skeleton applications generated by our Application Skeleton tool have performance close to that of the real applications.  We profiled three representative distributed applications---Montage, BLAST, CyberShake PostProcessing---to understand their computation and I/O behavior and then derived parameters required to specify
-the skeletons. 
+the skeletons.  
+
+We also investigated the tradeoffs between manually-measured, system dependent skeleton parameters and
+automated, system independent skeleton parameters. Manual, system dependent parameters are more precise that system
+independent metrics, which are also harder to obtain.  The system independent parameters, however, represent reasonable
+estimates for resource consumption on systems where manual
+profiling is difficult or impossible to perform.
+
 %\katznote{we may need to say something somewhere about why we keep saying distributed but actually use a single parallel systems.  If so, we would need to say this here, in the abstract maybe, and in the introduction - perhaps something like that these applications can and are run on both distributed and parallel systems, and our skeletons can similarly be run on both, but that we use parallel systems for testing because they are simpler, but our results should carry over to distributed systems.  Do you think this is true?  In any case, we should think about where we say distributed...} 
 %\zhaonote{yes I agree, I think one of the reasons we measure it on parallel system is the performance stability. For example, it is hard for OSG to have identical performance between two experiments with exactly the same settings.  put a few words here, please review.}
 
@@ -1357,7 +1391,7 @@ the skeletons.
 
 The Application Skeleton tool can produce skeleton applications that correctly capture important distributed properties of real applications but 
 are much simpler to define and use.
-Comparing performance shows overall errors of  -1.3\%, 1.5\%, and 2.4\%  for Montage, BLAST, and CyberShake PostProcessing, respectively.
+Comparing performance (with manually-measured skeleton parameters) shows overall errors of  -1.3\%, 1.5\%, and 2.4\%  for Montage, BLAST, and CyberShake PostProcessing, respectively.
 At the stage level, fourteen out of fifteen stages have errors of less than 3\%, ten have errors less than 2\%, and four have errors of less than 1\%.
 
 The four examples of system improvements (data caching, task scheduling, I/O tuning, and resilience mechanism) 
@@ -1371,7 +1405,9 @@ The Application Skeleton code is available as open source at \url{https://github
 
 We plan the following in the near future:
 \begin{itemize}
-\item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance. \note{synapse?}
+\item {} Use application trace data to produce skeleton applications, ideally purely from the trace data but initially from a combination of trace data and user guidance.
+\item {} Investigate how well Skeletons represent applications when
+    configured with system independent parameters, as derived by SYNAPSE.
 \item {} Determine a way to represent the computational work in a task that when combined with a particular platform can give an accurate runtime for that task.
 \item {} Support concurrent tasks that need to run at the same time to exchange information.
 \item {} Test on distributed systems where latencies, particular file usage, and other issues may be more important than on the parallel systems and cloud environments.
@@ -1387,9 +1423,10 @@ We plan the following in the near future:
 
 \section*{Acknowledgments}
 
-\katznote{update this?}  This work was supported in part by the U.S. Department of Energy 
-under the ASCR award DE-SC0008617 (the AIMES project).
-It has benefited from discussions with Matteo Turilli, Jon Weissman, and Lavanya Ramakrishnan.
+This work is part of the AIMES project, supported by the U.S. Department of Energy 
+under the ASCR awards DE-FG02-12ER26115,
+DE-SC0008617, and DE-SC0008651.
+It has benefited from discussions with Matteo Turilli, Jon Weissman, Michael Wilde, Lavanya Ramakrishnan, and Simon Caton.
 Computing resources were provided by the
 Argonne Leadership Computing Facility and Google. Work by Katz was supported by 
 the National Science Foundation while working at the Foundation.  Any 
