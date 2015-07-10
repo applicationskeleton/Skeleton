@@ -202,7 +202,7 @@ and integrated middleware to support eScience at extreme scales. AIMES is co-des
 perspective. Thus, it requires applications with various characteristics for better application coverage. We have previously encountered many problems
 when accessing real applications and when trying to distribute applications and data as test cases to other researchers. Application Skeletons are intended to overcome these issues.
 
-We previous presented~\cite{Skeleton2013} the Skeleton idea of working around such issues by quickly
+We previously presented~\cite{Skeleton2013} the Skeleton idea of working around such issues by quickly
 and easily producing a synthetic distributed application that is executable in a distributed environment, for example, grids, clusters, and clouds, and then showed~\cite{Skeleton2014} improvements in reducing the gap between skeleton and real application performance, as well
 as showing Skeleton applications could be used to simplify understanding and demonstrating system optimizations, such as AMFORA~\cite{AMFS2013}.
 
@@ -214,7 +214,7 @@ The Skeleton task can mimic real application tasks' interleaving behavior for re
 The tasks are C programs compiled to static executables, so they can run on supercomputers with an OS that doesn't have fork()/exec() support, such as the IBM Blue Gene/Q. 
 Some of the task parameters, such as task lengths and input file sizes, can be
 described as a statistical distribution.
-The task implementation is based on UNIX/Linux sleep and dd commands. 
+The task implementation is based on the UNIX/Linux sleep and dd programs, controlling the CPU time and I/O, respectively.
 
 This Skeleton implementation can generate bag-of-task, (iterative) map-reduce, and (iterative) multistage workflow applications. 
 The skeleton applications are executable with common
@@ -348,8 +348,7 @@ input files, sleeps (in place of computation), then writes output files, while o
 %\zhaonote{No, 'does computation' is exactly spleeping. I add one more sentence in the first paragraph of this subsection to explain computation is in the form of sleep}
 %There is a barrier point in every process before the program exits.
 
-We want to balance between mimicking the exact the operation sequence of the real application tasks' I/O and computation in the skeleton task, which requires
-reimplementing the actual task and results in poor programmability, and having very simple programming but very different performance. As a compromise,
+We want to balance between mimicking the exact the operation sequence of the real application tasks' I/O and computation in the skeleton task and having very simple programming.  The former requires reimplementing the actual task and results in poor programmability, while the latter gives very different performance.  As a compromise,
  we define four interleaving options for a skeleton task (the serial task or the rank 0 process in a parallel task): %, as visualized in Figure~\ref{fig:interleave}:
 \begin{enumerate}
 \item[0)] \textbf{interleave-nothing}: reads, computes, then writes
