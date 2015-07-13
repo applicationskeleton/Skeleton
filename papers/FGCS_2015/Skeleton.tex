@@ -180,7 +180,7 @@ computational science \sep data science \sep application modeling \sep system mo
 %% main text
 
 
-\section{Introduction}
+\section{Introduction} \label{lb:intro}
 
 Computer scientists who build tools and systems (programming languages, runtime systems, file systems, workflow systems, etc.) 
 %to support distributed applications often have to work on real scientific applications to prove the effectiveness of
@@ -239,6 +239,11 @@ And changing the parameters makes it easy to study how the system responds to di
 
 
 This paper summarizes our previous work~\cite{Skeleton2013,Skeleton2014} and adds further work towards automated, system independent application profiling. 
+Specifically, the main new contribution is almost all of Section~\ref{lb:Params}.
+Sections~\ref{lb:Design}, \ref{lb:Perf},  and \ref{lb:RFwork} were initially shortened to focus on the key points and then modified to include automated profiling and further modified as part of the review process.  
+The Introduction (Section~\ref{lb:intro}) and Conclusions (Section~\ref{lb:Con}) have been reworked for this paper but used the introductions and conclusions of the previous papers as a starting points.
+Section~\ref{lb:using} has just been shortened from~\cite{Skeleton2014}.
+
 The contributions of this work include the following:
 \begin{itemize}
 \item An application abstraction that gives users good expressiveness and ease of programming to capture the key performance elements of distributed applications
@@ -257,7 +262,7 @@ Section~\ref{lb:Design} introduces the design of the Application Skeleton tool a
 In Section \ref{lb:Params}, we discuss how Skeleton parameters can be determined.
 In Section \ref{lb:Perf}, we select three representative applications, and compare the Skeleton application performance against the real application performance. In Section \ref{lb:using}, we show how application skeletons can help eScience infrastructure developers.
 Section~\ref{lb:RFwork} discusses related work and envisions future work.
-Conclusions are drawn in Section \ref{lb:Con}. 
+Conclusions are drawn in Section~\ref{lb:Con}. 
 
 %\section{A Survey of Distributed Applications}
 %\label{lb:Survey}
