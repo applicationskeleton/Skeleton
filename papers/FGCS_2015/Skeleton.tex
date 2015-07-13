@@ -818,14 +818,15 @@ in the operating system layers.
 hardware resources consumed by an application, SYNAPSE inspects the
 Linux kernel and hardware counters, via the \T{/proc/} filesystem and
 the Linux system tool \T{`perf'}.  SYNAPSE provides a command line
-tool (\T{synapse-profile}), which runs the application in question
-under non-intrusive observation: at a fixed frequency SYNAPSE reads
-different system hardware and kernel counters which report on the
+tool (\T{synapse-profile}) that runs the application in question
+under non-intrusive observation. During the run, SYNAPSE reads
+(with fixed frequency)
+different system hardware and kernel counters that report on the
 process' resource consumption.  Those data are stored as time series
-in a database, so that the resource consumption is later available as a
+in a database, so that resource consumption is later available as a
 series of sampled data points. Sampling the application's resource
 consumption at frequent intervals results in application profiles that
-describe the application behavior over its runtime.  Sampling though
+describe the application behavior over its runtime.  However, sampling
 is not appropriate for metrics that are very sensitive to system load
 (e.g., CPU utilization), or that are only meaningful as an integrated
 total (e.g., peak memory size, number of spawned threads).
