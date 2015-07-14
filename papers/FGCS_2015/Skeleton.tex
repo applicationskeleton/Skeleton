@@ -1316,35 +1316,35 @@ is a node failure during execution.
 We ran the workload on various scales on GCE, but the improvements are marginal. 
 The reason is that the recovery overhead difference of mBackground tasks is not significant, so even if we make the right decision for every task, the accumulated
 improvement is still not significant.
-%\zhaonote{proposed new text below, please review.}
 To prove the benefit of this dynamic resilience strategy, we need to show  a more significant improvement of the recovery performance. We first profiled the mBackground tasks' time-to-solution and I/O parameters, and generated a skeleton-mBackground workload with similar performance as real-mBackground. We then provisionally executed the skeleton-mBackground workload with AMFORA and recorded which files were replicated by re-execution and replications.
 We next modified the skeleton-mBackground workload to have 10x longer tasks for the tasks whose output files
 should be replicated, and 10x larger output files for the tasks whose output files should be recovered by re-execution. 
-%\katznote{this needs more explanation - it sounds like we are setting up the problem so we can't fail}
-%\zhaonote{can you be more specific about additional explanation? I think our point is to use this modified mBackground workload to show the recovery performance
-%with a significant improvement, it can certainly fail if the dynamic replication is incorrectly implemented.} 
-%\katznote{I think you need to explain a bit about how you know which tasks should be 10x longer, and which should have 10x bigger outputs.}
 In other words, we magnified the penalty of the wrong replication decision.
 With this modified skeleton-mBackground work load, we see an increased improvement of 9.1\%, 4.4\%, and 4.9\% on 4, 16, and 64 compute nodes of GCE, respectively.
 
 
 \section{Related Work}\label{lb:RFwork}
 
-%\katznote{need to update this section -- is there anything that we should add from the SYNAPSE work?}
-%\amnote{no, not really}
+We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  In generally, we accept that researchers have been using application replacements for experiments for a long time, and some of those replacements were certainly tunable in one way or the other. The distinction in our work is that the Skeletons provide that capability in a systematic way, being tunable to a range of diverse application, including multi-stage applications, with the promise to preserve the significant part of the application's behavior. This is why we do not list much related work here: the problem space is pervasive, but attempts to solve it systematically are rare. 
 
-We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.
+Examples of benchmarking/analysis work in a parallel (not distributed) context include the Berkeley Dwarfs~\cite{dwarfs} (also called `motifs') and the related OpenDwarfs~\cite{6868650}.  Such work has at its core the idea that there is a key computational or data movement kernel that is responsible for most of the application's performance, and that that kernel can be extracted and used to represent the full application, at least in terms of performance.
 
-Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance skeletons,
-but these are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications, unlike our work, which produces a simplified versions of full distributed applications. 
-This work overlaps our work in the approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on MPI applications that do not have disk I/O.
+An alternative method is from Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777}, who developed a tool called performance skeletons.   
+These are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications.  Unlike the dwarf work, this assumes that the work done by applications is spread through out the application (not in a single kernel).
+This idea of fractional versions of parallel applications is also unlike our work, which produces simplified and scalable versions of full distributed applications. 
+Sodhi's work does overlap ours in its approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on single system MPI applications that do not have disk I/O.  
 
 Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
 a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
 
-WGL~\cite{WGL} abstracts an application from a dataflow point of view and lets users generate a Swift script for a workflow application by 
-describing the dataflow patterns between stages.
+The work that is probably closest to ours is WGL~\cite{WGL}, which abstracts an application from a dataflow point of view and lets users generate a Swift script for a potentially distributed workflow application by 
+describing the dataflow patterns between stages.  Since there is some institutional overlap between
+the WGL developers and Skeleton developers and because both overlap the Swift team, it's likely that informal discussions carried some of this concept from WGL to Skeletons, though there is a nine-year gap between the projects.
+
+An example of loosely related work is by Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values.
+
+
 %Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
 %programs based on the algorithmic skeletons.
 
