@@ -180,7 +180,7 @@ computational science \sep data science \sep application modeling \sep system mo
 %% main text
 
 
-\section{Introduction}
+\section{Introduction} \label{lb:intro}
 
 Computer scientists who build tools and systems (programming languages, runtime systems, file systems, workflow systems, etc.) 
 %to support distributed applications often have to work on real scientific applications to prove the effectiveness of
@@ -202,7 +202,7 @@ and integrated middleware to support eScience at extreme scales. AIMES is co-des
 perspective. Thus, it requires applications with various characteristics for better application coverage. We have previously encountered many problems
 when accessing real applications and when trying to distribute applications and data as test cases to other researchers. Application Skeletons are intended to overcome these issues.
 
-We previous presented~\cite{Skeleton2013} the Skeleton idea of working around such issues by quickly
+We previously presented~\cite{Skeleton2013} the Skeleton idea of working around such issues by quickly
 and easily producing a synthetic distributed application that is executable in a distributed environment, for example, grids, clusters, and clouds, and then showed~\cite{Skeleton2014} improvements in reducing the gap between skeleton and real application performance, as well
 as showing Skeleton applications could be used to simplify understanding and demonstrating system optimizations, such as AMFORA~\cite{AMFS2013}.
 
@@ -214,7 +214,7 @@ The Skeleton task can mimic real application tasks' interleaving behavior for re
 The tasks are C programs compiled to static executables, so they can run on supercomputers with an OS that doesn't have fork()/exec() support, such as the IBM Blue Gene/Q. 
 Some of the task parameters, such as task lengths and input file sizes, can be
 described as a statistical distribution.
-The task implementation is based on UNIX/Linux sleep and dd commands. 
+The task implementation is based on the UNIX/Linux sleep and dd programs, controlling the CPU time and I/O, respectively.
 
 This Skeleton implementation can generate bag-of-task, (iterative) map-reduce, and (iterative) multistage workflow applications. 
 The skeleton applications are executable with common
@@ -239,6 +239,11 @@ And changing the parameters makes it easy to study how the system responds to di
 
 
 This paper summarizes our previous work~\cite{Skeleton2013,Skeleton2014} and adds further work towards automated, system independent application profiling. 
+Specifically, the main new contribution is almost all of Section~\ref{lb:Params}.
+Sections~\ref{lb:Design}, \ref{lb:Perf},  and \ref{lb:RFwork} were initially shortened to focus on the key points and then modified to include automated profiling and further modified as part of the review process.  
+The Introduction (Section~\ref{lb:intro}) and Conclusions (Section~\ref{lb:Con}) have been reworked for this paper but used the introductions and conclusions of the previous papers as a starting points.
+Section~\ref{lb:using} has just been shortened from~\cite{Skeleton2014}.
+
 The contributions of this work include the following:
 \begin{itemize}
 \item An application abstraction that gives users good expressiveness and ease of programming to capture the key performance elements of distributed applications
@@ -257,7 +262,7 @@ Section~\ref{lb:Design} introduces the design of the Application Skeleton tool a
 In Section \ref{lb:Params}, we discuss how Skeleton parameters can be determined.
 In Section \ref{lb:Perf}, we select three representative applications, and compare the Skeleton application performance against the real application performance. In Section \ref{lb:using}, we show how application skeletons can help eScience infrastructure developers.
 Section~\ref{lb:RFwork} discusses related work and envisions future work.
-Conclusions are drawn in Section \ref{lb:Con}. 
+Conclusions are drawn in Section~\ref{lb:Con}. 
 
 %\section{A Survey of Distributed Applications}
 %\label{lb:Survey}
@@ -348,8 +353,7 @@ input files, sleeps (in place of computation), then writes output files, while o
 %\zhaonote{No, 'does computation' is exactly spleeping. I add one more sentence in the first paragraph of this subsection to explain computation is in the form of sleep}
 %There is a barrier point in every process before the program exits.
 
-We want to balance between mimicking the exact the operation sequence of the real application tasks' I/O and computation in the skeleton task, which requires
-reimplementing the actual task and results in poor programmability, and having very simple programming but very different performance. As a compromise,
+We want to balance between mimicking the exact the operation sequence of the real application tasks' I/O and computation in the skeleton task and having very simple programming.  The former requires reimplementing the actual task and results in poor programmability, while the latter gives very different performance.  As a compromise,
  we define four interleaving options for a skeleton task (the serial task or the rank 0 process in a parallel task): %, as visualized in Figure~\ref{fig:interleave}:
 \begin{enumerate}
 \item[0)] \textbf{interleave-nothing}: reads, computes, then writes
@@ -760,7 +764,7 @@ target system.  For example, the data input size (in Bytes) is constant,
 whether the application is executed on a local desktop, on
 a remote cluster, or on a supercomputer.  Some metrics are, however,
 not system-independent.  Specifically, the application runtime depends
-from the respective resource performance, such as the CPU type and
+on the respective resource performance, such as the CPU type and
 clock speed.  
 
 The underlying reason is that some metrics do not really denote
@@ -802,29 +806,31 @@ in the operating system layers.
 % concurrency which modern systems have, apart from edge cases like I/O
 % or network dominated applications.}
 
-\begin{wrapfigure}{l}{0.5\textwidth}
-  \centering
-  \includegraphics[width=0.5\textwidth]{experiments/synapse_montage/rs_synapse_2mass_m101_j_6_6_mprojectpp_mem}
-  \caption {
-      \footnotesize
-      \B{Memory consumption profiles for Montage \T{mProjectPP} tasks:}
-      Two clusters of memory loads can be identified, where the
-      cluster of smaller memory consumption generally correlates to
-      smaller runtimes.  For the majority of tasks (the larger
-      cluster), the memory consumption is constant, and runtime is not
-      influenced by other factors.
-      \label{fig:synapse_mem_6_6}
-      }
- \end{wrapfigure}
-To quantify the hardware resources consumed by an application, SYNAPSE
-inspects the Linux kernel and hardware counters, via the \T{/proc/}
-filesystem and the Linux system tool \T{`perf'}.  Sampling the
-application's resource consumption at frequent intervals results in
-application profiles that describe the application behavior over its
-runtime.  Sampling is not appropriate for metrics that are very 
-sensitive to system load (e.g., CPU utilization), or that are only
-meaningful as an integrated total (e.g., peak memory size, number of
-spawned threads).
+\begin{wrapfigure}{l}{0.5\textwidth} \centering
+    \includegraphics[width=0.5\textwidth]{experiments/synapse_montage/rs_synapse_2mass_m101_j_6_6_mprojectpp_mem}
+    \caption { \footnotesize \B{Memory consumption profiles for
+            Montage \T{mProjectPP} tasks:} Two clusters of memory
+        loads can be identified, where the cluster of smaller memory
+        consumption generally correlates to smaller runtimes.  For the
+        majority of tasks (the larger cluster), the memory consumption
+        is constant, and runtime is not influenced by other factors.
+        \label{fig:synapse_mem_6_6} } \end{wrapfigure} To quantify the
+hardware resources consumed by an application, SYNAPSE inspects the
+Linux kernel and hardware counters, via the \T{/proc/} filesystem and
+the Linux system tool \T{`perf'}.  SYNAPSE provides a command line
+tool (\T{synapse-profile}) that runs the application in question
+under non-intrusive observation. During the run, SYNAPSE reads
+(with fixed frequency)
+different system hardware and kernel counters that report on the
+process' resource consumption.  Those data are stored as time series
+in a database, so that resource consumption is later available as a
+series of sampled data points. Sampling the application's resource
+consumption at frequent intervals results in application profiles that
+describe the application behavior over its runtime.  However, sampling
+is not appropriate for metrics that are very sensitive to system load
+(e.g., CPU utilization), or that are only meaningful as an integrated
+total (e.g., peak memory size, number of spawned threads).
+
 Exemplarily, \figurename~\ref{fig:synapse_mem_6_6} shows the time variation of
 memory consumption over the set of Montage \T{mProjectPP} tasks, showing a
 clustering into tasks that allocate two distinctly different
@@ -865,6 +871,8 @@ resources.
  \label{fig:test}
  \end{figure}
 
+
+
 In summary, focusing on metrics that represent resource consumption
 instead of metrics that represent the \I{effects} of resource
 consumption (such as runtime) allows a more accurate representation of
@@ -884,6 +892,8 @@ To examine and understand the differences between skeleton and real application 
 we select three applications (Montage, BLAST, and CyberShake PostProcessing), profile the application properties, 
 produce the skeleton versions with the Application Skeleton tool, and compare the skeleton and real 
 performance for each computation stage.
+
+We chose these three applications for a variety of reasons.  First, they are applications we have familiarity with from previous research projects, either in the applications themselves or computer science problems in how to best run them on a variety of parallel and distributed systems.  Second, because fifteen stages well represent the variety of dataflow patterns that can occur in MTC applications, including gather, scatter, reduce, pipeline, and multicast~\cite{AMFS2012}. Finally, these applications and their stages are scalable and include a variety of computation/data movement ratios~\cite{ENVELOPE}.
 
 We use 64 BG/P processors with GPFS as the shared file system. Each of the processors has a $\sim$500MB
 RAM disk. Each application stage is executed with AMFORA~\cite{AMFS2013}, a parallel scripting framework on supercomputers.
@@ -1308,35 +1318,35 @@ is a node failure during execution.
 We ran the workload on various scales on GCE, but the improvements are marginal. 
 The reason is that the recovery overhead difference of mBackground tasks is not significant, so even if we make the right decision for every task, the accumulated
 improvement is still not significant.
-%\zhaonote{proposed new text below, please review.}
 To prove the benefit of this dynamic resilience strategy, we need to show  a more significant improvement of the recovery performance. We first profiled the mBackground tasks' time-to-solution and I/O parameters, and generated a skeleton-mBackground workload with similar performance as real-mBackground. We then provisionally executed the skeleton-mBackground workload with AMFORA and recorded which files were replicated by re-execution and replications.
 We next modified the skeleton-mBackground workload to have 10x longer tasks for the tasks whose output files
 should be replicated, and 10x larger output files for the tasks whose output files should be recovered by re-execution. 
-%\katznote{this needs more explanation - it sounds like we are setting up the problem so we can't fail}
-%\zhaonote{can you be more specific about additional explanation? I think our point is to use this modified mBackground workload to show the recovery performance
-%with a significant improvement, it can certainly fail if the dynamic replication is incorrectly implemented.} 
-%\katznote{I think you need to explain a bit about how you know which tasks should be 10x longer, and which should have 10x bigger outputs.}
 In other words, we magnified the penalty of the wrong replication decision.
 With this modified skeleton-mBackground work load, we see an increased improvement of 9.1\%, 4.4\%, and 4.9\% on 4, 16, and 64 compute nodes of GCE, respectively.
 
 
 \section{Related Work}\label{lb:RFwork}
 
-%\katznote{need to update this section -- is there anything that we should add from the SYNAPSE work?}
-%\amnote{no, not really}
+We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  In generally, we accept that researchers have been using application replacements for experiments for a long time, and some of those replacements were certainly tunable in one way or the other. The distinction in our work is that the Skeletons provide that capability in a systematic way, being tunable to a range of diverse application, including multi-stage applications, with the promise to preserve the significant part of the application's behavior. This is why we do not list much related work here: the problem space is pervasive, but attempts to solve it systematically are rare. 
 
-We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.
+Examples of benchmarking/analysis work in a parallel (not distributed) context include the Berkeley Dwarfs~\cite{dwarfs} (also called `motifs') and the related OpenDwarfs~\cite{6868650}.  Such work has at its core the idea that there is a key computational or data movement kernel that is responsible for most of the application's performance, and that that kernel can be extracted and used to represent the full application, at least in terms of performance.
 
-Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance skeletons,
-but these are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications, unlike our work, which produces a simplified versions of full distributed applications. 
-This work overlaps our work in the approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on MPI applications that do not have disk I/O.
+An alternative method is from Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777}, who developed a tool called performance skeletons.   
+These are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications.  Unlike the dwarf work, this assumes that the work done by applications is spread through out the application (not in a single kernel).
+This idea of fractional versions of parallel applications is also unlike our work, which produces simplified and scalable versions of full distributed applications. 
+Sodhi's work does overlap ours in its approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on single system MPI applications that do not have disk I/O.  
 
 Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
 a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
 
-WGL~\cite{WGL} abstracts an application from a dataflow point of view and lets users generate a Swift script for a workflow application by 
-describing the dataflow patterns between stages.
+The work that is probably closest to ours is WGL~\cite{WGL}, which abstracts an application from a dataflow point of view and lets users generate a Swift script for a potentially distributed workflow application by 
+describing the dataflow patterns between stages.  Since there is some institutional overlap between
+the WGL developers and Skeleton developers and because both overlap the Swift team, it's likely that informal discussions carried some of this concept from WGL to Skeletons, though there is a nine-year gap between the projects.
+
+An example of loosely related work is by Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values.
+
+
 %Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
 %programs based on the algorithmic skeletons.
 
