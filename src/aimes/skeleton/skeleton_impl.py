@@ -426,7 +426,7 @@ class Application(object):
             
             #now generate task length
             if stage.length_para[0] == "polynomial":
-                m=re.match(r"(?P<para>\[\d+,\s*\d+\])\s*(?P<src>\w*)", stage.length_para[1])
+                m=re.match(r"(?P<para>\[\d+[\.\d+]*,\s*\d+[\.\d+]*]\])\s*(?P<src>\w*)", stage.length_para[1])
                 para = m.group('para')
                 src = m.group('src')
                 index = int(src[6:])
