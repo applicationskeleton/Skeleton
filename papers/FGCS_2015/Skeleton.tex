@@ -893,6 +893,8 @@ we select three applications (Montage, BLAST, and CyberShake PostProcessing), pr
 produce the skeleton versions with the Application Skeleton tool, and compare the skeleton and real 
 performance for each computation stage.
 
+We chose these three applications for a variety of reasons.  First, they are applications we have familiarity with from previous research projects, either in the applications themselves or computer science problems in how to best run them on a variety of parallel and distributed systems.  Second, because fifteen stages well represent the variety of dataflow patterns that can occur in MTC applications, including gather, scatter, reduce, pipeline, and multicast~\cite{AMFS2012}. Finally, these applications and their stages are scalable and include a variety of computation/data movement ratios~\cite{ENVELOPE}.
+
 We use 64 BG/P processors with GPFS as the shared file system. Each of the processors has a $\sim$500MB
 RAM disk. Each application stage is executed with AMFORA~\cite{AMFS2013}, a parallel scripting framework on supercomputers.
 With AMFORA, we can simply list all tasks of a stage in a Bash script, and instruct AMFORA to execute them (in parallel, subject to data dependencies.)
