@@ -257,15 +257,51 @@ The contributions of this work include the following:
 
 The rest of the paper is organized as follows: 
 %Section~\ref{lb:Survey} surveys a number of distributed applications that Application Skeletons are intended to cover. 
+Section~\ref{lb:RFwork} discusses the idea of application modeling, including related work.
 Section~\ref{lb:Design} introduces the design of the Application Skeleton tool and the tradeoffs we made during the process.
 %Section~\ref{lb:Model} presents the Application Skeleton programming model with several examples.
 In Section \ref{lb:Params}, we discuss how Skeleton parameters can be determined.
 In Section \ref{lb:Perf}, we select three representative applications, and compare the Skeleton application performance against the real application performance. In Section \ref{lb:using}, we show how application skeletons can help eScience infrastructure developers.
-Section~\ref{lb:RFwork} discusses related work and envisions future work.
 Conclusions are drawn in Section~\ref{lb:Con}. 
 
 %\section{A Survey of Distributed Applications}
 %\label{lb:Survey}
+
+\section{Modeling Background and Related Work}\label{lb:RFwork}
+
+Researchers have been using application replacements of various types (e.g., kernels, benchmarks,  reduced applications, mini-apps) for experiments for a long time, and some of those replacements have been and are certainly tunable in one way or another. These application replacements are for a variety of purposes, including: \katznote{others?}
+\begin{itemize}
+\item They are easier to build than the actual application.
+\item They can be reused across different system to compare those systems.
+\item They run faster than the actual application.
+\end{itemize}
+
+However, we believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel. 
+ The distinction in our work is that the Skeletons provide an application replacement (or workload generation) capability in a systematic way, being tunable to a range of diverse application, including multi-stage applications, with the promise to preserve the significant part of the application's behavior. Because of the problem space is pervasive, but attempts to solve it systematically are rare, particularly for distributed applications, the related work we discuss here are examples of some of the different types of application replacements that have been used.
+
+Examples of benchmarking/analysis work in a parallel (not distributed) context include the NAS Parallel Benchmarks~\cite{NPB}, and Berkeley Dwarfs~\cite{dwarfs} (also called `motifs') and the related OpenDwarfs~\cite{6868650}.
+The NAS benchmarks include both kernels and pseudo-applications (an example of reduced applications), intended for use on parallel (not distributed) computers.  These benchmarks can be scaled by choosing different predeveloped classes.  However, they cannot be arbitrarily tuned to expose particular system features, as skeletons can.
+The dwarf work has at its core the idea that there is a key computational or data movement kernel that is responsible for most of the application's performance, and that that kernel can be extracted and used to represent the full application, at least in terms of performance.
+
+An alternative to reducing the application over the space of the application is reducing it over time.  For example, Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance skeletons.   
+These are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications.  Unlike the dwarf work, this assumes that the work done by applications is spread through out the application (not in a single kernel).
+This idea of fractional versions of parallel applications is also unlike our work, which produces simplified and scalable versions of full distributed applications. 
+Sodhi's work does overlap ours in its approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on single system MPI applications that do not have disk I/O.  
+
+Skel~\cite{Skel} uses a similar idea, though it aims at understanding the I/O performance of parallel applications on supercomputers. Users can extract 
+the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
+a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
+
+The work that is probably closest to ours is WGL~\cite{WGL}, which abstracts an application from a dataflow point of view and lets users generate a Swift script for a potentially distributed workflow application by 
+describing the dataflow patterns between stages.  Since there is some institutional overlap between
+the WGL developers and Skeleton developers and because both overlap the Swift team, it's likely that informal discussions carried some of this concept from WGL to Skeletons, though there is a nine-year gap between the projects.
+
+Very loosely related work includes Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values.
+
+
+%Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
+%programs based on the algorithmic skeletons.
+
 
 
 \section{Application Skeleton Design}
@@ -1325,30 +1361,30 @@ In other words, we magnified the penalty of the wrong replication decision.
 With this modified skeleton-mBackground work load, we see an increased improvement of 9.1\%, 4.4\%, and 4.9\% on 4, 16, and 64 compute nodes of GCE, respectively.
 
 
-\section{Related Work}\label{lb:RFwork}
-
-We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  In generally, we accept that researchers have been using application replacements for experiments for a long time, and some of those replacements were certainly tunable in one way or the other. The distinction in our work is that the Skeletons provide that capability in a systematic way, being tunable to a range of diverse application, including multi-stage applications, with the promise to preserve the significant part of the application's behavior. This is why we do not list much related work here: the problem space is pervasive, but attempts to solve it systematically are rare, particularly for distributed applications. 
-
-Examples of benchmarking/analysis work in a parallel (not distributed) context include the Berkeley Dwarfs~\cite{dwarfs} (also called `motifs') and the related OpenDwarfs~\cite{6868650}.  Such work has at its core the idea that there is a key computational or data movement kernel that is responsible for most of the application's performance, and that that kernel can be extracted and used to represent the full application, at least in terms of performance.
-
-An alternative method is from Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777}, who developed a tool called performance skeletons.   
-These are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications.  Unlike the dwarf work, this assumes that the work done by applications is spread through out the application (not in a single kernel).
-This idea of fractional versions of parallel applications is also unlike our work, which produces simplified and scalable versions of full distributed applications. 
-Sodhi's work does overlap ours in its approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on single system MPI applications that do not have disk I/O.  
-
-Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
-the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
-a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
-
-The work that is probably closest to ours is WGL~\cite{WGL}, which abstracts an application from a dataflow point of view and lets users generate a Swift script for a potentially distributed workflow application by 
-describing the dataflow patterns between stages.  Since there is some institutional overlap between
-the WGL developers and Skeleton developers and because both overlap the Swift team, it's likely that informal discussions carried some of this concept from WGL to Skeletons, though there is a nine-year gap between the projects.
-
-An example of loosely related work is by Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values.
-
-
-%Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
-%programs based on the algorithmic skeletons.
+%\section{Related Work}\label{lb:RFwork}
+%
+%We believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel.  In generally, we accept that researchers have been using application replacements for experiments for a long time, and some of those replacements were certainly tunable in one way or the other. The distinction in our work is that the Skeletons provide that capability in a systematic way, being tunable to a range of diverse application, including multi-stage applications, with the promise to preserve the significant part of the application's behavior. This is why we do not list much related work here: the problem space is pervasive, but attempts to solve it systematically are rare, particularly for distributed applications. 
+%
+%Examples of benchmarking/analysis work in a parallel (not distributed) context include the Berkeley Dwarfs~\cite{dwarfs} (also called `motifs') and the related OpenDwarfs~\cite{6868650}.  Such work has at its core the idea that there is a key computational or data movement kernel that is responsible for most of the application's performance, and that that kernel can be extracted and used to represent the full application, at least in terms of performance.
+%
+%An alternative method is from Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777}, who developed a tool called performance skeletons.   
+%These are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications.  Unlike the dwarf work, this assumes that the work done by applications is spread through out the application (not in a single kernel).
+%This idea of fractional versions of parallel applications is also unlike our work, which produces simplified and scalable versions of full distributed applications. 
+%Sodhi's work does overlap ours in its approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on single system MPI applications that do not have disk I/O.  
+%
+%Skel~\cite{Skel} uses a similar idea to understand the I/O performance of parallel applications on supercomputers. Users can extract 
+%the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
+%a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
+%
+%The work that is probably closest to ours is WGL~\cite{WGL}, which abstracts an application from a dataflow point of view and lets users generate a Swift script for a potentially distributed workflow application by 
+%describing the dataflow patterns between stages.  Since there is some institutional overlap between
+%the WGL developers and Skeleton developers and because both overlap the Swift team, it's likely that informal discussions carried some of this concept from WGL to Skeletons, though there is a nine-year gap between the projects.
+%
+%An example of loosely related work is by Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values.
+%
+%
+%%Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
+%%programs based on the algorithmic skeletons.
 
 \section{Conclusion and Future Work}\label{lb:Con}
 
