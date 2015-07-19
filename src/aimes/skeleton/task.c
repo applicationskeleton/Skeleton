@@ -232,6 +232,34 @@ void compute(double task_length)
     return;
 }
 
+/* --------------------------------------------------------------------------
+ * Run floating point calculations as a token of work
+ * compute_flop with run task_length number of floating point
+ * operations
+ */
+void compute_flop(double task_length)
+{
+    int ret;
+    int i;
+    double a = 0.0;
+    double b = 1.0;
+    double c;
+    struct timespec tim;
+
+    if ( (int)task_length < 0 ) bail ("task_length must be > 0");
+
+    printf("floating point operations : %f\n", task_length);
+
+    // Simple fibonacci generation
+    for ( i = 0; i < int(task_length) ; i++ ){
+        c = a+b;
+        a = b;
+        b = c;
+    }
+
+    return;
+}
+
 
 /* -------------------------------------------------------------------------- */
 void read_compute(char **input_files, int bufsize, int num_input, double task_length)
