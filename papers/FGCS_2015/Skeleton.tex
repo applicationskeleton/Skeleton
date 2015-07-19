@@ -159,6 +159,9 @@ We then show examples of using skeleton applications to verify system optimizati
 data caching, I/O tuning, and task scheduling, as well as the system resilience mechanism, in some cases modifying the skeleton applications to emphasize some characteristic, and thus show that using skeleton applications 
 simplifies the process of designing, implementing, and testing these optimizations.
 
+\note{I note that there isn't a mention of the profile/emulation that Synapse
+  provides in the abstract?} 
+
 \end{abstract}
 
 \begin{keyword}
@@ -194,8 +197,13 @@ or more of the following reasons:
 \item {} Some applications use legacy code and are dependent on out-of-date libraries.
 \item {} Some applications are hard to understand because they implicitly assume domain knowledge.
 \end{itemize}
-In addition, real applications may be difficult to scale or modify in order to demonstrate
-system trends and characteristics~\cite{DPA-paper}.
+In addition, real applications may be difficult to scale or modify in order to
+demonstrate system trends and characteristics~\cite{DPA-paper}.
+
+\note{Maybe we should add a sentence or two -- possibly around the reference
+  to the DPA Paper that we're really interested in distributed
+  applications. This ``detail'' was lost on at least one reviewer. If we do so,
+  we should also add deployment challenges are another motivation for Skeletons}
 
 Our Application Skeletons idea was created in the AIMES project, whose goal is to explore the role of abstractions
 and integrated middleware to support eScience at extreme scales. AIMES is co-designing middleware from an application and infrastructure
