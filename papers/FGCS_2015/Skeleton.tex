@@ -277,24 +277,57 @@ Conclusions are drawn in Section~\ref{lb:Con}.
 
 \section{Modeling Background and Related Work}\label{lb:RFwork}
 
-Researchers have been using application replacements of various types (e.g., kernels, benchmarks,  reduced applications, mini-apps) for experiments for a long time, and some of those replacements have been and are certainly tunable in one way or another. These application replacements are for a variety of purposes, including: \katznote{others?}
+\note{how about ``representative applications'' in lieu of application
+  replacements?}  Researchers have been using application replacements of
+various types (e.g., kernels, benchmarks, reduced applications, mini-apps) for
+experiments for a long time, and some of those replacements have been and are
+certainly tunable in one way or another. These application replacements are for
+a variety of purposes, including: \katznote{others?}\note{are we missing a verb,
+  like ``used''?}
 \begin{itemize}
 \item They are easier to build than the actual application.
 \item They can be reused across different system to compare those systems.
 \item They run faster than the actual application.
 \end{itemize}
 
-However, we believe that the idea of using application skeletons, particularly for overall system performance, is relatively novel. 
- The distinction in our work is that the Skeletons provide an application replacement (or workload generation) capability in a systematic way, being tunable to a range of diverse application, including multi-stage applications, with the promise to preserve the significant part of the application's behavior. Because of the problem space is pervasive, but attempts to solve it systematically are rare, particularly for distributed applications, the related work we discuss here are examples of some of the different types of application replacements that have been used.
+However, we believe that the idea of using application skeletons, particularly
+for overall system performance, is relatively novel.  The distinction in our
+work is that the Skeletons provide an application replacement (or workload
+generation) capability in a systematic way, being tunable to a range of diverse
+application, including multi-stage applications, with the promise to preserve
+the significant part of the application's behavior. Because of the problem space
+is pervasive, but attempts to solve it systematically are rare, particularly for
+distributed applications, the related work we discuss here are examples of some
+of the different types of application replacements that have been used. \note{I
+  think this paragraph could do with smoothening}
 
-Examples of benchmarking/analysis work in a parallel (not distributed) context include the NAS Parallel Benchmarks~\cite{NPB}, and Berkeley Dwarfs~\cite{dwarfs} (also called `motifs') and the related OpenDwarfs~\cite{6868650}.
-The NAS benchmarks include both kernels and pseudo-applications (an example of reduced applications), intended for use on parallel (not distributed) computers.  These benchmarks can be scaled by choosing different predeveloped classes.  However, they cannot be arbitrarily tuned to expose particular system features, as skeletons can.
-The dwarf work has at its core the idea that there is a key computational or data movement kernel that is responsible for most of the application's performance, and that that kernel can be extracted and used to represent the full application, at least in terms of performance.
+Examples of benchmarking/analysis work in a parallel (not distributed) context
+include the NAS Parallel Benchmarks~\cite{NPB}, and Berkeley
+Dwarfs~\cite{dwarfs} (also called `motifs') and the related
+OpenDwarfs~\cite{6868650}.  The NAS benchmarks include both kernels and
+pseudo-applications (an example of reduced applications), intended for use on
+parallel (not distributed) computers.  These benchmarks can be scaled by
+choosing different predeveloped classes.  However, they cannot be arbitrarily
+tuned to expose particular system features, as skeletons can.  The dwarf work
+has at its core the idea that there is a key computational or data movement
+kernel that is responsible for most of the application's performance, and that
+that kernel can be extracted and used to represent the full application, at
+least in terms of performance.\note{Dwarf as opposed to dwarf?} 
 
-An alternative to reducing the application over the space of the application is reducing it over time.  For example, Sodhi et al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance skeletons.   
-These are short running parallel MPI programs with performance meant to fractionally represent the performance of the full applications.  Unlike the dwarf work, this assumes that the work done by applications is spread through out the application (not in a single kernel).
-This idea of fractional versions of parallel applications is also unlike our work, which produces simplified and scalable versions of full distributed applications. 
-Sodhi's work does overlap ours in its approach to automatically capturing the execution behavior of an application and automatically generating a synthetic skeleton program that reflects that execution behavior, but is also fairly different, as it focuses on single system MPI applications that do not have disk I/O.  
+An alternative to reducing the application over the space of the application is
+reducing it over time.  For example, Sodhi et
+al. ~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance
+skeletons.  These are short running parallel MPI programs with performance meant
+to fractionally represent the performance of the full applications.  Unlike the
+dwarf work, this assumes that the work done by applications is spread through
+out the application (not in a single kernel).  This idea of fractional versions
+of parallel applications is also unlike our work, which produces simplified and
+scalable versions of full distributed applications.  Our work overlaps with
+Ref.~\cite{Sodhi:2008:PPS:1355774.1355777}, in its approach to automatically
+capturing the execution behavior of an application and automatically generating
+a synthetic skeleton program that reflects that execution behavior; however,
+Ref.~\cite{Sodhi:2008:PPS:1355774.1355777} focuses on single system MPI
+applications that do not have disk I/O.
 
 Skel~\cite{Skel} uses a similar idea, though it aims at understanding the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
