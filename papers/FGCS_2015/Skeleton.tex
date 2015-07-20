@@ -275,12 +275,11 @@ Conclusions are drawn in Section~\ref{lb:Con}.
 
 \section{Modeling Background and Related Work}\label{lb:RFwork}
 
-\note{how about ``representative applications'' in lieu of application
-  replacements?}  \katznote{not really the same thing} Researchers have been using application replacements of
-various types (e.g., kernels, benchmarks, reduced applications, mini-apps) for
-experiments for a long time, and some of those replacements have been and are
-certainly tunable in one way or another. These application replacements are used for
-a variety of purposes, including: \katznote{others?}
+Researchers have been using application replacements of various types (e.g.,
+kernels, benchmarks, reduced applications, mini-apps) for experiments for a long
+time, and some of those replacements have been and are certainly tunable in one
+way or another. These application replacements are used for a variety of
+purposes, including: \katznote{others?}
 \begin{itemize}
 \item They are easier to build than the actual application.
 \item They can be reused across different system to compare those systems.
@@ -296,8 +295,7 @@ and is tunable across a range of diverse
 applications. Because of the problem space
 is pervasive but attempts to solve it systematically are rare, particularly for
 distributed applications, the related work we discuss here are examples of some
-of the different types of application replacements that have been used. \note{I
-  think this paragraph could do with smoothening} \katznote{tried - any better?}
+of the different types of application replacements that have been used. 
 
 Examples of benchmarking/analysis work in a parallel (not distributed) context
 include the NAS Parallel Benchmarks~\cite{NPB}, and Berkeley
@@ -310,7 +308,7 @@ tuned to expose particular system features, as skeletons can.  The dwarf work
 has at its core the idea that there is a key computational or data movement
 kernel that is responsible for most of the application's performance, and that
 that kernel can be extracted and used to represent the full application, at
-least in terms of performance.\note{Dwarf as opposed to dwarf?} \katznote{no}
+least in terms of performance.
 
 An alternative to reducing the application over the space of the application is
 reducing it over time.  For example, Sodhi et
