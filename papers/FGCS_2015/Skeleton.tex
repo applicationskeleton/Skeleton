@@ -159,9 +159,6 @@ We then show examples of using skeleton applications to verify system optimizati
 data caching, I/O tuning, and task scheduling, as well as the system resilience mechanism, in some cases modifying the skeleton applications to emphasize some characteristic, and thus show that using skeleton applications 
 simplifies the process of designing, implementing, and testing these optimizations.
 
-\note{I note that there isn't a mention of the profile/emulation that Synapse
-  provides in the abstract?} 
-
 \end{abstract}
 
 \begin{keyword}
@@ -204,6 +201,7 @@ demonstrate system trends and characteristics~\cite{DPA-paper}.
   to the DPA Paper that we're really interested in distributed
   applications. This ``detail'' was lost on at least one reviewer. If we do so,
   we should also add deployment challenges are another motivation for Skeletons}
+  \katznote{please give it a go}
 
 Our Application Skeletons idea was created in the AIMES project, whose goal is to explore the role of abstractions
 and integrated middleware to support eScience at extreme scales. AIMES is co-designing middleware from an application and infrastructure
@@ -230,7 +228,7 @@ distributed computing middleware, Swift~\cite{SWIFT2007, swift-ieee09, Swift_201
 site (a local cluster with a shared file system), and the skeleton set of tasks can also be output as a generic JSON object that can be used by other systems, such as in our case, by our AIMES middleware.
 
 Skeleton parameters can be discovered by either by manually or automatically profiling the application.
-Once the real application is represented by a Skeleton description file it can easily be reused.  
+Once the real application is represented by a Skeleton description file, it can easily be distributed and reused.  
 We measured the performance error between the skeleton application against three real applications (Montage~\cite{montage1,montage2}, BLAST~\cite{ParallelBlast}, and CyberShake PostProcessing~\cite{SCEC07}) on 64 processors of a BG/P supercomputer with per stage and total errors of between 1 and 3\%.
 And changing the parameters makes it easy to study how the system responds to different application characteristics, specifically data caching, task scheduling, I/O tuning, and resilience mechanism.
 
@@ -278,12 +276,11 @@ Conclusions are drawn in Section~\ref{lb:Con}.
 \section{Modeling Background and Related Work}\label{lb:RFwork}
 
 \note{how about ``representative applications'' in lieu of application
-  replacements?}  Researchers have been using application replacements of
+  replacements?}  \katznote{not really the same thing} Researchers have been using application replacements of
 various types (e.g., kernels, benchmarks, reduced applications, mini-apps) for
 experiments for a long time, and some of those replacements have been and are
-certainly tunable in one way or another. These application replacements are for
-a variety of purposes, including: \katznote{others?}\note{are we missing a verb,
-  like ``used''?}
+certainly tunable in one way or another. These application replacements are used for
+a variety of purposes, including: \katznote{others?}
 \begin{itemize}
 \item They are easier to build than the actual application.
 \item They can be reused across different system to compare those systems.
@@ -292,14 +289,15 @@ a variety of purposes, including: \katznote{others?}\note{are we missing a verb,
 
 However, we believe that the idea of using application skeletons, particularly
 for overall system performance, is relatively novel.  The distinction in our
-work is that the Skeletons provide an application replacement (or workload
-generation) capability in a systematic way, being tunable to a range of diverse
-application, including multi-stage applications, with the promise to preserve
-the significant part of the application's behavior. Because of the problem space
-is pervasive, but attempts to solve it systematically are rare, particularly for
+work is that the Skeletons provide a systematic application replacement 
+capability, which both preserves
+the significant part of the application's behavior
+and is tunable across a range of diverse
+applications. Because of the problem space
+is pervasive but attempts to solve it systematically are rare, particularly for
 distributed applications, the related work we discuss here are examples of some
 of the different types of application replacements that have been used. \note{I
-  think this paragraph could do with smoothening}
+  think this paragraph could do with smoothening} \katznote{tried - any better?}
 
 Examples of benchmarking/analysis work in a parallel (not distributed) context
 include the NAS Parallel Benchmarks~\cite{NPB}, and Berkeley
@@ -312,21 +310,21 @@ tuned to expose particular system features, as skeletons can.  The dwarf work
 has at its core the idea that there is a key computational or data movement
 kernel that is responsible for most of the application's performance, and that
 that kernel can be extracted and used to represent the full application, at
-least in terms of performance.\note{Dwarf as opposed to dwarf?} 
+least in terms of performance.\note{Dwarf as opposed to dwarf?} \katznote{no}
 
 An alternative to reducing the application over the space of the application is
 reducing it over time.  For example, Sodhi et
-al. ~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance
+al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance
 skeletons.  These are short running parallel MPI programs with performance meant
 to fractionally represent the performance of the full applications.  Unlike the
 dwarf work, this assumes that the work done by applications is spread through
 out the application (not in a single kernel).  This idea of fractional versions
 of parallel applications is also unlike our work, which produces simplified and
 scalable versions of full distributed applications.  Our work overlaps with
-Ref.~\cite{Sodhi:2008:PPS:1355774.1355777}, in its approach to automatically
+Sodhi's in its approach to automatically
 capturing the execution behavior of an application and automatically generating
 a synthetic skeleton program that reflects that execution behavior; however,
-Ref.~\cite{Sodhi:2008:PPS:1355774.1355777} focuses on single system MPI
+Sodhi focuses on single system MPI
 applications that do not have disk I/O.
 
 Skel~\cite{Skel} uses a similar idea, though it aims at understanding the I/O performance of parallel applications on supercomputers. Users can extract 
@@ -433,7 +431,7 @@ input files, sleeps (in place of computation), then writes output files, while o
 We want to balance between mimicking the exact the operation sequence of the real application tasks' I/O and computation in the skeleton task and having very simple programming.  The former requires reimplementing the actual task and results in poor programmability, while the latter gives very different performance.  As a compromise,
  we define four interleaving options for a skeleton task (the serial task or the rank 0 process in a parallel task): %, as visualized in Figure~\ref{fig:interleave}:
 \begin{enumerate}
-\item[0)] \textbf{interleave-nothing}: reads, computes, then writes
+\item[0.] \textbf{interleave-nothing}: reads, computes, then writes
 \item{\textbf{interleave-read-compute}:} interleaves reads and computations, then writes outputs
 \item{\textbf{interleave-compute-write}:} reads all inputs, then interleaves writes and computations
 \item{\textbf{interleave-all}:} interleave reads, computations, and writes
@@ -946,7 +944,7 @@ instead of metrics that represent the \I{effects} of resource
 consumption (such as runtime) allows a more accurate representation of
 the application behavior on arbitrary target resources, and thus
 provides adequate input to the application emulation via skeletons.
-In Section~\ref{sec:Montage} we will discuss the extent to which the
+In Section~\ref{sec:Montage}, we will discuss the extent to which the
 profiles provided by SYNAPSE support the results of the manual
 profiling, which have been used in the skeleton emulation experiments.
 % \amnote{In the later section on skeleton parameters, we need to pick
