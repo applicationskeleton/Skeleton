@@ -70,11 +70,13 @@
 \newcommand{\katznote}[1]{ {\textcolor{blue}    { ***Dan:   #1 }}}
 \newcommand{\zhaonote}[1]{{\textcolor{darkgreen}{ ***Zhao:  #1 }}}
 \newcommand{\amnote}[1]{{\textcolor{magenta}    { ***Andre: #1 }}}
+\newcommand{\jhanote}[1]{{\textcolor{green}    { ***Shantenu: #1 }}}
 \newcommand{\note}[1]{ {\textcolor{red}    {\bf #1 }}}
 \else
 \newcommand{\katznote}[1]{}
 \newcommand{\zhaonote}[1]{}
 \newcommand{\amnote}[1]{}
+\newcommand{\jhanote}[1]{}
 \newcommand{\note}[1]{}
 \fi
 
@@ -197,7 +199,7 @@ or more of the following reasons:
 In addition, real applications may be difficult to scale or modify in order to
 demonstrate system trends and characteristics~\cite{DPA-paper}.
 
-\note{Maybe we should add a sentence or two -- possibly around the reference
+\jhanote{Maybe we should add a sentence or two -- possibly around the reference
   to the DPA Paper that we're really interested in distributed
   applications. This ``detail'' was lost on at least one reviewer. If we do so,
   we should also add deployment challenges are another motivation for Skeletons}
@@ -823,7 +825,7 @@ manual approach.  In many ways, it is complementary to the work described
 in~\cite{ENVELOPE}; whereas the latter aims to describe system performance in an
 application independent way, SYNAPSE describes application performance
 independent of the system's envelope, by focusing on system independent
-performance metrics.\note{Andre: system's envelope is unclear. Please clarify}
+performance metrics.\jhanote{Andre: system's envelope is unclear. Please clarify}
 
 
 \subsection{System Independent Profiling}
