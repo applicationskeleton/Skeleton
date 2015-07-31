@@ -45,6 +45,7 @@
 \usepackage{graphicx}
 \usepackage{wrapfig}
 \usepackage{caption}
+\usepackage{booktabs}
 \usepackage{subcaption}
 \usepackage{ifpdf}
 
@@ -83,6 +84,8 @@
 \newcommand{\I}[1]{\textit{#1}\xspace}
 \newcommand{\B}[1]{\textbf{#1}\xspace}
 \newcommand{\T}[1]{\texttt{#1}\xspace}
+\newcommand{\N}{\newline}
+\newcommand{\HF}{\hfill}
 
 \journal{FGCS}
 
@@ -1000,17 +1003,19 @@ Measured Time Avg and Measured Time Stdev show the average and the standard devi
 \begin{center}
     \caption{Number of tasks, inputs, and outputs, and input and output size, for each Montage stage}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1.65cm} | p{0.6cm} | p{0.65cm} | p{0.75cm} | p{0.85cm} | p{0.85cm} | p{1.2cm} | p{1.3cm} | p{1.7cm} |}
-    \hline
-    Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
-    mProject    & 1319 & 1319 & 2594 &  2800 & 10400 & 11.6 &  2.5 & uniform 11.6\\ \hline
-    mImgtbl     &    1 & 1297 &    1 &  5200 &   0.8 &  N/A &    0 & uniform 30.1\\ \hline
-    mOverlaps   &    1 &    1 &    1 &   0.8 &   0.4 &  9.1 &    0 & uniform  9.1\\ \hline
-    mDiffFit    & 3883 & 7766 & 7766 & 31000 &   487 &  1.8 &  0.6 & uniform  1.8\\ \hline
-    mConcatFit  &    1 & 3883 &    1 &   1.1 &   4.3 &  2.1 &    0 & uniform  2.1\\ \hline
-    mBgModel    &    1 &    2 &    1 &   4.5 &  0.07 &  288 &    0 & uniform  288\\ \hline
-    mBackground & 1297 & 1297 & 1297 &  5200 &  5200 &  0.4 & 0.08 & uniform  0.4\\ \hline
-    mAdd        &    1 & 1297 &    2 &  5200 &  7400 &  N/A &    0 & uniform  519\\ \hline
+    \begin{tabular}{ @{} p{1.9cm} p{0.65cm} p{0.80cm} p{0.85cm} p{1.00cm} p{1.00cm} p{1.10cm} p{1.1cm} p{2.1cm}@{}}
+    \toprule
+    \B{Stage} & \B{\#\N Tasks} & \B{\#\N Inputs} & \B{\#\N Outputs} & \B{In\N (MB)} & \B{Out\N (MB)} & \B{Runtime Avg (s)} & \B{Runtime Stdev} & \B{Skeleton Task\N Length}\\
+    \midrule
+    \B{mProject   } & \HF 1319 & \HF 1319 & \HF 2594 & \HF  2800.0 & \HF 10400.0 & \HF  11.6 & \HF  2.5 & uniform \HF  11.6\\
+    \B{mImgtbl    } & \HF    1 & \HF 1297 & \HF    1 & \HF  5200.0 & \HF     0.8 & \HF   N/A & \HF  0.0 & uniform \HF  30.1\\
+    \B{mOverlaps  } & \HF    1 & \HF    1 & \HF    1 & \HF     0.8 & \HF     0.4 & \HF   9.1 & \HF  0.0 & uniform \HF   9.1\\
+    \B{mDiffFit   } & \HF 3883 & \HF 7766 & \HF 7766 & \HF 31000.0 & \HF   487.0 & \HF   1.8 & \HF  0.6 & uniform \HF   1.8\\
+    \B{mConcatFit } & \HF    1 & \HF 3883 & \HF    1 & \HF     1.1 & \HF     4.3 & \HF   2.1 & \HF  0.0 & uniform \HF   2.1\\
+    \B{mBgModel   } & \HF    1 & \HF    2 & \HF    1 & \HF     4.5 & \HF     0.1 & \HF 288.0 & \HF  0.0 & uniform \HF 288.0\\
+    \B{mBackground} & \HF 1297 & \HF 1297 & \HF 1297 & \HF  5200.0 & \HF  5200.0 & \HF   0.4 & \HF  0.1 & uniform \HF   0.4\\
+    \B{mAdd       } & \HF    1 & \HF 1297 & \HF    2 & \HF  5200.0 & \HF  7400.0 & \HF   N/A & \HF  0.0 & uniform \HF   519\\
+    \bottomrule
     \end{tabular}
     \end{scriptsize}
     \label{tb:montage-stats}
@@ -1035,14 +1040,16 @@ the result as the estimated task length.
 \begin{center}
     \caption{Time-To-Solution Comparison of Skeleton Montage and Real Montage (seconds)}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1cm} | p{1.05cm} | p{1cm} | p{1.2cm} | p{0.75cm} | p{1.1cm} | p{0.8cm} | p{1.0cm} | p{0.75cm} | p{0.8cm} |}
-    \hline
-               & mProject& mImgtbl   & mOverlaps  & mDiff- Fit   & mConcat- Fit & mBg- Model & mBack- ground & mAdd   & Total \\ \hline \hline
-      Montage  & 282.3   & 139.7     & 10.2       & 426.7        & 60.1         & 288.0      & 107.9         &  788.8 & 2103.7\\ \hline
-      Stdev    &   9.7   &   1.8     &  0.1       &   8.4        &  3.4         &   0.1      &   2.8         &    5.9 &    ---\\ \hline
-      Skeleton & 281.8   & 136.8     & 10.0       & 412.5        & 59.2         & 288.1      & 106.2         &  781.8 & 2076.4\\ \hline
-      Stdev    &   7.7   &   4.1     &  0.1       &   7.8        &  2.3         &   0.1      &   9.9         &    6.0 &    ---\\ \hline
-      Error    & -0.2\%  & -2.1\%    & -0.2\%     & -3.3\%       & -1.5\%       & 0.03\%     & -1.6\%        & -0.9\% & -1.3\%\\ \hline
+        \begin{tabular}{ @{} p{1.4cm}@{}p{1.10cm} p{1.00cm} p{1.3cm} p{0.80cm} p{1.2cm} p{0.9cm} p{1.1cm} p{0.75cm} p{0.9cm} @{}}
+    \toprule
+    & \B{mProject} & \B{mImgtbl} & \B{mOverlaps} & \B{mDiff- Fit} & \B{mConcat- Fit} & \B{mBg- Model} & \B{mBack- ground} & \B{mAdd}     & \B{Total}   \\
+    \midrule
+    \B{Montage } & \HF 282.3   & \HF 139.7   & \HF 10.2      & \HF 426.7      & \HF 60.1         & \HF 288.0      & \HF 107.9         &  \HF 788.8   & \HF 2103.7  \\
+    \B{Stdev   } & \HF   9.7   & \HF   1.8   & \HF  0.1      & \HF   8.4      & \HF  3.4         & \HF   0.1      & \HF   2.8         &  \HF   5.9   & \HF    ---  \\
+    \B{Skeleton} & \HF 281.8   & \HF 136.8   & \HF 10.0      & \HF 412.5      & \HF 59.2         & \HF 288.1      & \HF 106.2         &  \HF 781.8   & \HF 2076.4  \\
+    \B{Stdev   } & \HF   7.7   & \HF   4.1   & \HF  0.1      & \HF   7.8      & \HF  2.3         & \HF   0.1      & \HF   9.9         &  \HF   6.0   & \HF    ---  \\
+    \B{Error   } & \HF  -0.2\% & \HF -2.1\%  & \HF -0.2\%    & \HF  -3.3\%    & \HF -1.5\%       & \HF   0.1\%    & \HF  -1.6\%       &  \HF  -0.9\% & \HF   -1.3\%\\
+    \bottomrule
     \end{tabular}
     \end{scriptsize}
     \label{tb:montage-results}
@@ -1104,17 +1111,19 @@ architecturally very different x86 CPU.
 \begin{center}
     \caption{runtime observation vs. runtime prediction}
     \begin{scriptsize}
-    \begin{tabular}{|l|r|r|r|}
-    \hline
-    Stage       & measurement & prediction &  deviation \\\hline
-    mProject    &        11.6 &       8.54 &       1.35 \\ \hline
-    mImgtbl     &         N/A &      27.41 &        N/A \\ \hline
-    mOverlaps   &         9.1 &       7.36 &       1.23 \\ \hline
-    mDiffFit    &         1.8 &        N/A &        N/A \\ \hline
-    mConcatFit  &         2.1 &        N/A &        N/A \\ \hline
-    mBgModel    &       288.0 &     386.69 &       0.74 \\ \hline
-    mBackground &         0.4 &       0.62 &       0.64 \\ \hline
-    mAdd        &         N/A &    1477.54 &        N/A \\ \hline
+        \begin{tabular}{@{}l@{}rrr@{}}
+    \toprule
+    \B{Stage}       & \B{measurement} & \B{prediction} &  \B{deviation} \\
+    \midrule
+    \B{mProject   } &        11.6 &       8.54 &       1.35 \\
+    \B{mImgtbl    } &         N/A &      27.41 &        N/A \\
+    \B{mOverlaps  } &         9.1 &       7.36 &       1.23 \\
+    \B{mDiffFit   } &         1.8 &        N/A &        N/A \\
+    \B{mConcatFit } &         2.1 &        N/A &        N/A \\
+    \B{mBgModel   } &       288.0 &     386.69 &       0.74 \\
+    \B{mBackground} &         0.4 &       0.62 &       0.64 \\
+    \B{mAdd       } &         N/A &    1477.54 &        N/A \\
+    \bottomrule
     \end{tabular}
     \end{scriptsize}
     \label{tb:prof-compare}
@@ -1171,13 +1180,15 @@ shows the basic statistics of each BLAST stage.
 \begin{center}
     \caption{Number of tasks, inputs, and outputs, and input and output size, for each BLAST stage}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1.25cm} | p{0.6cm} | p{0.65cm} | p{0.75cm} | p{0.85cm} | p{0.85cm} | p{1.2cm} | p{1.2cm} | p{2.5cm} |}
-    \hline
-    Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
-    split & 1 & 1 & 64 & 3800 & 3800 & 0 & N/A & 0\\ \hline
-    formatdb & 64 & 64 & 192 & 3800 & 4400 & 41.9 & 0.1 & uniform 42\\ \hline
-    blastp & 1024 & 4096 & 1024 & 70402 & 966 & 109.2 & 14.9 & normal[109.2, 14.9]\\ \hline
-    merge & 16 & 1024 & 16 & 966 & 867 & 4.4 & 4.1 & normal[4.4, 4.1]\\ \hline
+    \begin{tabular}{ @{} p{1.4cm} @{}p{0.65cm} p{0.80cm} p{0.95cm} p{0.85cm} p{1.00cm} p{1.10cm} p{1.1cm} p{2.8cm}@{}}
+    \toprule
+    \B{Stage} & \B{\#\N Tasks} & \B{\#\N Inputs} & \B{\#\N Outputs} & \B{In\N (MB)} & \B{Out\N (MB)} & \B{Runtime Avg (s)} & \B{Runtime Stdev} & \B{Skeleton Task\N Length}\\
+    \midrule
+    \B{split   } & \HF    1 & \HF    1 & \HF   64 & \HF  3800 & \HF 3800 & \HF   0.0 & \HF  N/A &         \HF             0 \\
+    \B{formatdb} & \HF   64 & \HF   64 & \HF  192 & \HF  3800 & \HF 4400 & \HF  41.9 & \HF  0.1 & uniform \HF            42 \\
+    \B{blastp  } & \HF 1024 & \HF 4096 & \HF 1024 & \HF 70402 & \HF  966 & \HF 109.2 & \HF 14.9 & normal  \HF [109.2, 14.9] \\
+    \B{merge   } & \HF   16 & \HF 1024 & \HF   16 & \HF   966 & \HF  867 & \HF   4.4 & \HF  4.1 & normal  \HF    [4.4, 4.1] \\
+    \bottomrule
     \end{tabular}
     \end{scriptsize}
     \label{tb:blast-stats}
@@ -1239,14 +1250,16 @@ GPFS. So when we compare the Skeleton and real formatdb, we run the both with da
 \begin{center}
     \caption{Time-To-Solution Comparison of Skeleton BLAST and Real BLAST (seconds)}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1cm} | p{1cm} |p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | }
-    \hline
-             & split  & formatdb & blastp & merge & Total  \\ \hline \hline
-    BLAST    & 74.4   & 82.1     & 1996.3 & 35.9  & 2188.7 \\ \hline
-    Stdev    &  0.6   &  1.7     &    6.0 &  1.1  &    --- \\ \hline
-    Skeleton & 72.9   & 81.6     & 2028.9 & 36.3  & 2219.7 \\ \hline
-    Stdev    &  2.7   &  0.3     &    1.2 &  0.5  &    --- \\ \hline
-    Error    & -1.9\% & -0.6\%   & 1.6\%  & 1.1\% &  1.4\% \\ \hline
+        \begin{tabular}{ @{} p{1.4cm} p{1.2cm} p{1.4cm} p{1.4cm} p{1.4cm} p{1.4cm} @{} }
+    \toprule
+             & \HF \B{split}  & \HF \B{formatdb} & \HF \B{blastp} & \HF \B{merge} & \HF \B{Total}\\ 
+    \midrule
+    \B{BLAST   } & \HF 74.4   & \HF 82.1     & \HF 1996.3 & \HF 35.9  & \HF 2188.7 \\
+    \B{Stdev   } & \HF  0.6   & \HF  1.7     & \HF    6.0 & \HF  1.1  & \HF    --- \\
+    \B{Skeleton} & \HF 72.9   & \HF 81.6     & \HF 2028.9 & \HF 36.3  & \HF 2219.7 \\
+    \B{Stdev   } & \HF  2.7   & \HF  0.3     & \HF    1.2 & \HF  0.5  & \HF    --- \\
+    \B{Error   } & \HF -1.9\% & \HF -0.6\%   & \HF 1.6\%  & \HF 1.1\% & \HF  1.4\% \\
+    \bottomrule
     \end{tabular}
     \end{scriptsize}
     \label{tb:blast-results}
@@ -1257,12 +1270,14 @@ GPFS. So when we compare the Skeleton and real formatdb, we run the both with da
 \begin{center}
     \caption{Number of tasks, inputs, and outputs, and input and output size, for each CyberShake Postprocessing stage}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1.25cm} | p{0.6cm} | p{0.65cm} | p{0.75cm} | p{0.85cm} | p{0.85cm} | p{1.2cm} | p{1.2cm} | p{2.5cm} |}
-    \hline
-    Stage & \# Tasks & \# Inputs & \# Outputs & In (MB) & Out (MB) & Measured Time Avg (s) & Measured Time Stdev & Skeleton Task Length\\ \hline \hline
-    Extract & 128 & 130 & 256 & 5400 & 11000 & 6.39 & 2.2 & uniform 6.39\\ \hline
-    Seis & 4096 & 4352 & 4096 & 11000 & 96 & 26.9 & 13.3 & normal[26.9, 13.3]\\ \hline
-    PeakGM & 4096 & 4096 & 4096 & 96 & 1.4 & 0.23 & 0.03 & uniform 0.23\\ \hline
+        \begin{tabular}{ @{} p{1.5cm} @{} p{0.80cm} p{0.80cm} p{0.80cm} p{1.00cm} p{1.00cm} p{1.2cm} p{1.1cm} p{2.5cm}@{}}
+    \toprule
+    \B{Stage} & \B{\#\N Tasks} & \B{\#\N Inputs} & \B{\#\N Outputs} & \B{In\N (MB)} & \B{Out\N (MB)} & \B{Runtime Avg (s)} & \B{Runtime Stdev} & \B{Skeleton Task\N Length}\\
+    \midrule
+    \B{Extract} & \HF  128 & \HF  130 & \HF  256 & \HF  5400 & \HF 11000.0 & \HF  6.4 & \HF  2.2 & uniform \HF         6.39\\
+    \B{Seis   } & \HF 4096 & \HF 4352 & \HF 4096 & \HF 11000 & \HF    96.0 & \HF 26.9 & \HF 13.3 & normal  \HF [26.9, 13.3]\\
+    \B{PeakGM } & \HF 4096 & \HF 4096 & \HF 4096 & \HF    96 & \HF     1.4 & \HF  0.2 & \HF  0.1 & uniform \HF         0.23\\
+    \bottomrule
     \end{tabular}
     \end{scriptsize}
     \label{tb:cybershake-stats}
@@ -1289,14 +1304,16 @@ Table~\ref{tb:cybershake-stats} shows the basic statistics of each CyberShake Po
 \begin{center}
     \caption{Time-To-Solution Comparison of Skeleton CyberShake and Real CyberShake (seconds)}
     \begin{scriptsize}
-    \begin{tabular}{ | p{1.5cm} | p{1cm} | p{1cm} | p{1.2cm} | p{1cm} | }
-    \hline
-               & Extract & Seis   & PeakGM & Total  \\ \hline \hline
-    CyberShake & 571.5   & 2386.5 & 81.5   & 3039.4 \\ \hline
-    Stdev      &  15.9   &   40.8 &  1.5   &    --- \\ \hline
-    Skeleton   & 586.3   & 2443.3 & 83.3   & 3112.9 \\ \hline
-    Stdev      &   1.5   &    4.9 &  2.7   &    --- \\ \hline
-    Error      & 2.6\%   & 2.4\%  & 2.3\%  & 2.4\%  \\ \hline
+        \begin{tabular}{ @{} p{1.5cm} p{1cm} p{1cm} p{1.2cm} p{1cm} @{} }
+    \toprule
+                   & \B{Extract} & \B{Seis}   & \B{PeakGM} & \B{Total}  \\ 
+    \midrule
+    \B{CyberShake} & 571.5       & 2386.5     & 81.5       & 3039.4     \\
+    \B{Stdev     } &  15.9       &   40.8     &  1.5       &    ---     \\
+    \B{Skeleton  } & 586.3       & 2443.3     & 83.3       & 3112.9     \\
+    \B{Stdev     } &   1.5       &    4.9     &  2.7       &    ---     \\
+    \B{Error     } & 2.6\%       & 2.4\%      & 2.3\%      & 2.4\%      \\
+    \bottomrule
     \end{tabular}
     \end{scriptsize}
     \label{tb:cybershake-results}
