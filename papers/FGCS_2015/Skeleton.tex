@@ -199,19 +199,26 @@ or more of the following reasons:
 \item {} Some applications use legacy code and are dependent on out-of-date libraries.
 \item {} Some applications are hard to understand because they implicitly assume domain knowledge.
 \end{itemize}
+
 In addition, real applications may be difficult to scale or modify in order to
-demonstrate system trends and characteristics~\cite{DPA-paper}.
+demonstrate system trends and characteristics. Our work is partially motivated
+by the state of distributed applications.  Ref.~\cite{DPA-paper,dpagrid2009}
+highlighted the challenges of developing distributed applications. The lack of
+development abstractions and the complexity of deployment were two important
+barriers that were identified.  \jhanote{Maybe we should add a sentence or two
+  -- possibly around the reference to the DPA Paper that we're really interested
+  in distributed applications. This ``detail'' was lost on at least one
+  reviewer. If we do so, we should also add deployment challenges are another
+  motivation for Skeletons} \katznote{please give it a go}\jhanote{OK?}
 
-\jhanote{Maybe we should add a sentence or two -- possibly around the reference
-  to the DPA Paper that we're really interested in distributed
-  applications. This ``detail'' was lost on at least one reviewer. If we do so,
-  we should also add deployment challenges are another motivation for Skeletons}
-  \katznote{please give it a go}
-
-Our Application Skeletons idea was created in the AIMES project, whose goal is to explore the role of abstractions
-and integrated middleware to support eScience at extreme scales. AIMES is co-designing middleware from an application and infrastructure
-perspective. Thus, it requires applications with various characteristics for better application coverage. We have previously encountered many problems
-when accessing real applications and when trying to distribute applications and data as test cases to other researchers. Application Skeletons are intended to overcome these issues.
+Our Application Skeletons idea was created in the AIMES project, whose goal is
+to explore the role of abstractions and integrated middleware to support
+eScience at extreme scales. AIMES is co-designing middleware from an application
+and infrastructure perspective. Thus, it requires applications with various
+characteristics for better application coverage. We have previously encountered
+many problems when accessing real applications and when trying to distribute
+applications and data as test cases to other researchers. Application Skeletons
+are intended to overcome these issues.
 
 We previously presented~\cite{Skeleton2013} the Skeleton idea of working around such issues by quickly
 and easily producing a synthetic distributed application that is executable in a distributed environment, for example, grids, clusters, and clouds, and then showed~\cite{Skeleton2014} improvements in reducing the gap between skeleton and real application performance, as well
@@ -403,10 +410,12 @@ The Application Skeleton concept ideally should also allow a concurrent applicat
 %task dependencies at the file level (e.g. Swift) will be able to launch both stages simultaneously.
 
 \subsection{Task Configuration}
-The core elements of tasks are computation and I/O. In the Application Skeleton design, time consumption of computation is represented
-by letting the task sleep for a user-specified period.
-A serial task
-only mimics the computation and I/O, since in many applications the communication between tasks is in the form of file production and consumption. Tasks with communication between processes (within a task) are referred to as parallel tasks. 
+The core elements of tasks are computation and I/O. In the Application Skeleton
+design, time consumption of computation is represented by letting the task sleep
+for a user-specified period.  A serial task only mimics the computation and I/O,
+since in many applications the communication between tasks is in the form of
+file production and consumption. Tasks with communication between processes
+(within a task) are referred to as parallel tasks.
 %Parallel tasks can mimic the computation and I/O operations, 
 %while the communication within tasks are simplified as a barrier before the task exits. 
 %\katznote{last part is a little hard to understand}
@@ -827,10 +836,11 @@ automates the application profiling at a comparable level of granularity as the
 manual approach.  In many ways, it is complementary to the work described
 in~\cite{ENVELOPE}; whereas the latter aims to describe system performance in an
 application independent way, SYNAPSE describes application performance
-independent of the system's envelope~\cite{ENVELOPE}, by focusing on system independent
-performance metrics.
-\jhanote{Andre: system's envelope is unclear. Please clarify}
-\amnote{addressed (I hope).}
+independent of the system's envelope~\cite{ENVELOPE}, by focusing on system
+independent performance metrics.  \jhanote{Andre: system's envelope is
+  unclear. Please clarify} \amnote{addressed (I hope).}\jhanote{Unfortunately,
+  I'm still not sure what envelope is referring to. System properties?  System
+  specifics?}
 
 
 \subsection{System Independent Profiling}
