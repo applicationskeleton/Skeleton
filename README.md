@@ -22,6 +22,10 @@ Documentation about Skeletons can be found in the report directory
 
 Contributors are welcome!
 
+To receive email about commits to this repo, join the Google Groups "skeleton-commits" group,
+http://groups.google.com/group/skeleton-commits/subscribe
+
+
 =======
 
 A paper about the first version of Application Skeletons is:
