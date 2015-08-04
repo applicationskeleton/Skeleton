@@ -111,9 +111,9 @@ setup_args = {
     'long_description' : (read('README.md') + '\n\n' + read('CHANGES.md')),
     'author'           : '',
     'author_email'     : '',
-    'maintainer'       : '',
-    'maintainer_email' : '',
-    'url'              : '',
+    'maintainer'       : 'Yadu Nand Babuji',
+    'maintainer_email' : 'yadu@uchicago.edu',
+    'url'              : 'https://github.com/applicationskeleton',
     'license'          : 'MIT',
     'keywords'         : '',
     'classifiers'      : [
@@ -137,7 +137,7 @@ setup_args = {
     'packages'         : find_packages('src'),
     'package_dir'      : {'': 'src'},
     'scripts'          : ['bin/aimes-skeleton-generate',
-                          'bin/aimes-skeleton-version', 
+                          'bin/aimes-skeleton-version',
                           'bin/dax2dot'],
     'package_data'     : {'': ['*.sh', '*.c', 'VERSION', 'VERSION.git']},
 
