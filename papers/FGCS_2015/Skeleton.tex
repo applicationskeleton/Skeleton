@@ -324,6 +324,14 @@ kernel that is responsible for most of the application's performance, and that
 that kernel can be extracted and used to represent the full application, at
 least in terms of performance.
 
+Additional examples are from Kerbyson et
+al.~\cite{Kerbyson_SC13}, who used simplified version of parallel MPI applications
+to study Blue Gene systems; and Worley et al.~\cite{Worley1994,FosterWorley1997}, 
+who studied a parallel spectral transform shallow water model by implementing the
+real spectral transform in what is otherwise a synthetic code that replicates a
+range of different communication structures as found in different parallelizations
+of climate models.  Similarly, Prophesy~\cite{Taylor_HPDC2000} is an infrastructure that helps in performance modeling of applications on parallel and distributed systems through a relational database that allows for the recording of performance data, system features and application details.  The applications data gathered has some overlap with the processes by which we can obtain our skeleton parameters.
+
 An alternative to reducing the application over the space of the application is
 reducing it over time.  For example, Sodhi et
 al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance
@@ -352,10 +360,7 @@ Chen et al.~\cite{MRTraces2012}, who analyzed a collection of industrial MapRedu
 Harter et al.~\cite{HDFSTraces2014}, who studied the underlying HDFS traces to understand the performance of the Facebook message service, then proposed potential improvements; and
 Ousterhout et al.~\cite{SparkTrace2015}, who analyzed the Spark traces of industrial applications to study potential improvements of potential hardware upgrades.
 
-Very loosely related work includes Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values.
-
-%Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
-%programs based on the algorithmic skeletons.
+Loosely related work includes Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values; and algorithmic motifs (formerly called skeletons)~\cite{foster1990parallel}, which abstracts parallel application with an algorithmic approach, and lets users build parallel programs based on the algorithmic motifs.  The term skeleton has also been used in SKOPE, which produces a descriptive model about the semantic behavior of a workload, which can infer potential transformations and help users understand how workloads may interact with and adapt to emerging hardware. SKOPE models can be shared, annotated, and studied by a community of performance engineers and system designers.
 
 
 
