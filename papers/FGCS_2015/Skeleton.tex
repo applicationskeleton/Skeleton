@@ -289,7 +289,7 @@ Conclusions are drawn in Section~\ref{lb:Con}.
 \section{Modeling Background and Related Work}\label{lb:RFwork}
 
 Researchers have been using application replacements of various types (e.g.,
-kernels, benchmarks, reduced applications, mini-apps, traces~\zhaonote{add ``traces'' as an app replacement}) for experiments for a long
+kernels, benchmarks, reduced applications, mini-apps, traces) for experiments for a long
 time, and some of those replacements have been and are certainly tunable in one
 way or another. These application replacements are used for a variety of
 purposes, including: %\katznote{others?}
@@ -297,7 +297,7 @@ purposes, including: %\katznote{others?}
 \item They are easier to build than the actual application.
 \item They can be reused across different system to compare those systems.
 \item They run faster than the actual application.
-\item They can be shared with collaborators who do not have access to the application or the data. \zhaonote{add one more for traces}
+\item They can be shared with collaborators who do not have access to the application or the data. 
 \end{itemize}
 
 However, we believe that the idea of using application skeletons, particularly
@@ -347,14 +347,12 @@ The work that is probably closest to ours is WGL~\cite{WGL}, which abstracts an 
 describing the dataflow patterns between stages.  Since there is some institutional overlap between
 the WGL developers and Skeleton developers and because both overlap the Swift team, it's likely that informal discussions carried some of this concept from WGL to Skeletons, though there is a nine-year gap between the projects.
 
+Another application replacement is system traces, used when the analyzers do not have access to the applications or the data.  Some examples of system traces can be found in:
+Chen et al.~\cite{MRTraces2012}, who analyzed a collection of industrial MapReduce workload traces and built a big data processing benchmark for MapReduce systems;
+Harter et al.~\cite{HDFSTraces2014}, who studied the underlying HDFS traces to understand the performance of the Facebook message service, then proposed potential improvements; and
+Ousterhout et al.~\cite{SparkTrace2015}, who analyzed the Spark traces of industrial applications to study potential improvements of potential hardware upgrades.
+
 Very loosely related work includes Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values.
-
-\zhaonote{add trace study refs}
-Analyzing system traces is another application replacement when the analyzers do not have access to the applications or the data. 
-Chen et al.~\cite{MRTraces2012} analyzes a collection of industrial MapReduce workload traces and builds a big data processing benchmark for MapReduce systems.
-Harter et al.~\cite{HDFSTraces2014} studies the underlying HDFS traces to understand the performance of the Facebook message service then proposes potential improvements.
-Ousterhout et al.~\cite{SparkTrace2015} analyzes the Spark traces of industrial applications to study the improvement space of certain hardware upgrade.
-
 
 %Algorithmic motifs (skeletons)~\cite{foster1990parallel} abstracts parallel application with an algorithmic approach, and let users build parallel
 %programs based on the algorithmic skeletons.
