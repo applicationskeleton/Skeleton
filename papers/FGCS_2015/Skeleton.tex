@@ -332,6 +332,17 @@ real spectral transform in what is otherwise a synthetic code that replicates a
 range of different communication structures as found in different parallelizations
 of climate models.  Similarly, Prophesy~\cite{Taylor_HPDC2000} is an infrastructure that helps in performance modeling of applications on parallel and distributed systems through a relational database that allows for the recording of performance data, system features and application details.  The applications data gathered has some overlap with the processes by which we can obtain our skeleton parameters.
 
+Mini-apps are another tool for improving the performance characterization of high-performance
+applications. Two specific projects are Mantevo~\cite{mantevo-url},
+which provides dominant numerical kernels
+contained in an actual ``stand-alone'' application, predicated upon the
+fact that the performance critical sections of applications are fairly
+localized,  and DOE Mini-apps~\cite{mini-apps-url}, focusing on the
+programming models and
+communication patterns of a range of applications from material sciences to
+combustion.
+
+
 An alternative to reducing the application over the space of the application is
 reducing it over time.  For example, Sodhi et
 al.~\cite{Sodhi:2008:PPS:1355774.1355777} developed a tool called performance
@@ -346,15 +357,6 @@ application and automatically generating a synthetic skeleton program that
 reflects that execution behavior; however, Sodhi focuses on single system MPI
 applications that do not have disk I/O.
 
-The desire to improve the performance characterization of high-performance
-applications has been a primary driver of {\it miniapps}. We briefly discuss two
-specific projects: Mantevo~\cite{mantevo-url} and DOE
-Mini-apps~\cite{mini-apps-url}.  The former provide dominant numerical kernels
-contained in an actual ``stand-alone'' application and is predicated upon the
-fact that the performance critical sections of applications are fairly
-localized. The DOE Mini-apps project focuses on the programming models and
-communication patterns of a range of applications in material sciences to
-combustion.
 
 % http://portal.nersc.gov/project/CAL/overview.htm
 
