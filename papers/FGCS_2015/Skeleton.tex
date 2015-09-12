@@ -341,11 +341,26 @@ dwarf work, this assumes that the work done by applications is spread through
 out the application (not in a single kernel).  This idea of fractional versions
 of parallel applications is also unlike our work, which produces simplified and
 scalable versions of full distributed applications.  Our work overlaps with
-Sodhi's in its approach to automatically
-capturing the execution behavior of an application and automatically generating
-a synthetic skeleton program that reflects that execution behavior; however,
-Sodhi focuses on single system MPI
+Sodhi's in its approach to automatically capturing the execution behavior of an
+application and automatically generating a synthetic skeleton program that
+reflects that execution behavior; however, Sodhi focuses on single system MPI
 applications that do not have disk I/O.
+
+The desire to improve the performance characterization of high-performance
+applications has been a primary driver of {\it miniapps}. We briefly discuss two
+specific projects: Mantevo~\cite{mantevo-url} and DOE
+Mini-apps~\cite{mini-apps-url}.  The former provide dominant numerical kernels
+contained in an actual ``stand-alone'' application and is predicated upon the
+fact that the performance critical sections of applications are fairly
+localized. The DOE Mini-apps project focuses on the programming models and
+communication patterns of a range of applications in material sciences to
+combustion.
+
+% http://portal.nersc.gov/project/CAL/overview.htm
+
+% https://mantevo.org/
+
+
 
 Skel~\cite{Skel} uses a similar idea, though it aims at understanding the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
