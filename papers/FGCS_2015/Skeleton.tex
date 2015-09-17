@@ -367,6 +367,7 @@ applications that do not have disk I/O.
 Skel~\cite{Skel} uses a similar idea, though it aims at understanding the I/O performance of parallel applications on supercomputers. Users can extract 
 the I/O behavior from an application, then produce a skeletal application that mimics the I/O operations and pattern by specifying
 a Skel configuration file. The produced skeletal application can run on ADIOS~\cite{ADIOS}. 
+Another similar idea is found in the Tigres project~\cite{tigres}, which has a concept of templates that could potentially be used as an alternate method to define skeletons, though the skeletons described by these templates would more limited than the skeletons described using our method.
 
 The work that is probably closest to ours is WGL~\cite{WGL}, which abstracts an application from a dataflow point of view and lets users generate a Swift script for a potentially distributed workflow application by 
 describing the dataflow patterns between stages.  Since there is some institutional overlap between
@@ -378,7 +379,6 @@ Harter et al.~\cite{HDFSTraces2014}, who studied the underlying HDFS traces to u
 Ousterhout et al.~\cite{SparkTrace2015}, who analyzed the Spark traces of industrial applications to study potential improvements of potential hardware upgrades.
 
 Loosely related work includes Holl et al.~\cite{Holl:2013:SSS:2534248.2534251}, who have studied how to store and share parameters values for shared workflows, an idea that could be applied to skeleton values; and algorithmic motifs (formerly called skeletons)~\cite{foster1990parallel}, which abstracts parallel application with an algorithmic approach, and lets users build parallel programs based on the algorithmic motifs.  The term skeleton has also been used in SKOPE, which produces a descriptive model about the semantic behavior of a workload, which can infer potential transformations and help users understand how workloads may interact with and adapt to emerging hardware. SKOPE models can be shared, annotated, and studied by a community of performance engineers and system designers.
-
 
 
 \section{Application Skeleton Design}
