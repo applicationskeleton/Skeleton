@@ -251,7 +251,7 @@ void compute_flop(double task_length)
     printf("floating point operations : %f\n", task_length);
 
     // Simple fibonacci generation
-    for ( i = 0; i < int(task_length) ; i++ ){
+    for ( i = 0; i < task_length ; i++ ){
         c = a+b;
         a = b;
         b = c;
@@ -759,5 +759,7 @@ int main(int argc, char **argv)
     free(input_names);
     free(output_names);
     free(output_sizes);
+
+    exit(0);
 }
 
