@@ -18,11 +18,15 @@ Tasks can be serial or parallel, and have compute and I/O (read and write) eleme
 
 Documentation about Skeletons can be found in the report directory
 
+If you have questions, need support, want to report a bug, or want to request a feature, please do so by opening a new issue -- https://github.com/applicationskeleton/Skeleton/issues/new
+
 =======
 
 Contributors are welcome!
 
-To receive email about commits to this repo, join the Google Groups "skeleton-commits" group,
+Ideally, these can be made via pull requests to the repository.
+
+To receive email about commits to this repository, join the Google Groups "skeleton-commits" group,
 http://groups.google.com/group/skeleton-commits/subscribe
 
 
