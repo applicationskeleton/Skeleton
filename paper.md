@@ -23,6 +23,9 @@ authors:
  - name: Shantenu Jha
    orcid: 0000-0002-5040-026X
    affiliation: RADICAL Laboratory, Rutgers University
+ - name: Yadu Nand
+   orcid: 0000-0002-9162-6003
+   affiliation: Computation Institute, University of Chicago
 date: 5 May 2016
 bibliography: paper.bib
 ---
