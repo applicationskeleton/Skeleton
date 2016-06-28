@@ -2,8 +2,9 @@ Num_Stage = 2
 
 Stage_Name = Stage_1
     Task_Type = serial
+    Task_Mode = flops
     Num_Tasks = 4
-    Task_Length = uniform 10
+    Task_Length = uniform 100000000000
     Num_Processes = 1
     Read_Buffer = 65536
     Write_Buffer = 65536
@@ -18,6 +19,7 @@ Stage_Name = Stage_1
 
 Stage_Name = Stage_2
     Task_Type = serial
+    Task_Mode = time
     Num_Tasks = 4
     Task_Length = uniform 32
     Num_Processes = 1
