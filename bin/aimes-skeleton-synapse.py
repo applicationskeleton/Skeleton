@@ -260,7 +260,7 @@ def main(argv):
         size   = 1
 
 
-    if argc < 9:
+    if argc <= 9:
         raise ValueError("insufficient arguments")
 
     # input parameter processing
@@ -285,15 +285,15 @@ def main(argv):
     if argc < (9 + num_input + (2*num_output)):
         raise ValueError("insufficient arguments")
 
-  # print "task type     : %s" & task_type
-  # print "task mode     : %s" & task_mode
-  # print "num_processes : %d" & num_proc
-  # print "task_length   : %d" & task_length
-  # print "read_buf      : %d" & read_buf
-  # print "write_buf     : %d" & write_buf
-  # print "num_input     : %d" & num_input
-  # print "num_output    : %d" & num_output
-  # print "interleave_opt: %d" & interleave_opt
+    print "task type     : %s" % task_type
+    print "task mode     : %s" % task_mode
+    print "num_processes : %d" % num_proc
+    print "task_length   : %d" % task_length
+    print "read_buf      : %d" % read_buf
+    print "write_buf     : %d" % write_buf
+    print "num_input     : %d" % num_input
+    print "num_output    : %d" % num_output
+    print "interleave_opt: %d" % interleave_opt
 
     input_names  = list()
     output_names = list()
