@@ -28,6 +28,7 @@ __license__   = "MIT"
 
 const char* MODE_TIME  = "time";
 const char* MODE_FLOPS = "flops";
+const char* MODE_PROF  = "prof";
 
 /* -------------------------------------------------------------------------- */
 /* Declare write element */
@@ -263,12 +264,25 @@ void compute_flops(double task_length)
 }
 
 
+/* --------------------------------------------------------------------------
+ */
+void compute_prof(const char* task_prof)
+{
+    fprintf(stderr, "profile based emulation is not implemented!\n");
+    exit(-1);
+}
+
+
 /* -------------------------------------------------------------------------- */
-void compute(const char* task_mode, double task_length)
+void compute(const char* task_mode, const char* task_prof, double task_length)
 {
     if (0 == strncmp(task_mode,MODE_FLOPS, 5))
     {
         compute_flops(task_length);
+    }
+    else if (0 == strncmp(task_mode,MODE_PROF, 4))
+    {
+        compute_prof(task_prof);
     }
     else
     {
@@ -280,7 +294,7 @@ void compute(const char* task_mode, double task_length)
 
 /* -------------------------------------------------------------------------- */
 void read_compute(char **input_files, int bufsize, int num_input, 
-                  const char* task_mode, double task_length)
+                  const char* task_mode, const char* task_prof, double task_length)
 {
     int i;
     int ret;
@@ -353,7 +367,7 @@ void read_compute(char **input_files, int bufsize, int num_input,
                 bail ("cannot read from %s", input_files[i]);
 
             total_size = total_size + size;
-            compute(task_mode, task_interval);
+            compute(task_mode, task_prof, task_interval);
         }
     }
 
@@ -361,7 +375,7 @@ void read_compute(char **input_files, int bufsize, int num_input,
 }
 
 /* -------------------------------------------------------------------------- */
-void compute_write (const char* task_mode, double task_length, 
+void compute_write (const char* task_mode, const char* task_prof, double task_length, 
                     char **output_files, int *output_sizes, 
                     int bufsize, int num_output)
 {
@@ -405,7 +419,7 @@ void compute_write (const char* task_mode, double task_length,
 
         while (total_size < output_sizes[i])
         {
-            compute(task_mode, task_interval);
+            compute(task_mode, task_prof, task_interval);
 
             if(output_sizes[i] - total_size > bufsize)
                 size = write(fd, buffer, bufsize);
@@ -436,7 +450,7 @@ void compute_write (const char* task_mode, double task_length,
 
 /* -------------------------------------------------------------------------- */
 void read_compute_write(char **input_files, int r_bufsize, int num_input, 
-                        const char* task_mode, double task_length, 
+                        const char* task_mode, const char* task_prof, double task_length, 
                         char **output_files, int *output_sizes, 
                         int w_bufsize, int num_output)
 {
@@ -577,7 +591,7 @@ void read_compute_write(char **input_files, int r_bufsize, int num_input,
                 bail ("cannot read from %s", input_files[i]);
 
             total_size = total_size + size;
-            compute(task_mode, task_interval);
+            compute(task_mode, task_prof, task_interval);
 
             printf("num_writes: %d, num_reads: %d, iteration: %d\n", num_writes, 
                    num_reads, (int)ceil(num_writes/(double)num_reads));
@@ -623,19 +637,31 @@ int main(int argc, char **argv)
     printf("serial: %d\n", argc);
 #endif
 
-    if ( argc < 9 )
+    if ( argc < 10 )
         bail ("insufficient arguments");
 
     /*Input parameter processing*/
     char* task_type    =      argv[1];
     char* task_mode    =      argv[2];
-    int num_proc       = atoi(argv[3]);
-    double task_length = atof(argv[4]);
-    int read_buf       = atoi(argv[5]);
-    int write_buf      = atoi(argv[6]);
-    int num_input      = atoi(argv[7]);
-    int num_output     = atoi(argv[8]);
-    int interleave_opt = atoi(argv[9]);
+    char* task_prof    =      argv[3];
+    int num_proc       = atoi(argv[4]);
+    double task_length = atof(argv[5]);
+    int read_buf       = atoi(argv[6]);
+    int write_buf      = atoi(argv[7]);
+    int num_input      = atoi(argv[8]);
+    int num_output     = atoi(argv[9]);
+    int interleave_opt = atoi(argv[10]);
+
+    printf("task type     : %s\n", task_type);  
+    printf("task mode     : %s\n", task_mode);  
+    printf("task prof     : %s\n", task_prof);  
+    printf("num_processes : %d\n", num_proc);
+    printf("task_length   : %d\n", task_length);
+    printf("read_buf      : %d\n", read_buf);
+    printf("write_buf     : %d\n", write_buf);
+    printf("num_input     : %d\n", num_input);
+    printf("num_output    : %d\n", num_output);
+    printf("interleave_opt: %d\n", interleave_opt);
 
     if (num_proc       <= 0) bail ("invalid value for num_proc");
     if (task_length    <  0) bail ("invalid value for task_length");
@@ -645,18 +671,8 @@ int main(int argc, char **argv)
     if (num_output     <  0) bail ("invalid value for num_output");
     if (interleave_opt <  0) bail ("invalid value for interleave_opt");
 
-    if ( argc < (9 + num_input + (2*num_output)) )
+    if ( argc < (10 + num_input + (2*num_output)) )
         bail ("insufficient arguments");
-
-    printf("task type     : %s\n", task_type);  
-    printf("task mode     : %s\n", task_mode);  
-    printf("num_processes : %d\n", num_proc);
-    printf("task_length   : %d\n", task_length);
-    printf("read_buf      : %d\n", read_buf);
-    printf("write_buf     : %d\n", write_buf);
-    printf("num_input     : %d\n", num_input);
-    printf("num_output    : %d\n", num_output);
-    printf("interleave_opt: %d\n", interleave_opt);
 
     char** input_names;
     input_names = malloc(num_input*sizeof(char)*MAXSTR);
@@ -666,7 +682,7 @@ int main(int argc, char **argv)
 
     for (i=0; i<num_input; i++)
     {
-        input_names[i] = argv[10+i];
+        input_names[i] = argv[11+i];
         printf("%dth input file name: %s\n", i, input_names[i]);
     }
 
@@ -684,8 +700,8 @@ int main(int argc, char **argv)
 
     for (i=0; i<num_output; i++)
     { 
-        output_names[i] = argv[10+num_input+i*2];
-        output_sizes[i] = atoi(argv[11+num_input+i*2]);
+        output_names[i] = argv[11+num_input+i*2];
+        output_sizes[i] = atoi(argv[12+num_input+i*2]);
         printf("%dth output file name: %s, size: %d\n", i, output_names[i], output_sizes[i]);
     }
 
@@ -713,7 +729,7 @@ int main(int argc, char **argv)
 #endif
 
         /*compute*/
-        compute(task_mode, task_length);
+        compute(task_mode, task_prof, task_length);
 
 #ifdef MPI
         MPI_Barrier(MPI_COMM_WORLD);
@@ -738,7 +754,7 @@ int main(int argc, char **argv)
         printf("interleave input and compute, then write\n");
 
         /*Interleaved read and compute*/
-        read_compute(input_names, read_buf, num_input, task_mode, task_length);
+        read_compute(input_names, read_buf, num_input, task_mode, task_prof, task_length);
 
         /*Write*/
         writefiles(output_names, output_sizes, write_buf, num_output);
@@ -747,12 +763,12 @@ int main(int argc, char **argv)
     {
         printf("read input, then interleave compute and write\n");
         readfiles(input_names, read_buf, num_input);
-        compute_write(task_mode, task_length, output_names, output_sizes, write_buf, num_output);
+        compute_write(task_mode, task_prof, task_length, output_names, output_sizes, write_buf, num_output);
     }
     else if(interleave_opt == 3)
     {
         printf("interleave input, compute, and write\n");
-        read_compute_write(input_names, read_buf, num_input, task_mode, task_length, 
+        read_compute_write(input_names, read_buf, num_input, task_mode, task_prof, task_length, 
                            output_names, output_sizes, write_buf, num_output);
     }
 

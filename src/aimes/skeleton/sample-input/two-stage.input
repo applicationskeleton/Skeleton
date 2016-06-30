@@ -2,7 +2,8 @@ Num_Stage = 2
 
 Stage_Name = Stage_1
     Task_Type = serial
-    Task_Mode = flops
+    Task_Mode = prof
+    Task_Profile = 84.json
     Num_Tasks = 4
     Task_Length = uniform 100000000000
     Num_Processes = 1
