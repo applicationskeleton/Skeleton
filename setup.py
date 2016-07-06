@@ -138,6 +138,7 @@ setup_args = {
     'package_dir'      : {'': 'src'},
     'scripts'          : ['bin/aimes-skeleton-generate',
                           'bin/aimes-skeleton-version',
+                          'bin/aimes-skeleton-synapse.py',
                           'bin/dax2dot'],
     'package_data'     : {'': ['*.sh', '*.c', 'VERSION', 'VERSION.git']},
 
