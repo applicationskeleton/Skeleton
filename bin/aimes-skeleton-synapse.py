@@ -79,12 +79,21 @@ def writefiles(output_files, output_sizes, bufsize):
 
 # ------------------------------------------------------------------------------
 #
-def compute(task_length):
+def compute(task_mode, task_length):
 
     samples = list()
-    samples.append(['cpu', 0, {'time'       : task_length, 
-                               'flops'      : 0, 
-                               'efficiency' : 1}])
+
+    if task_mode == 'time' :
+        samples.append(['cpu', 0, {'time'       : task_length, 
+                                   'flops'      : 0, 
+                                   'efficiency' : 1}])
+
+    elif task_mode == 'flops' :
+        samples.append(['cpu', 0, {'time'       : 0, 
+                                   'flops'      : task_length, 
+                                   'efficiency' : 1}])
+    else:
+        raise ValueError('Unknown task mode %s' % task_mode)
 
     info, ret, out = rs.emulate(samples=samples)
   # pprint.pprint(info)
@@ -92,7 +101,7 @@ def compute(task_length):
 
 # ------------------------------------------------------------------------------
 #
-def read_compute(input_files, bufsize, task_length):
+def read_compute(input_files, bufsize, task_mode, task_length):
 
     total_size = 0
     for input_file in input_files:
@@ -113,9 +122,14 @@ def read_compute(input_files, bufsize, task_length):
 
             # construct artificial time)
             n += 1
-            samples.append(['cpu', t, {'time'       : cpu_chunk, 
-                                       'flops'      : 0, 
-                                       'efficiency' : 1}])
+            if task_mode == 'time':
+                samples.append(['cpu', t, {'time'       : cpu_chunk, 
+                                           'flops'      : 0, 
+                                           'efficiency' : 1}])
+            elif task_mode == 'flops':
+                samples.append(['cpu', t, {'time'       : 0, 
+                                           'flops'      : cpu_chunk,
+                                           'efficiency' : 1}])
 
             samples.append(['sto', t,  {'src'        : input_file, 
                                         'rsize'      : bufsize, 
@@ -129,7 +143,7 @@ def read_compute(input_files, bufsize, task_length):
 
 # ------------------------------------------------------------------------------
 #
-def compute_write(task_length, output_files, output_sizes, bufsize):
+def compute_write(task_mode, task_length, output_files, output_sizes, bufsize):
 
     total_size = 0
     for output_size in output_sizes:
@@ -149,9 +163,14 @@ def compute_write(task_length, output_files, output_sizes, bufsize):
         for s in range(n_samples):
 
             n += 1
-            samples.append(['cpu', n, {'time'       : cpu_chunk, 
-                                       'flops'      : 0, 
-                                       'efficiency' : 1}])
+            if task_mode == 'time':
+                samples.append(['cpu', n, {'time'       : cpu_chunk, 
+                                           'flops'      : 0, 
+                                           'efficiency' : 1}])
+            elif task_mode == 'flops':
+                samples.append(['cpu', n, {'time'       : 0, 
+                                           'flops'      : cpu_chunk,
+                                           'efficiency' : 1}])
 
             samples.append(['sto', n,  {'src'        : None, 
                                         'rsize'      : 0, 
@@ -166,7 +185,7 @@ def compute_write(task_length, output_files, output_sizes, bufsize):
 # ------------------------------------------------------------------------------
 #
 def read_compute_write(input_files, r_bufsize, 
-                       task_length, 
+                       task_mode, task_length, 
                        output_files, output_sizes, w_bufsize):
 
     # we chunk the compute according to output chunking
@@ -195,9 +214,14 @@ def read_compute_write(input_files, r_bufsize,
                                         'wsize'        : 0, 
                                         'buf'          : r_bufsize}])
 
-            samples.append(['cpu', t+1, {'time'        : cpu_chunk, 
-                                         'flops'       : 0, 
-                                         'efficiency'  : 1}])
+            if task_mode == 'time':
+                samples.append(['cpu', t+1, {'time'       : cpu_chunk, 
+                                           'flops'      : 0, 
+                                           'efficiency' : 1}])
+            elif task_mode == 'flops':
+                samples.append(['cpu', t+1, {'time'       : 0, 
+                                           'flops'      : cpu_chunk,
+                                           'efficiency' : 1}])
 
             samples.append(['sto', t+1,  {'src'        : None, 
                                           'rsize'      : 0, 
@@ -236,18 +260,19 @@ def main(argv):
         size   = 1
 
 
-    if argc < 9:
+    if argc <= 9:
         raise ValueError("insufficient arguments")
 
     # input parameter processing
-    type_s         = str(argv[1])
-    num_proc       = int(argv[2])
-    task_length    = float(argv[3])
-    read_buf       = int(argv[4])
-    write_buf      = int(argv[5])
-    num_input      = int(argv[6])
-    num_output     = int(argv[7])
-    interleave_opt = int(argv[8])
+    task_type      =   str(argv[1])
+    task_mode      =   str(argv[2])
+    num_proc       =   int(argv[3])
+    task_length    = float(argv[4])
+    read_buf       =   int(argv[5])
+    write_buf      =   int(argv[6])
+    num_input      =   int(argv[7])
+    num_output     =   int(argv[8])
+    interleave_opt =   int(argv[9])
 
     if num_proc       <= 0 : raise ValueError("invalid value for num_proc")
     if task_length    <  0 : raise ValueError("invalid value for task_length")
@@ -260,14 +285,15 @@ def main(argv):
     if argc < (9 + num_input + (2*num_output)):
         raise ValueError("insufficient arguments")
 
-  # print "task type     : %s" & type
-  # print "num_processes : %d" & num_proc
-  # print "task_length   : %d" & task_length
-  # print "read_buf      : %d" & read_buf
-  # print "write_buf     : %d" & write_buf
-  # print "num_input     : %d" & num_input
-  # print "num_output    : %d" & num_output
-  # print "interleave_opt: %d" & interleave_opt
+    print "task type     : %s" % task_type
+    print "task mode     : %s" % task_mode
+    print "num_processes : %d" % num_proc
+    print "task_length   : %d" % task_length
+    print "read_buf      : %d" % read_buf
+    print "write_buf     : %d" % write_buf
+    print "num_input     : %d" % num_input
+    print "num_output    : %d" % num_output
+    print "interleave_opt: %d" % interleave_opt
 
     input_names  = list()
     output_names = list()
@@ -275,12 +301,12 @@ def main(argv):
 
     for i in range(num_input):
 
-        input_names.append(argv[9+i])
+        input_names.append(argv[10+i])
         # print "%dth input file name: %s" % (i, input_names[i])
 
     for i in range(num_output):
-        output_names.append(str(argv[9+num_input+i*2]))
-        output_sizes.append(int(argv[10+num_input+i*2]))
+        output_names.append(str(argv[10+num_input+i*2]))
+        output_sizes.append(int(argv[11+num_input+i*2]))
       # print "%dth output file name: %s, size: %d" % \
       #       (i, output_names[i], # output_sizes[i])
 
@@ -300,7 +326,7 @@ def main(argv):
             print "process %d/%d is sleeping" % (rank, size)
 
         # compute
-        compute(task_length)
+        compute(task_mode, task_length)
 
         if mpi:
             comm.Barrier()
@@ -319,7 +345,7 @@ def main(argv):
             print "interleave input and compute, then write"
 
         # interleaved read and compute
-        read_compute(input_names, read_buf, num_input, task_length)
+        read_compute(input_names, read_buf, num_input, task_mode, task_length)
 
         # write
         writefiles(output_names, output_sizes, write_buf)
@@ -331,13 +357,13 @@ def main(argv):
             print "read input, then interleave compute and write"
 
         readfiles(input_names, read_buf)
-        compute_write(task_length, output_names, output_sizes, write_buf, num_output)
+        compute_write(task_mode, task_length, output_names, output_sizes, write_buf, num_output)
 
 
     elif interleave_opt == 3:
 
         print "interleave input, compute, and write"
-        read_compute_write(input_names, read_buf, num_input, task_length, 
+        read_compute_write(input_names, read_buf, num_input, task_mode, task_length, 
                            output_names, output_sizes, write_buf, num_output);
 
     return 0
