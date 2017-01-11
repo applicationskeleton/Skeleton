@@ -37,9 +37,14 @@ http://groups.google.com/group/skeleton-commits/subscribe
 =======
 
 A paper about the first version of Application Skeletons is:
-Z. Zhang and D. S. Katz, "Application Skeletons: Encapsulating MTC Application Task Computation and I/O," Proceedings of 6th Workshop on Many-Task Computing on Grids and Supercomputers (MTAGS), (in conjunction with SC13), 2013. http://dx.doi.org/10.1145/2503210.2503222
+Z. Zhang and D. S. Katz, "Application Skeletons: Encapsulating MTC Application Task Computation and I/O," Proceedings of 6th Workshop on Many-Task Computing on Grids and Supercomputers (MTAGS), (in conjunction with SC13), 2013. https://doi.org/10.1145/2503210.2503222
 
 A paper about the current version is:
 Z. Zhang and D. S. Katz, "Using Application Skeletons to Improve eScience Infrastructure," Proceedings of 10th IEEE International Conference on eScience, 2014.
-http://dx.doi.org/10.1109/eScience.2014.9 (paper).
+https://doi.org/10.1109/eScience.2014.9 (paper).
 http://www.slideshare.net/danielskatz/using-application-skeletons-to-improve-escience-infrastructure (slides).
+
+A longer paper about Application Skeletons and Synapse work is:
+D. S. Katz, A. Merzky, Z. Zhang, S. Jha, "Application Skeletons: Construction and Use in eScience," Future Generation Computing Systems, v.59. pp 114-124, 2016.
+https://doi.org/10.1016/j.future.2015.10.001
+
